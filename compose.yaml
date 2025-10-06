@@ -1,0 +1,60 @@
+services:
+  cine-rent-db:
+    image: 'postgres:latest'
+    env_file:
+      - .env
+    ports:
+      - '5432:5432'
+    networks:
+      - cine-rent-network
+
+  cine-rent-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
+      - SPRING_DOCKER_COMPOSE_ENABLED=false
+    ports:
+      - '4443:443'
+    volumes:
+      - ./backend:/app
+      - ./certs:/certs
+    networks:
+      - cine-rent-network
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 6G
+        reservations:
+          cpus: '2'
+          memory: 4G
+
+  cine-rent-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    networks:
+      - cine-rent-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+networks:
+  cine-rent-network:
+    driver: bridge
+
+volumes:
+  frontend_node_modules:
