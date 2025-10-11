@@ -39,7 +39,7 @@ class ValidationStrategyFactoryTest {
         when(userExistence.getName()).thenReturn(TokenValidationNames.USER_EXISTENCE);
         when(adminAccess.getName()).thenReturn(TokenValidationNames.ADMIN_ACCESS);
 
-        ValidationStrategyFactory factory = new ValidationStrategyFactory(
+        TokenValidationStrategyFactory factory = new TokenValidationStrategyFactory(
                 List.of(presence, blacklist, extraction, userExistence, adminAccess));
 
         ValidationChain chain = factory.createValidationChain(
@@ -67,7 +67,7 @@ class ValidationStrategyFactoryTest {
         when(presence.validate(any(TokenPresenceInput.class), any(HttpServletResponse.class), anyString()))
                 .thenReturn(null);
 
-        ValidationStrategyFactory factory = new ValidationStrategyFactory(List.of(presence));
+        TokenValidationStrategyFactory factory = new TokenValidationStrategyFactory(List.of(presence));
 
         HttpServletRequest req = mock(HttpServletRequest.class);
         HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -97,7 +97,7 @@ class ValidationStrategyFactoryTest {
         when(blacklist.getName()).thenReturn(TokenValidationNames.BLACKLIST);
         when(blacklist.validate(any(), any(HttpServletResponse.class), anyString())).thenReturn(null);
 
-        ValidationStrategyFactory factory = new ValidationStrategyFactory(List.of(blacklist));
+        TokenValidationStrategyFactory factory = new TokenValidationStrategyFactory(List.of(blacklist));
 
         HttpServletRequest req = mock(HttpServletRequest.class);
         HttpServletResponse resp = mock(HttpServletResponse.class);

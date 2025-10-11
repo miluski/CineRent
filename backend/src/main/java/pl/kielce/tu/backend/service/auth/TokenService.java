@@ -35,17 +35,14 @@ public class TokenService {
     @Value("${jwt.refresh.expiration}")
     private int jwtRefreshExpirationMillis;
 
-    @Value("${jwt.refresh.remembered.expiration}")
-    private int jwtRefreshRememberedExpirationMillis;
-
     private final TokenMapper tokenMapper;
     private final CookieService cookieService;
     private final ClaimsExtractor claimsExtractor;
     private final BlacklistedTokenRepository blacklistedTokenRepository;
 
-    public String generateToken(User user, boolean isRemembered, CookieNames cookieName) {
+    public String generateToken(User user, CookieNames cookieName) {
         try {
-            int expirationMillis = determineExpirationTime(cookieName, isRemembered);
+            int expirationMillis = determineExpirationTime(cookieName);
             SecretKey key = createSecretKey();
             return buildJwtToken(user, expirationMillis, key);
         } catch (Exception e) {
@@ -56,10 +53,6 @@ public class TokenService {
 
     public Long extractUserIdFromToken(String token) {
         return claimsExtractor.extractUserId(token, jwtSecret);
-    }
-
-    public boolean isTokenRemembered(String token) {
-        return claimsExtractor.extractIsRemembered(token, jwtSecret);
     }
 
     public boolean isTokenBlacklisted(String token) {
@@ -76,12 +69,10 @@ public class TokenService {
         blacklistToken(httpServletRequest, CookieNames.REFRESH_TOKEN);
     }
 
-    private int determineExpirationTime(CookieNames cookieName, boolean isRemembered) {
-        boolean isAccessToken = CookieNames.ACCESS_TOKEN.equals(cookieName);
-        if (isAccessToken) {
-            return jwtExpirationMillis;
-        }
-        return isRemembered ? jwtRefreshRememberedExpirationMillis : jwtRefreshExpirationMillis;
+    private int determineExpirationTime(CookieNames cookieName) {
+        return CookieNames.ACCESS_TOKEN.equals(cookieName)
+                ? jwtExpirationMillis
+                : jwtRefreshExpirationMillis;
     }
 
     private SecretKey createSecretKey() {
@@ -93,12 +84,10 @@ public class TokenService {
         Date issuedAt = Date.from(Instant.now());
         Date expiresAt = Date.from(Instant.now().plusMillis(expirationMillis));
         String subject = String.valueOf(user.getId());
-        boolean isRemembered = expirationMillis == jwtRefreshRememberedExpirationMillis;
 
         return Jwts.builder()
                 .subject(subject)
                 .issuedAt(issuedAt)
-                .claim("isRemembered", isRemembered)
                 .expiration(expiresAt)
                 .signWith(key)
                 .compact();

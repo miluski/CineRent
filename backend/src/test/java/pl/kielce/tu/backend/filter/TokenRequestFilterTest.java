@@ -24,7 +24,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import pl.kielce.tu.backend.filter.factory.ValidationStrategyFactory;
+import pl.kielce.tu.backend.filter.factory.TokenValidationStrategyFactory;
 import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.PublicEndpoints;
 import pl.kielce.tu.backend.model.entity.User;
@@ -35,7 +35,7 @@ public class TokenRequestFilterTest {
     private ResponseHelper responseHelper;
 
     @Mock
-    private ValidationStrategyFactory validationFactory;
+    private TokenValidationStrategyFactory validationFactory;
 
     @Mock
     private HttpServletRequest request;

@@ -116,8 +116,6 @@ jwt.expiration=300000
 jwt.cookie.maxAge=360
 jwt.refresh.expiration=86400000
 jwt.refresh.cookie.maxAge=90000
-jwt.refresh.remembered.expiration=604800000
-jwt.refresh.remembered.cookie.maxAge=608400
 
 # File Upload Configuration
 spring.servlet.multipart.max-file-size=-1

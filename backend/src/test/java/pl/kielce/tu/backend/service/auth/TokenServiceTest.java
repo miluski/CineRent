@@ -61,7 +61,6 @@ class TokenServiceTest {
         ReflectionTestUtils.setField(tokenService, "jwtSecret", secret);
         ReflectionTestUtils.setField(tokenService, "jwtExpirationMillis", 3600000);
         ReflectionTestUtils.setField(tokenService, "jwtRefreshExpirationMillis", 86400000);
-        ReflectionTestUtils.setField(tokenService, "jwtRefreshRememberedExpirationMillis", 259200000);
     }
 
     @Test
@@ -69,7 +68,7 @@ class TokenServiceTest {
         User user = new User();
         user.setId(42L);
 
-        String token = tokenService.generateToken(user, false, CookieNames.ACCESS_TOKEN);
+        String token = tokenService.generateToken(user, CookieNames.ACCESS_TOKEN);
         assertNotNull(token);
 
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -95,24 +94,6 @@ class TokenServiceTest {
         Long id = tokenService.extractUserIdFromToken(token);
         assertEquals(123L, id);
         verify(claimsExtractor).extractUserId(token, secret);
-    }
-
-    @Test
-    void isTokenRemembered_trueWhenExpirationAboveThreshold() {
-        String token = "tok";
-        when(claimsExtractor.extractIsRemembered(token, secret)).thenReturn(true);
-
-        assertTrue(tokenService.isTokenRemembered(token));
-        verify(claimsExtractor).extractIsRemembered(token, secret);
-    }
-
-    @Test
-    void isTokenRemembered_falseWhenExpirationBelowThreshold() {
-        String token = "tok";
-        when(claimsExtractor.extractIsRemembered(token, secret)).thenReturn(false);
-
-        assertFalse(tokenService.isTokenRemembered(token));
-        verify(claimsExtractor).extractIsRemembered(token, secret);
     }
 
     @Test

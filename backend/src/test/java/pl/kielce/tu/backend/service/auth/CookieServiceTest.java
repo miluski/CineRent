@@ -31,7 +31,6 @@ class CookieServiceTest {
         cookieService = new CookieService();
         setPrivateIntField("cookieMaxAge", 3600);
         setPrivateIntField("refreshCookieMaxAge", 7200);
-        setPrivateIntField("refreshRememberedCookieMaxAge", 2592000);
     }
 
     private void setPrivateIntField(String name, int value) throws Exception {
@@ -59,11 +58,11 @@ class CookieServiceTest {
     }
 
     @Test
-    void setRefreshTokenCookie_notRemembered_shouldUseRefreshCookieMaxAge() {
+    void setRefreshTokenCookie_shouldUseRefreshCookieMaxAge() {
         HttpServletResponse response = mock(HttpServletResponse.class);
         ArgumentCaptor<Cookie> captor = ArgumentCaptor.forClass(Cookie.class);
 
-        cookieService.setRefreshTokenCookie(response, "refresh-token-1", false);
+        cookieService.setRefreshTokenCookie(response, "refresh-token-1");
 
         verify(response).addCookie(captor.capture());
         Cookie added = captor.getValue();
@@ -71,21 +70,6 @@ class CookieServiceTest {
         assertEquals(CookieNames.REFRESH_TOKEN.name(), added.getName());
         assertEquals("refresh-token-1", added.getValue());
         assertEquals(7200, added.getMaxAge());
-    }
-
-    @Test
-    void setRefreshTokenCookie_remembered_shouldUseRememberedMaxAge() {
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        ArgumentCaptor<Cookie> captor = ArgumentCaptor.forClass(Cookie.class);
-
-        cookieService.setRefreshTokenCookie(response, "refresh-token-2", true);
-
-        verify(response).addCookie(captor.capture());
-        Cookie added = captor.getValue();
-
-        assertEquals(CookieNames.REFRESH_TOKEN.name(), added.getName());
-        assertEquals("refresh-token-2", added.getValue());
-        assertEquals(2592000, added.getMaxAge());
     }
 
     @Test
