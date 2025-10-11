@@ -43,7 +43,6 @@ class SecurityConfigTest {
     HttpSecurity httpSecurity;
 
     @Test
-    @SuppressWarnings("null")
     void corsConfigurationSource_shouldConfigureCorsCorrectly() {
         SecurityConfig config = new SecurityConfig(tokenRequestFilter);
         var source = config.corsConfigurationSource();

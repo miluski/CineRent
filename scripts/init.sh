@@ -150,13 +150,33 @@ CRT_FILE="$CERTS_DIR/backend.crt"
 
 rm -f "$CERT_FILE" "$KEY_FILE" "$CRT_FILE"
 
-openssl genrsa -out "$KEY_FILE" 2048
+if [ "$OS" = "windows" ]; then
+    WIN_KEY_FILE=$(cygpath -w "$KEY_FILE" 2>/dev/null || echo "$KEY_FILE" | sed 's|^/\([a-z]\)/|\1:/|')
+    MSYS_NO_PATHCONV=1 openssl genrsa -out "$WIN_KEY_FILE" 2048
+else
+    openssl genrsa -out "$KEY_FILE" 2048
+fi
 
-openssl req -new -x509 -key "$KEY_FILE" -out "$CRT_FILE" -days 365 \
-    -subj "/C=PL/ST=Swietokrzyskie/L=Kielce/O=DVD Rental/OU=Development/CN=backend"
+if [ "$OS" = "windows" ]; then
+    WIN_KEY_FILE=$(cygpath -w "$KEY_FILE" 2>/dev/null || echo "$KEY_FILE" | sed 's|^/\([a-z]\)/|\1:/|')
+    WIN_CRT_FILE=$(cygpath -w "$CRT_FILE" 2>/dev/null || echo "$CRT_FILE" | sed 's|^/\([a-z]\)/|\1:/|')
+    MSYS_NO_PATHCONV=1 openssl req -new -x509 -key "$WIN_KEY_FILE" -out "$WIN_CRT_FILE" -days 365 \
+        -subj "//C=PL/ST=Swietokrzyskie/L=Kielce/O=DVD Rental/OU=Development/CN=backend"
+else
+    openssl req -new -x509 -key "$KEY_FILE" -out "$CRT_FILE" -days 365 \
+        -subj "/C=PL/ST=Swietokrzyskie/L=Kielce/O=DVD Rental/OU=Development/CN=backend"
+fi
 
-openssl pkcs12 -export -in "$CRT_FILE" -inkey "$KEY_FILE" \
-    -out "$CERT_FILE" -name backend -password pass:"$SSL_PASSWORD"
+if [ "$OS" = "windows" ]; then
+    WIN_KEY_FILE=$(cygpath -w "$KEY_FILE" 2>/dev/null || echo "$KEY_FILE" | sed 's|^/\([a-z]\)/|\1:/|')
+    WIN_CRT_FILE=$(cygpath -w "$CRT_FILE" 2>/dev/null || echo "$CRT_FILE" | sed 's|^/\([a-z]\)/|\1:/|')
+    WIN_CERT_FILE=$(cygpath -w "$CERT_FILE" 2>/dev/null || echo "$CERT_FILE" | sed 's|^/\([a-z]\)/|\1:/|')
+    MSYS_NO_PATHCONV=1 openssl pkcs12 -export -in "$WIN_CRT_FILE" -inkey "$WIN_KEY_FILE" \
+        -out "$WIN_CERT_FILE" -name backend -password pass:"$SSL_PASSWORD"
+else
+    openssl pkcs12 -export -in "$CRT_FILE" -inkey "$KEY_FILE" \
+        -out "$CERT_FILE" -name backend -password pass:"$SSL_PASSWORD"
+fi
 
 rm -f "$KEY_FILE" "$CRT_FILE"
 
