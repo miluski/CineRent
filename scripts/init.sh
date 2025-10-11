@@ -74,6 +74,24 @@ check_windows_environment() {
     echo "✅ Git Bash environment detected and ready."
 }
 
+normalize_path() {
+    local path="$1"
+    if [ "$OS" = "windows" ]; then
+        echo "$path" | sed 's|\\|/|g'
+    else
+        echo "$path"
+    fi
+}
+
+get_absolute_path() {
+    local path="$1"
+    if [ "$OS" = "windows" ]; then
+        (cd "$path" 2>/dev/null && pwd -W 2>/dev/null || pwd) || echo "$path"
+    else
+        (cd "$path" && pwd) || echo "$path"
+    fi
+}
+
 echo "🚀 Initializing DVD Rental Backend Application..."
 
 OS=$(detect_os)
@@ -104,6 +122,12 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if [ "$OS" = "windows" ]; then
+    SCRIPT_DIR=$(normalize_path "$SCRIPT_DIR")
+    BASE_DIR=$(normalize_path "$BASE_DIR")
+fi
+
 BACKEND_DIR="$BASE_DIR/backend"
 CERTS_DIR="$BASE_DIR/certs"
 LOGS_DIR="$BASE_DIR/logs"
@@ -204,8 +228,6 @@ jwt.expiration=300000
 jwt.cookie.maxAge=360
 jwt.refresh.expiration=86400000
 jwt.refresh.cookie.maxAge=90000
-jwt.refresh.remembered.expiration=604800000
-jwt.refresh.remembered.cookie.maxAge=608400
 logging.file.name=logs/application.log
 logging.level.pl.kielce.tu.backend=INFO
 logging.level.root=INFO
@@ -243,7 +265,6 @@ spring.sql.init.mode=never
 jwt.secret=$JWT_SECRET
 jwt.expiration=300000
 jwt.refresh.expiration=86400000
-jwt.refresh.remembered.expiration=604800000
 logging.level.pl.kielce.tu.backend=WARN
 logging.level.root=WARN
 logging.level.org.springframework.web=WARN

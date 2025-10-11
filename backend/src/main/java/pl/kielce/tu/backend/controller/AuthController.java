@@ -28,23 +28,30 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user", description = """
-            Creates a new user account with the provided credentials. \
-            Nickname must be 3-50 characters and contain only letters, numbers, underscores, and hyphens. \
-            Password must be 8-100 characters.""")
+            Creates a new user account with the provided credentials and preferences. \
+            Required fields: nickname (3-50 characters, alphanumeric with underscores/hyphens), \
+            password (8-100 characters), and age (1-149 years). \
+            Optional: preferred genre identifiers (must exist in the database).""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "User successfully registered"),
-            @ApiResponse(responseCode = "422", description = "Validation failed - invalid user data provided", content = @Content),
+            @ApiResponse(responseCode = "422", description = "Validation failed - invalid user data (invalid nickname/password format, age out of range 1-149, or non-existent genre identifiers)", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error occurred during registration", content = @Content)
     })
     public ResponseEntity<Void> register(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User data containing nickname and password", required = true, content = @Content(schema = @Schema(implementation = UserDto.class))) @RequestBody UserDto userDto) {
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User registration data", required = true, content = @Content(schema = @Schema(example = """
+                    {
+                      "nickname": "FilmLover99",
+                      "password": "Serduszko223",
+                      "age": 24,
+                      "preferredGenresIdentifiers": [1, 10, 21, 37]
+                    }"""))) @RequestBody UserDto userDto) {
         return authService.handleRegister(userDto);
     }
 
     @PostMapping("/login")
     @Operation(summary = "Authenticate user", description = """
             Authenticates a user with the provided credentials and returns JWT tokens as HTTP-only cookies. \
-            The isRemembered flag determines if the refresh token will have extended expiration time. \
+            Required fields: nickname and password. Age and preferred genres are not required for login. \
             On successful login, access and refresh tokens are set as secure HTTP-only cookies.""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User successfully authenticated, tokens set in cookies"),
@@ -52,7 +59,11 @@ public class AuthController {
             @ApiResponse(responseCode = "422", description = "Validation failed - invalid user data format", content = @Content)
     })
     public ResponseEntity<Void> login(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User credentials with nickname, password, and optional isRemembered flag", required = true, content = @Content(schema = @Schema(implementation = UserDto.class))) @RequestBody UserDto userDto,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User login credentials", required = true, content = @Content(schema = @Schema(example = """
+                    {
+                      "nickname": "FilmLover99",
+                      "password": "Serduszko223"
+                    }"""))) @RequestBody UserDto userDto,
             HttpServletResponse httpServletResponse) {
         return authService.handleLogin(userDto, httpServletResponse);
     }
@@ -73,7 +84,7 @@ public class AuthController {
     @PostMapping("/refresh-tokens")
     @Operation(summary = "Refresh authentication tokens", description = """
             Refreshes the user's access and refresh tokens using the current valid refresh token. \
-            The old tokens are blacklisted and new tokens are generated with the same isRemembered flag. \
+            The old tokens are blacklisted and new tokens are generated. \
             This allows maintaining the user session without requiring re-authentication. \
             The refresh token must be present in the request cookies and not blacklisted.""")
     @ApiResponses(value = {

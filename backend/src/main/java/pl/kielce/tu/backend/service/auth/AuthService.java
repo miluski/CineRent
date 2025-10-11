@@ -1,5 +1,6 @@
 package pl.kielce.tu.backend.service.auth;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,10 +12,11 @@ import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.mapper.UserMapper;
 import pl.kielce.tu.backend.model.constant.CookieNames;
+import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
 import pl.kielce.tu.backend.model.dto.UserDto;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
-import pl.kielce.tu.backend.service.validation.UserValidator;
+import pl.kielce.tu.backend.service.validation.factory.UserValidationStrategyFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -23,15 +25,15 @@ public class AuthService {
     private final UserMapper userMapper;
     private final TokenService tokenService;
     private final CookieService cookieService;
-    private final UserValidator userValidator;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserValidationStrategyFactory validationFactory;
 
     public ResponseEntity<Void> handleLogin(UserDto userDto, HttpServletResponse httpServletResponse) {
         try {
-            userValidator.validate(userDto);
+            validateForLogin(userDto);
             User user = authenticateUser(userDto);
-            generateAndSetNewTokens(httpServletResponse, user, userDto.isRemembered());
+            generateAndSetNewTokens(httpServletResponse, user);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
@@ -54,7 +56,7 @@ public class AuthService {
 
     public ResponseEntity<Void> handleRegister(UserDto userDto) {
         try {
-            userValidator.validate(userDto);
+            validateForRegistration(userDto);
             register(userDto);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (ValidationException e) {
@@ -70,19 +72,22 @@ public class AuthService {
             String refreshToken = extractRefreshToken(httpServletRequest);
             Long userId = tokenService.extractUserIdFromToken(refreshToken);
             User user = findUserById(userId);
-            boolean isRemembered = tokenService.isTokenRemembered(refreshToken);
             tokenService.blacklistRequestTokens(httpServletRequest);
-            generateAndSetNewTokens(httpServletResponse, user, isRemembered);
+            generateAndSetNewTokens(httpServletResponse, user);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
-    private void register(UserDto userDto) {
-        User user = userMapper.toUser(userDto);
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        userRepository.save(user);
+    private void register(UserDto userDto) throws ValidationException {
+        try {
+            User user = userMapper.toUser(userDto);
+            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new ValidationException("User with this nickname already exists");
+        }
     }
 
     private User authenticateUser(UserDto userDto) {
@@ -111,11 +116,25 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    private void generateAndSetNewTokens(HttpServletResponse httpServletResponse, User user, boolean isRemembered) {
-        String accessToken = tokenService.generateToken(user, isRemembered, CookieNames.ACCESS_TOKEN);
-        String refreshToken = tokenService.generateToken(user, isRemembered, CookieNames.REFRESH_TOKEN);
+    private void generateAndSetNewTokens(HttpServletResponse httpServletResponse, User user) {
+        String accessToken = tokenService.generateToken(user, CookieNames.ACCESS_TOKEN);
+        String refreshToken = tokenService.generateToken(user, CookieNames.REFRESH_TOKEN);
         cookieService.setAccessTokenCookie(httpServletResponse, accessToken);
-        cookieService.setRefreshTokenCookie(httpServletResponse, refreshToken, isRemembered);
+        cookieService.setRefreshTokenCookie(httpServletResponse, refreshToken);
+    }
+
+    private void validateForLogin(UserDto userDto) throws ValidationException {
+        if (userDto == null) {
+            throw new ValidationException("User data cannot be null");
+        }
+        validationFactory.getStrategy(ValidationStrategyType.NICKNAME).validate(userDto.getNickname());
+        validationFactory.getStrategy(ValidationStrategyType.PASSWORD).validate(userDto.getPassword());
+    }
+
+    private void validateForRegistration(UserDto userDto) throws ValidationException {
+        validateForLogin(userDto);
+        validationFactory.getStrategy(ValidationStrategyType.AGE).validate(userDto.getAge());
+        validationFactory.getStrategy(ValidationStrategyType.GENRE).validate(userDto.getPreferredGenresIdentifiers());
     }
 
 }

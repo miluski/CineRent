@@ -22,7 +22,9 @@ class ValidationConstraintsTest {
     @Test
     void valuesShouldBePositive() {
         for (ValidationConstraints c : ValidationConstraints.values()) {
-            assertTrue(c.getValue() > 0, c.name() + " must be positive");
+            if (c.getPattern() == null) {
+                assertTrue(c.getValue() > 0, c.name() + " must be positive");
+            }
         }
     }
 

@@ -16,11 +16,12 @@ class UserDtoTest {
 
     @Test
     void allArgsConstructorAndGetters() {
-        UserDto user = new UserDto("nick", "pass", "rank", false);
+        UserDto user = UserDto.builder()
+                .nickname("nick")
+                .password("pass")
+                .build();
         assertEquals("nick", user.getNickname());
         assertEquals("pass", user.getPassword());
-        assertEquals("rank", user.getRank());
-        assertEquals(false, user.isRemembered());
     }
 
     @Test
@@ -28,31 +29,23 @@ class UserDtoTest {
         UserDto user = UserDto.builder()
                 .nickname("n")
                 .password("p")
-                .rank("r")
-                .isRemembered(true)
                 .build();
 
         assertEquals("n", user.getNickname());
         assertEquals("p", user.getPassword());
-        assertEquals("r", user.getRank());
-        assertEquals(true, user.isRemembered());
 
         user.setNickname("n2");
         user.setPassword("p2");
-        user.setRank("r2");
-        user.setRemembered(false);
 
         assertEquals("n2", user.getNickname());
         assertEquals("p2", user.getPassword());
-        assertEquals("r2", user.getRank());
-        assertEquals(false, user.isRemembered());
     }
 
     @Test
     void equalsAndHashCode() {
-        UserDto a = UserDto.builder().nickname("x").password("y").rank("z").isRemembered(false).build();
-        UserDto b = UserDto.builder().nickname("x").password("y").rank("z").isRemembered(false).build();
-        UserDto c = UserDto.builder().nickname("other").password("y").rank("z").isRemembered(false).build();
+        UserDto a = UserDto.builder().nickname("x").password("y").build();
+        UserDto b = UserDto.builder().nickname("x").password("y").build();
+        UserDto c = UserDto.builder().nickname("other").password("y").build();
 
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
@@ -61,11 +54,13 @@ class UserDtoTest {
 
     @Test
     void toStringContainsFields() {
-        UserDto user = new UserDto("nick", "pass", "rank", false);
+        UserDto user = UserDto.builder()
+                .nickname("nick")
+                .password("pass")
+                .build();
         String s = user.toString();
         assertTrue(s.contains("nick"));
         assertTrue(s.contains("pass"));
-        assertTrue(s.contains("rank"));
     }
 
     @Test
@@ -73,8 +68,6 @@ class UserDtoTest {
         UserDto original = UserDto.builder()
                 .nickname("sN")
                 .password("sP")
-                .rank("sR")
-                .isRemembered(true)
                 .build();
 
         byte[] bytes;

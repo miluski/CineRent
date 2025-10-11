@@ -17,16 +17,12 @@ public class CookieService {
     @Value("${jwt.refresh.cookie.maxAge}")
     private int refreshCookieMaxAge;
 
-    @Value("${jwt.refresh.remembered.cookie.maxAge}")
-    private int refreshRememberedCookieMaxAge;
-
     public void setAccessTokenCookie(HttpServletResponse response, String token) {
         setTokenCookie(response, token, CookieNames.ACCESS_TOKEN, cookieMaxAge);
     }
 
-    public void setRefreshTokenCookie(HttpServletResponse response, String token, boolean isRemembered) {
-        int maxAge = isRemembered ? refreshRememberedCookieMaxAge : refreshCookieMaxAge;
-        setTokenCookie(response, token, CookieNames.REFRESH_TOKEN, maxAge);
+    public void setRefreshTokenCookie(HttpServletResponse response, String token) {
+        setTokenCookie(response, token, CookieNames.REFRESH_TOKEN, refreshCookieMaxAge);
     }
 
     public void deleteTokenCookie(HttpServletResponse response, CookieNames cookieName) {

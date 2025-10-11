@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import pl.kielce.tu.backend.filter.factory.ValidationStrategyFactory;
+import pl.kielce.tu.backend.filter.factory.TokenValidationStrategyFactory;
 import pl.kielce.tu.backend.filter.strategy.ValidationResult;
 import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.CookieNames;
@@ -32,7 +32,7 @@ import pl.kielce.tu.backend.model.entity.User;
 public class TokenRequestFilter extends OncePerRequestFilter {
 
     private final ResponseHelper responseHelper;
-    private final ValidationStrategyFactory validationFactory;
+    private final TokenValidationStrategyFactory validationFactory;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,

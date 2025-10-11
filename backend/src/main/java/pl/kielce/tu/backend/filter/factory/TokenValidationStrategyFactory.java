@@ -18,13 +18,13 @@ import pl.kielce.tu.backend.model.constant.CookieNames;
 import pl.kielce.tu.backend.model.constant.TokenValidationNames;
 
 @Component
-public class ValidationStrategyFactory {
+public class TokenValidationStrategyFactory {
 
     private final Map<TokenValidationNames, ValidationStrategy<?>> strategies;
     private final List<TokenValidationNames> executionOrder;
 
     @Autowired
-    public ValidationStrategyFactory(List<ValidationStrategy<?>> validationStrategies) {
+    public TokenValidationStrategyFactory(List<ValidationStrategy<?>> validationStrategies) {
         this.strategies = new LinkedHashMap<>();
         validationStrategies.forEach(strategy -> strategies.put(strategy.getName(), strategy));
         this.executionOrder = List.of(

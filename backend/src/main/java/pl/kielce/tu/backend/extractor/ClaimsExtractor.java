@@ -26,12 +26,6 @@ public class ClaimsExtractor {
         return expiresAtMillis - issuedAtMillis;
     }
 
-    public boolean extractIsRemembered(String token, String secret) {
-        Claims claims = extractClaims(token, secret);
-        Boolean isRemembered = claims.get("isRemembered", Boolean.class);
-        return isRemembered != null && isRemembered;
-    }
-
     private Claims extractClaims(String token, String secret) {
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         return Jwts.parser()
