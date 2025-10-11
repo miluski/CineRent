@@ -17,21 +17,21 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import pl.kielce.tu.backend.filter.factory.TokenValidationStrategyFactory;
 import pl.kielce.tu.backend.filter.strategy.ValidationResult;
 import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.CookieNames;
-import pl.kielce.tu.backend.model.constant.ProtectedEndpoints;
 import pl.kielce.tu.backend.model.constant.PublicEndpoints;
+import pl.kielce.tu.backend.model.constant.SpecialEndpoints;
 import pl.kielce.tu.backend.model.entity.User;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TokenRequestFilter extends OncePerRequestFilter {
 
     private final ResponseHelper responseHelper;
+    private final UserContextLogger userContextLogger;
     private final TokenValidationStrategyFactory validationFactory;
 
     @Override
@@ -76,7 +76,7 @@ public class TokenRequestFilter extends OncePerRequestFilter {
     }
 
     private CookieNames determineTokenType(String requestPath) {
-        return ProtectedEndpoints.REFRESH_TOKENS.matches(requestPath)
+        return SpecialEndpoints.REFRESH_TOKENS.matches(requestPath)
                 ? CookieNames.REFRESH_TOKEN
                 : CookieNames.ACCESS_TOKEN;
     }
@@ -90,24 +90,26 @@ public class TokenRequestFilter extends OncePerRequestFilter {
     }
 
     private void handleExpiredToken(HttpServletResponse response, String requestPath) throws IOException {
-        log.debug("Token expired for {}", requestPath);
+        userContextLogger.logUserOperation("TOKEN_EXPIRED", "Token expired for " + requestPath);
         responseHelper.sendUnauthorized(response, "Token expired");
     }
 
     private void handleInvalidToken(HttpServletResponse response, String requestPath, JwtException e)
             throws IOException {
-        log.debug("Invalid token for {}: {}", requestPath, e.getMessage());
+        userContextLogger.logUserOperation("INVALID_TOKEN",
+                "Invalid token for " + requestPath + ": " + e.getMessage());
         responseHelper.sendUnauthorized(response, "Invalid token: " + e.getMessage());
     }
 
     private void handleInvalidTokenFormat(HttpServletResponse response, String requestPath) throws IOException {
-        log.debug("Invalid token format for {}", requestPath);
+        userContextLogger.logUserOperation("INVALID_TOKEN_FORMAT", "Invalid token format for " + requestPath);
         responseHelper.sendUnauthorized(response, "Invalid token format");
     }
 
     private void handleUnexpectedError(HttpServletResponse response, String requestPath, Exception e)
             throws IOException {
-        log.error("Unexpected error during token validation for {}", requestPath, e);
+        userContextLogger.logUserOperation("AUTHENTICATION_ERROR",
+                "Unexpected error during token validation for " + requestPath + ": " + e.getMessage());
         responseHelper.sendUnauthorized(response, "Authentication failed");
     }
 

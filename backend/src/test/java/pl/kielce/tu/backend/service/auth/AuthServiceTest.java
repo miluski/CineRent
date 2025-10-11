@@ -33,7 +33,7 @@ import pl.kielce.tu.backend.model.dto.UserDto;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
 import pl.kielce.tu.backend.service.validation.FieldValidationStrategy;
-import pl.kielce.tu.backend.service.validation.factory.UserValidationStrategyFactory;
+import pl.kielce.tu.backend.service.validation.factory.ValidationStrategyFactory;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -45,7 +45,7 @@ class AuthServiceTest {
     @Mock
     private CookieService cookieService;
     @Mock
-    private UserValidationStrategyFactory validationStrategyFactory;
+    private ValidationStrategyFactory validationStrategyFactory;
     @Mock
     private UserRepository userRepository;
     @Mock

@@ -24,6 +24,7 @@ import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.CookieNames;
 import pl.kielce.tu.backend.model.constant.TokenValidationNames;
 import pl.kielce.tu.backend.service.auth.CookieService;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 @ExtendWith(MockitoExtension.class)
 class TokenPresenceValidationStrategyTest {
@@ -33,6 +34,9 @@ class TokenPresenceValidationStrategyTest {
 
     @Mock
     private ResponseHelper responseHelper;
+
+    @Mock
+    private UserContextLogger userContextLogger;
 
     @Mock
     private HttpServletResponse response;

@@ -1,8 +1,9 @@
-package pl.kielce.tu.backend.service.validation.implementations;
+package pl.kielce.tu.backend.service.validation.implementations.user;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,14 +11,17 @@ import org.junit.jupiter.api.Test;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.model.constant.ValidationConstraints;
 import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 class AgeValidationStrategyTest {
 
     private AgeValidationStrategy strategy;
+    private UserContextLogger userContextLogger;
 
     @BeforeEach
     void setUp() {
-        strategy = new AgeValidationStrategy();
+        userContextLogger = mock(UserContextLogger.class);
+        strategy = new AgeValidationStrategy(userContextLogger);
     }
 
     @Test

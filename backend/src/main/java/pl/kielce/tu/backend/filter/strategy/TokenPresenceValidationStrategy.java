@@ -6,30 +6,29 @@ import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.TokenValidationNames;
 import pl.kielce.tu.backend.service.auth.CookieService;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TokenPresenceValidationStrategy implements ValidationStrategy<TokenPresenceInput> {
 
     private final CookieService cookieService;
     private final ResponseHelper responseHelper;
+    private final UserContextLogger userContextLogger;
 
     @Override
     public ValidationResult validate(TokenPresenceInput input, HttpServletResponse response,
             String requestPath) throws IOException {
         String token = cookieService.getTokenFromCookie(input.request(), input.tokenType());
-
         if (token == null || token.isEmpty()) {
-            log.debug("No {} found in request to {}", input.tokenType(), requestPath);
+            userContextLogger.logUserOperation("TOKEN_NOT_FOUND",
+                    "No " + input.tokenType() + " found in request to " + requestPath);
             responseHelper.sendUnauthorized(response, "Token not found");
             return new ValidationResult(false, null);
         }
-
         return new ValidationResult(true, token);
     }
 
@@ -37,4 +36,5 @@ public class TokenPresenceValidationStrategy implements ValidationStrategy<Token
     public TokenValidationNames getName() {
         return TokenValidationNames.PRESENCE;
     }
+
 }

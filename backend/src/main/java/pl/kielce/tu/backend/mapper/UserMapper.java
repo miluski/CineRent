@@ -1,23 +1,16 @@
 package pl.kielce.tu.backend.mapper;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.model.dto.UserDto;
-import pl.kielce.tu.backend.model.entity.Genre;
 import pl.kielce.tu.backend.model.entity.User;
-import pl.kielce.tu.backend.repository.GenreRepository;
 
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
 
-    private final GenreRepository genreRepository;
+    private final GenreMapper genreMappingService;
 
     public User toUser(UserDto userDto) {
         return User
@@ -25,7 +18,7 @@ public class UserMapper {
                 .nickname(userDto.getNickname())
                 .password(userDto.getPassword())
                 .age(userDto.getAge())
-                .preferredGenres(mapGenreIdsToGenres(userDto.getPreferredGenresIdentifiers()))
+                .preferredGenres(genreMappingService.mapGenreIdsToGenres(userDto.getPreferredGenresIdentifiers()))
                 .build();
     }
 
@@ -34,30 +27,8 @@ public class UserMapper {
                 .builder()
                 .nickname(user.getNickname())
                 .age(user.getAge())
-                .preferredGenres(mapGenresToNames(user.getPreferredGenres()))
+                .preferredGenres(genreMappingService.mapGenresToNames(user.getPreferredGenres()))
                 .build();
-    }
-
-    private List<Genre> mapGenreIdsToGenres(List<Long> genreIds) {
-        if (genreIds == null || genreIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return genreIds.stream()
-                .map(genreRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-    }
-
-    private List<String> mapGenresToNames(List<Genre> genres) {
-        if (genres == null || genres.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return genres.stream()
-                .map(Genre::getName)
-                .collect(Collectors.toList());
     }
 
 }

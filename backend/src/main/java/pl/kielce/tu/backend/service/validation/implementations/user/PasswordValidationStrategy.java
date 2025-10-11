@@ -1,21 +1,30 @@
-package pl.kielce.tu.backend.service.validation.implementations;
+package pl.kielce.tu.backend.service.validation.implementations.user;
 
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.model.constant.ValidationConstraints;
 import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
 import pl.kielce.tu.backend.service.validation.FieldValidationStrategy;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
-@Slf4j
 @Component
+@RequiredArgsConstructor
 public class PasswordValidationStrategy implements FieldValidationStrategy<String> {
+
+    private final UserContextLogger userContextLogger;
 
     @Override
     public void validate(String password) throws ValidationException {
-        validateNotEmpty(password);
-        validateLength(password);
+        try {
+            validateNotEmpty(password);
+            validateLength(password);
+            userContextLogger.logValidationOperation("PASSWORD", "SUCCESS", "Password validation passed");
+        } catch (ValidationException e) {
+            userContextLogger.logValidationOperation("PASSWORD", "FAILURE", e.getMessage());
+            throw e;
+        }
     }
 
     @Override

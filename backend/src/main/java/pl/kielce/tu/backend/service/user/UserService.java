@@ -21,7 +21,7 @@ import pl.kielce.tu.backend.model.entity.Genre;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
 import pl.kielce.tu.backend.service.auth.CookieService;
-import pl.kielce.tu.backend.service.validation.factory.UserValidationStrategyFactory;
+import pl.kielce.tu.backend.service.validation.factory.ValidationStrategyFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +35,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ClaimsExtractor claimsExtractor;
-    private final UserValidationStrategyFactory validationStrategyFactory;
+    private final ValidationStrategyFactory validationStrategyFactory;
 
     public ResponseEntity<UserDto> handleGetUser(HttpServletRequest httpServletRequest) {
         try {

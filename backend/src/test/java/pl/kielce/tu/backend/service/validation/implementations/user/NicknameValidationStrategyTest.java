@@ -1,18 +1,21 @@
-package pl.kielce.tu.backend.service.validation.implementations;
+package pl.kielce.tu.backend.service.validation.implementations.user;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.model.constant.ValidationConstraints;
 import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 class NicknameValidationStrategyTest {
 
-    private final NicknameValidationStrategy strategy = new NicknameValidationStrategy();
+    private final UserContextLogger userContextLogger = mock(UserContextLogger.class);
+    private final NicknameValidationStrategy strategy = new NicknameValidationStrategy(userContextLogger);
 
     @Test
     void getStrategyType_returnsNickname() {

@@ -1,21 +1,30 @@
-package pl.kielce.tu.backend.service.validation.implementations;
+package pl.kielce.tu.backend.service.validation.implementations.user;
 
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.model.constant.ValidationConstraints;
 import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
 import pl.kielce.tu.backend.service.validation.FieldValidationStrategy;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
-@Slf4j
 @Component
+@RequiredArgsConstructor
 public class AgeValidationStrategy implements FieldValidationStrategy<Integer> {
+
+    private final UserContextLogger userContextLogger;
 
     @Override
     public void validate(Integer age) throws ValidationException {
-        validateNotNull(age);
-        validateAgeRange(age);
+        try {
+            validateNotNull(age);
+            validateAgeRange(age);
+            userContextLogger.logValidationOperation("AGE", "SUCCESS", "Age validation passed for value: " + age);
+        } catch (ValidationException e) {
+            userContextLogger.logValidationOperation("AGE", "FAILURE", e.getMessage());
+            throw e;
+        }
     }
 
     @Override

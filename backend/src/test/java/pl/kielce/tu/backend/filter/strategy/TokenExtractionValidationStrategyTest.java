@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import pl.kielce.tu.backend.extractor.ClaimsExtractor;
 import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.TokenValidationNames;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 class TokenExtractionValidationStrategyTest {
 
@@ -33,7 +34,8 @@ class TokenExtractionValidationStrategyTest {
         claimsExtractor = mock(ClaimsExtractor.class);
         response = mock(HttpServletResponse.class);
 
-        strategy = new TokenExtractionValidationStrategy(responseHelper, claimsExtractor);
+        UserContextLogger userContextLogger = mock(UserContextLogger.class);
+        strategy = new TokenExtractionValidationStrategy(responseHelper, claimsExtractor, userContextLogger);
 
         Field jwtField = TokenExtractionValidationStrategy.class.getDeclaredField("jwtSecret");
         jwtField.setAccessible(true);

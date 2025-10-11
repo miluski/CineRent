@@ -1,8 +1,9 @@
-package pl.kielce.tu.backend.service.validation.implementations;
+package pl.kielce.tu.backend.service.validation.implementations.user;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 
@@ -11,10 +12,12 @@ import org.junit.jupiter.api.Test;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.model.constant.ValidationConstraints;
 import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 class PasswordValidationStrategyTest {
 
-    private final PasswordValidationStrategy strategy = new PasswordValidationStrategy();
+    private final UserContextLogger userContextLogger = mock(UserContextLogger.class);
+    private final PasswordValidationStrategy strategy = new PasswordValidationStrategy(userContextLogger);
 
     @Test
     void getStrategyType_shouldReturnPassword() {
