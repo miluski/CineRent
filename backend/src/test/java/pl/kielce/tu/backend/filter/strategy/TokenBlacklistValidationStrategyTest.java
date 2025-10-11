@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,11 +18,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.TokenValidationNames;
 import pl.kielce.tu.backend.service.auth.TokenService;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 class TokenBlacklistValidationStrategyTest {
 
     @Test
-    void validate_shouldReturnInvalidAndSendUnauthorized_whenTokenIsBlacklisted() throws Exception {
+    void isTokenBlacklisted_returnsFalseAndSendsUnauthorized_whenTokenIsBlacklisted() throws Exception {
         TokenService tokenService = Mockito.mock(TokenService.class);
         ResponseHelper responseHelper = Mockito.mock(ResponseHelper.class);
         HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -30,7 +32,9 @@ class TokenBlacklistValidationStrategyTest {
         when(tokenService.isTokenBlacklisted(token)).thenReturn(true);
         doNothing().when(responseHelper).sendUnauthorized(response, "Token is blacklisted");
 
-        TokenBlacklistValidationStrategy strategy = new TokenBlacklistValidationStrategy(tokenService, responseHelper);
+        UserContextLogger userContextLogger = mock(UserContextLogger.class);
+        TokenBlacklistValidationStrategy strategy = new TokenBlacklistValidationStrategy(responseHelper, tokenService,
+                userContextLogger);
 
         ValidationResult result = strategy.validate(token, response, "/some/path");
 
@@ -49,10 +53,11 @@ class TokenBlacklistValidationStrategyTest {
         String token = "valid-token";
         when(tokenService.isTokenBlacklisted(token)).thenReturn(false);
 
-        TokenBlacklistValidationStrategy strategy = new TokenBlacklistValidationStrategy(tokenService, responseHelper);
+        UserContextLogger userContextLogger = mock(UserContextLogger.class);
+        TokenBlacklistValidationStrategy strategy = new TokenBlacklistValidationStrategy(responseHelper, tokenService,
+                userContextLogger);
 
         ValidationResult result = strategy.validate(token, response, "/another/path");
-
         assertTrue(result.isSuccess(), "Expected validation to be true for non-blacklisted token");
         assertEquals(token, result.getData(), "Expected returned value to be the original token");
 
@@ -64,10 +69,11 @@ class TokenBlacklistValidationStrategyTest {
         TokenService tokenService = Mockito.mock(TokenService.class);
         ResponseHelper responseHelper = Mockito.mock(ResponseHelper.class);
 
-        TokenBlacklistValidationStrategy strategy = new TokenBlacklistValidationStrategy(tokenService, responseHelper);
+        UserContextLogger userContextLogger = mock(UserContextLogger.class);
+        TokenBlacklistValidationStrategy strategy = new TokenBlacklistValidationStrategy(responseHelper, tokenService,
+                userContextLogger);
 
         TokenValidationNames name = strategy.getName();
-
         assertEquals(TokenValidationNames.BLACKLIST, name);
     }
 }

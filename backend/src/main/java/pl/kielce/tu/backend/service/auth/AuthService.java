@@ -16,7 +16,7 @@ import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
 import pl.kielce.tu.backend.model.dto.UserDto;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
-import pl.kielce.tu.backend.service.validation.factory.UserValidationStrategyFactory;
+import pl.kielce.tu.backend.service.validation.factory.ValidationStrategyFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class AuthService {
     private final CookieService cookieService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserValidationStrategyFactory validationFactory;
+    private final ValidationStrategyFactory validationFactory;
 
     public ResponseEntity<Void> handleLogin(UserDto userDto, HttpServletResponse httpServletResponse) {
         try {

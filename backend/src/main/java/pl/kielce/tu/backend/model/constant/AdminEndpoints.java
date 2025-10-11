@@ -10,7 +10,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum AdminEndpoints {
-    ;
+    DVD_CREATE("/api/v1/dvd/create"),
+    DVD_PATCH("/api/v1/dvd/*/edit");
+
     private final String pattern;
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 

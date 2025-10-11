@@ -13,15 +13,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import pl.kielce.tu.backend.extractor.ClaimsExtractor;
 import pl.kielce.tu.backend.mapper.TokenMapper;
 import pl.kielce.tu.backend.model.constant.CookieNames;
 import pl.kielce.tu.backend.model.entity.BlacklistedToken;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.BlacklistedTokenRepository;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TokenService {
@@ -39,6 +38,7 @@ public class TokenService {
     private final CookieService cookieService;
     private final ClaimsExtractor claimsExtractor;
     private final BlacklistedTokenRepository blacklistedTokenRepository;
+    private final UserContextLogger userContextLogger;
 
     public String generateToken(User user, CookieNames cookieName) {
         try {
@@ -46,7 +46,8 @@ public class TokenService {
             SecretKey key = createSecretKey();
             return buildJwtToken(user, expirationMillis, key);
         } catch (Exception e) {
-            log.error("Error generating token for user: {}", user.getId(), e);
+            userContextLogger.logUserOperation("TOKEN_GENERATION_FAILURE",
+                    "Error generating token for user: " + user.getId() + ", error: " + e.getMessage());
             throw new RuntimeException("Failed to generate token", e);
         }
     }
@@ -59,7 +60,8 @@ public class TokenService {
         try {
             return blacklistedTokenRepository.findByToken(token).isPresent();
         } catch (Exception e) {
-            log.error("Error checking if token is blacklisted", e);
+            userContextLogger.logUserOperation("TOKEN_BLACKLIST_CHECK_ERROR",
+                    "Error checking if token is blacklisted: " + e.getMessage());
             return false;
         }
     }
@@ -97,14 +99,17 @@ public class TokenService {
         try {
             String token = cookieService.getTokenFromCookie(httpServletRequest, cookieName);
             if (token == null || token.isEmpty()) {
-                log.debug("No token found for cookie: {}", cookieName);
+                userContextLogger.logUserOperation("TOKEN_BLACKLIST",
+                        "No token found for cookie: " + cookieName);
                 return;
             }
             BlacklistedToken blacklistedToken = tokenMapper.toBlacklistedToken(token);
             blacklistedTokenRepository.save(blacklistedToken);
-            log.info("Token blacklisted successfully for cookie: {}", cookieName);
+            userContextLogger.logUserOperation("TOKEN_BLACKLIST_SUCCESS",
+                    "Token blacklisted successfully for cookie: " + cookieName);
         } catch (Exception e) {
-            log.error("Error blacklisting token for cookie: {}", cookieName, e);
+            userContextLogger.logUserOperation("TOKEN_BLACKLIST_ERROR",
+                    "Error blacklisting token for cookie: " + cookieName + ", error: " + e.getMessage());
         }
     }
 

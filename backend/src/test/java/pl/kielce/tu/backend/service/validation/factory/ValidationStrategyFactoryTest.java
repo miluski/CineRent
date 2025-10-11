@@ -18,7 +18,7 @@ import pl.kielce.tu.backend.service.validation.FieldValidationStrategy;
 
 class ValidationStrategyFactoryTest {
 
-    private UserValidationStrategyFactory factory;
+    private ValidationStrategyFactory factory;
 
     @SuppressWarnings("rawtypes")
     private FieldValidationStrategy nicknameStrategy;
@@ -47,7 +47,7 @@ class ValidationStrategyFactoryTest {
                 ageStrategy,
                 genreStrategy);
 
-        factory = new UserValidationStrategyFactory(strategies);
+        factory = new ValidationStrategyFactory(strategies);
         factory.initializeStrategies();
     }
 
@@ -93,7 +93,7 @@ class ValidationStrategyFactoryTest {
 
     @Test
     void getStrategy_shouldThrowException_whenStrategyTypeNotFound() {
-        factory = new UserValidationStrategyFactory(Collections.emptyList());
+        factory = new ValidationStrategyFactory(Collections.emptyList());
         factory.initializeStrategies();
 
         IllegalArgumentException exception = assertThrows(
@@ -114,7 +114,7 @@ class ValidationStrategyFactoryTest {
 
     @Test
     void factory_shouldHandleEmptyStrategyList() {
-        factory = new UserValidationStrategyFactory(Collections.emptyList());
+        factory = new ValidationStrategyFactory(Collections.emptyList());
         factory.initializeStrategies();
 
         for (ValidationStrategyType type : ValidationStrategyType.values()) {
@@ -132,7 +132,7 @@ class ValidationStrategyFactoryTest {
                 nicknameStrategy,
                 duplicateNicknameStrategy);
 
-        factory = new UserValidationStrategyFactory(strategies);
+        factory = new ValidationStrategyFactory(strategies);
         factory.initializeStrategies();
 
         FieldValidationStrategy<?> result = factory.getStrategy(ValidationStrategyType.NICKNAME);

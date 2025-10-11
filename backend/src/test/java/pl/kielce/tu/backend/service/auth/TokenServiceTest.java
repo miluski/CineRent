@@ -35,6 +35,7 @@ import pl.kielce.tu.backend.model.constant.CookieNames;
 import pl.kielce.tu.backend.model.entity.BlacklistedToken;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.BlacklistedTokenRepository;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 @ExtendWith(MockitoExtension.class)
 class TokenServiceTest {
@@ -50,6 +51,9 @@ class TokenServiceTest {
 
     @Mock
     private BlacklistedTokenRepository blacklistedTokenRepository;
+
+    @Mock
+    private UserContextLogger userContextLogger;
 
     @InjectMocks
     private TokenService tokenService;

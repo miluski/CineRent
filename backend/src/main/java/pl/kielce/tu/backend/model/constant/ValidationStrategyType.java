@@ -4,5 +4,12 @@ public enum ValidationStrategyType {
     NICKNAME,
     PASSWORD,
     AGE,
-    GENRE
+    GENRE,
+    DVD_TITLE,
+    DVD_DIRECTORS,
+    DVD_DESCRIPTION,
+    DVD_YEAR,
+    DVD_DURATION,
+    DVD_COPIES,
+    DVD_PRICE
 }

@@ -13,7 +13,7 @@ import pl.kielce.tu.backend.service.validation.FieldValidationStrategy;
 
 @Component
 @RequiredArgsConstructor
-public class UserValidationStrategyFactory {
+public class ValidationStrategyFactory {
 
     private final List<FieldValidationStrategy<?>> validationStrategies;
     private final Map<ValidationStrategyType, FieldValidationStrategy<?>> strategyMap = new HashMap<>();

@@ -26,6 +26,7 @@ import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.TokenValidationNames;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 @ExtendWith(MockitoExtension.class)
 class UserExistenceValidationStrategyTest {
@@ -35,6 +36,9 @@ class UserExistenceValidationStrategyTest {
 
     @Mock
     private ResponseHelper responseHelper;
+
+    @Mock
+    private UserContextLogger userContextLogger;
 
     @Mock
     private HttpServletResponse httpServletResponse;

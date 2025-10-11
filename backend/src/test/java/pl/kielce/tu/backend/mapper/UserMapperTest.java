@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,12 +15,11 @@ import org.junit.jupiter.api.Test;
 import pl.kielce.tu.backend.model.dto.UserDto;
 import pl.kielce.tu.backend.model.entity.Genre;
 import pl.kielce.tu.backend.model.entity.User;
-import pl.kielce.tu.backend.repository.GenreRepository;
 
 class UserMapperTest {
 
-    private final GenreRepository genreRepository = mock(GenreRepository.class);
-    private final UserMapper mapper = new UserMapper(genreRepository);
+    private final GenreMapper genreMappingService = mock(GenreMapper.class);
+    private final UserMapper mapper = new UserMapper(genreMappingService);
 
     @Test
     void toUser_mapsNicknameAndPassword() {
@@ -28,11 +28,41 @@ class UserMapperTest {
                 .password("s3cr3t")
                 .build();
 
+        when(genreMappingService.mapGenreIdsToGenres(null))
+                .thenReturn(Collections.emptyList());
+
         User user = mapper.toUser(dto);
 
         assertNotNull(user);
         assertEquals("john_doe", user.getNickname());
         assertEquals("s3cr3t", user.getPassword());
+    }
+
+    @Test
+    void toUser_mapsPreferredGenres_whenGenreIdsProvided() {
+        Genre comedy = Genre.builder().id(1L).name("Komedia").build();
+        Genre action = Genre.builder().id(2L).name("Akcja").build();
+
+        UserDto dto = UserDto.builder()
+                .nickname("test_user")
+                .password("password")
+                .age(25)
+                .preferredGenresIdentifiers(Arrays.asList(1L, 2L))
+                .build();
+
+        when(genreMappingService.mapGenreIdsToGenres(Arrays.asList(1L, 2L)))
+                .thenReturn(Arrays.asList(comedy, action));
+
+        User user = mapper.toUser(dto);
+
+        assertNotNull(user);
+        assertEquals("test_user", user.getNickname());
+        assertEquals("password", user.getPassword());
+        assertEquals(25, user.getAge());
+        assertNotNull(user.getPreferredGenres());
+        assertEquals(2, user.getPreferredGenres().size());
+        assertEquals("Komedia", user.getPreferredGenres().get(0).getName());
+        assertEquals("Akcja", user.getPreferredGenres().get(1).getName());
     }
 
     @Test
@@ -61,6 +91,9 @@ class UserMapperTest {
                 .preferredGenres(Arrays.asList(comedy, sciFi, action))
                 .build();
 
+        when(genreMappingService.mapGenresToNames(Arrays.asList(comedy, sciFi, action)))
+                .thenReturn(Arrays.asList("Komedia", "Sci-Fi", "Akcja"));
+
         UserDto dto = mapper.toDto(user);
 
         assertNotNull(dto);
@@ -81,6 +114,9 @@ class UserMapperTest {
                 .preferredGenres(Collections.emptyList())
                 .build();
 
+        when(genreMappingService.mapGenresToNames(Collections.emptyList()))
+                .thenReturn(Collections.emptyList());
+
         UserDto dto = mapper.toDto(user);
 
         assertNotNull(dto);
@@ -95,6 +131,9 @@ class UserMapperTest {
                 .age(25)
                 .preferredGenres(null)
                 .build();
+
+        when(genreMappingService.mapGenresToNames(null))
+                .thenReturn(Collections.emptyList());
 
         UserDto dto = mapper.toDto(user);
 

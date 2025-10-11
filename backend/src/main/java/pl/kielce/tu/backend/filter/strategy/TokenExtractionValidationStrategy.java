@@ -7,18 +7,18 @@ import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import pl.kielce.tu.backend.extractor.ClaimsExtractor;
 import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.TokenValidationNames;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TokenExtractionValidationStrategy implements ValidationStrategy<String> {
 
     private final ResponseHelper responseHelper;
     private final ClaimsExtractor claimsExtractor;
+    private final UserContextLogger userContextLogger;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -30,7 +30,8 @@ public class TokenExtractionValidationStrategy implements ValidationStrategy<Str
             Long userId = claimsExtractor.extractUserId(token, jwtSecret);
             return new ValidationResult(true, userId);
         } catch (Exception e) {
-            log.debug("Failed to extract user ID from token for {}", requestPath);
+            userContextLogger.logUserOperation("TOKEN_EXTRACTION_FAILURE",
+                    "Failed to extract user ID from token for " + requestPath);
             responseHelper.sendUnauthorized(response, "Invalid token");
             return new ValidationResult(false, null);
         }

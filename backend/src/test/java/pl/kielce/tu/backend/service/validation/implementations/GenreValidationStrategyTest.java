@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
 import pl.kielce.tu.backend.repository.GenreRepository;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 @ExtendWith(MockitoExtension.class)
 class GenreValidationStrategyTest {
@@ -27,11 +28,14 @@ class GenreValidationStrategyTest {
     @Mock
     private GenreRepository genreRepository;
 
+    @Mock
+    private UserContextLogger userContextLogger;
+
     private GenreValidationStrategy strategy;
 
     @BeforeEach
     void setUp() {
-        strategy = new GenreValidationStrategy(genreRepository);
+        strategy = new GenreValidationStrategy(genreRepository, userContextLogger);
     }
 
     @Test

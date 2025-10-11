@@ -1,22 +1,33 @@
-package pl.kielce.tu.backend.service.validation.implementations;
+package pl.kielce.tu.backend.service.validation.implementations.user;
 
 import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.model.constant.ValidationConstraints;
 import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
 import pl.kielce.tu.backend.service.validation.FieldValidationStrategy;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class NicknameValidationStrategy implements FieldValidationStrategy<String> {
+
+    private final UserContextLogger userContextLogger;
 
     @Override
     public void validate(String nickname) throws ValidationException {
-        validateNotEmpty(nickname);
-        validateLength(nickname);
-        validatePattern(nickname);
+        try {
+            validateNotEmpty(nickname);
+            validateLength(nickname);
+            validatePattern(nickname);
+            userContextLogger.logValidationOperation("NICKNAME", "SUCCESS", "Nickname validation passed");
+        } catch (ValidationException e) {
+            userContextLogger.logValidationOperation("NICKNAME", "FAILURE", e.getMessage());
+            throw e;
+        }
     }
 
     @Override

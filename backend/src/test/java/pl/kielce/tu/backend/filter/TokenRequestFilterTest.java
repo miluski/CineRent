@@ -28,6 +28,7 @@ import pl.kielce.tu.backend.filter.factory.TokenValidationStrategyFactory;
 import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.PublicEndpoints;
 import pl.kielce.tu.backend.model.entity.User;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 public class TokenRequestFilterTest {
 
@@ -46,13 +47,16 @@ public class TokenRequestFilterTest {
     @Mock
     private FilterChain filterChain;
 
+    @Mock
+    private UserContextLogger userContextLogger;
+
     private AutoCloseable mocks;
     private TokenRequestFilter filter;
 
     @BeforeEach
     void setUp() {
         mocks = MockitoAnnotations.openMocks(this);
-        filter = new TokenRequestFilter(responseHelper, validationFactory);
+        filter = new TokenRequestFilter(responseHelper, userContextLogger, validationFactory);
         SecurityContextHolder.clearContext();
     }
 

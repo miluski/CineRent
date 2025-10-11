@@ -64,3 +64,4 @@ certs/
 ### Node.js ###
 **/.npm
 **/.eslintcache
+uploads

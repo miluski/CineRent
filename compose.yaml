@@ -21,6 +21,7 @@ services:
     volumes:
       - ./backend:/app
       - ./certs:/certs
+      - ./uploads:/app/uploads
     networks:
       - cine-rent-network
     deploy:

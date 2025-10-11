@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -19,6 +20,7 @@ import pl.kielce.tu.backend.filter.util.ResponseHelper;
 import pl.kielce.tu.backend.model.constant.AdminEndpoints;
 import pl.kielce.tu.backend.model.constant.RankType;
 import pl.kielce.tu.backend.model.entity.User;
+import pl.kielce.tu.backend.util.UserContextLogger;
 
 @ExtendWith(MockitoExtension.class)
 class AdminAccessValidationStrategyTest {
@@ -34,7 +36,9 @@ class AdminAccessValidationStrategyTest {
         try (MockedStatic<AdminEndpoints> adminEndpointsMock = Mockito.mockStatic(AdminEndpoints.class)) {
             adminEndpointsMock.when(() -> AdminEndpoints.isMember(path)).thenReturn(true);
 
-            AdminAccessValidationStrategy strategy = new AdminAccessValidationStrategy(responseHelper);
+            UserContextLogger userContextLogger = mock(UserContextLogger.class);
+            AdminAccessValidationStrategy strategy = new AdminAccessValidationStrategy(responseHelper,
+                    userContextLogger);
             ValidationResult result = strategy.validate(user, response, path);
 
             verify(responseHelper).sendForbidden(response, "Insufficient permissions");
@@ -55,7 +59,9 @@ class AdminAccessValidationStrategyTest {
         try (MockedStatic<AdminEndpoints> adminEndpointsMock = Mockito.mockStatic(AdminEndpoints.class)) {
             adminEndpointsMock.when(() -> AdminEndpoints.isMember(path)).thenReturn(true);
 
-            AdminAccessValidationStrategy strategy = new AdminAccessValidationStrategy(responseHelper);
+            UserContextLogger userContextLogger = mock(UserContextLogger.class);
+            AdminAccessValidationStrategy strategy = new AdminAccessValidationStrategy(responseHelper,
+                    userContextLogger);
             ValidationResult result = strategy.validate(user, response, path);
 
             verifyNoInteractions(responseHelper);
@@ -75,7 +81,9 @@ class AdminAccessValidationStrategyTest {
         try (MockedStatic<AdminEndpoints> adminEndpointsMock = Mockito.mockStatic(AdminEndpoints.class)) {
             adminEndpointsMock.when(() -> AdminEndpoints.isMember(path)).thenReturn(false);
 
-            AdminAccessValidationStrategy strategy = new AdminAccessValidationStrategy(responseHelper);
+            UserContextLogger userContextLogger = mock(UserContextLogger.class);
+            AdminAccessValidationStrategy strategy = new AdminAccessValidationStrategy(responseHelper,
+                    userContextLogger);
             ValidationResult result = strategy.validate(user, response, path);
 
             verifyNoInteractions(responseHelper);
