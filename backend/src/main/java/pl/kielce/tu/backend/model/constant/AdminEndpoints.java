@@ -11,7 +11,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AdminEndpoints {
     DVD_CREATE("/api/v1/dvd/create"),
-    DVD_PATCH("/api/v1/dvd/*/edit");
+    DVD_PATCH("/api/v1/dvd/*/edit"),
+    GENRE_CREATE("/api/v1/genres/create"),
+    GENRE_DELETE("/api/v1/genres/*/delete");
 
     private final String pattern;
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();

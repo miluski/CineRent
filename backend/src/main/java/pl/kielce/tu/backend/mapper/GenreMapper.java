@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import pl.kielce.tu.backend.model.dto.GenreDto;
 import pl.kielce.tu.backend.model.entity.Genre;
 import pl.kielce.tu.backend.repository.GenreRepository;
 
@@ -16,6 +17,21 @@ import pl.kielce.tu.backend.repository.GenreRepository;
 public class GenreMapper {
 
     private final GenreRepository genreRepository;
+
+    public Genre toGenre(GenreDto genreDto) {
+        return Genre
+                .builder()
+                .name(genreDto.getName())
+                .build();
+    }
+
+    public GenreDto toDto(Genre genre) {
+        return GenreDto
+                .builder()
+                .id(genre.getId())
+                .name(genre.getName())
+                .build();
+    }
 
     public List<String> mapGenresToNames(List<Genre> genres) {
         if (genres == null || genres.isEmpty()) {
