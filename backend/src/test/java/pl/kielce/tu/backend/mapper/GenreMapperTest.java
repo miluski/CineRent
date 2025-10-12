@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import pl.kielce.tu.backend.model.dto.GenreDto;
 import pl.kielce.tu.backend.model.entity.Genre;
 import pl.kielce.tu.backend.repository.GenreRepository;
 
@@ -78,5 +79,60 @@ class GenreMapperTest {
 
         List<Genre> result = service.mapGenreIdsToGenres(Arrays.asList(1L, 2L, 3L));
         assertEquals(Arrays.asList(g1, g2), result);
+    }
+
+    @Test
+    void toGenre_withValidGenreDto_returnsGenre() {
+        GenreDto genreDto = GenreDto.builder()
+                .id(1L)
+                .name("Science Fiction")
+                .build();
+        Genre result = service.toGenre(genreDto);
+        assertEquals("Science Fiction", result.getName());
+        assertEquals(null, result.getId());
+    }
+
+    @Test
+    void toGenre_withNullName_returnsGenreWithNullName() {
+        GenreDto genreDto = GenreDto.builder()
+                .id(1L)
+                .name(null)
+                .build();
+        Genre result = service.toGenre(genreDto);
+        assertEquals(null, result.getName());
+        assertEquals(null, result.getId());
+    }
+
+    @Test
+    void toDto_withValidGenre_returnsGenreDto() {
+        Genre genre = Genre.builder()
+                .id(1L)
+                .name("Horror")
+                .build();
+        GenreDto result = service.toDto(genre);
+        assertEquals(1L, result.getId());
+        assertEquals("Horror", result.getName());
+    }
+
+    @Test
+    void toDto_withNullId_returnsGenreDtoWithNullId() {
+        Genre genre = Genre.builder()
+                .id(null)
+                .name("Comedy")
+                .build();
+        GenreDto result = service.toDto(genre);
+        assertEquals(null, result.getId());
+        assertEquals("Comedy", result.getName());
+    }
+
+    @Test
+    void toDto_withNullName_returnsGenreDtoWithNullName() {
+        Genre genre = Genre.builder()
+                .id(2L)
+                .name(null)
+                .build();
+        GenreDto result = service.toDto(genre);
+        assertEquals(2L, result.getId());
+        assertEquals(null, result.getName());
     }
 }

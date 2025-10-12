@@ -7,4 +7,7 @@ import pl.kielce.tu.backend.model.entity.Dvd;
 
 @Repository
 public interface DvdRepository extends JpaRepository<Dvd, Long> {
+
+    boolean existsByGenresId(Long genreId);
+
 }

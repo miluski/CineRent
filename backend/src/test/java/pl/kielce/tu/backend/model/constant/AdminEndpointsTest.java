@@ -13,9 +13,11 @@ class AdminEndpointsTest {
     void getAllPatterns_shouldReturnAllDefinedPatterns() {
         String[] patterns = AdminEndpoints.getAllPatterns();
         assertNotNull(patterns, "getAllPatterns should not return null");
-        assertEquals(2, patterns.length, "Expected 2 patterns for defined endpoints");
+        assertEquals(4, patterns.length, "Expected 4 patterns for defined endpoints");
         assertEquals("/api/v1/dvd/create", patterns[0]);
         assertEquals("/api/v1/dvd/*/edit", patterns[1]);
+        assertEquals("/api/v1/genres/create", patterns[2]);
+        assertEquals("/api/v1/genres/*/delete", patterns[3]);
     }
 
     @Test
@@ -35,6 +37,22 @@ class AdminEndpointsTest {
     }
 
     @Test
+    void isMember_shouldReturnTrue_forGenreCreateEndpoint() {
+        assertTrue(AdminEndpoints.isMember("/api/v1/genres/create"),
+                "Genre create endpoint should be recognized as admin endpoint");
+    }
+
+    @Test
+    void isMember_shouldReturnTrue_forGenreDeleteEndpoints() {
+        assertTrue(AdminEndpoints.isMember("/api/v1/genres/1/delete"),
+                "Genre delete with numeric ID should be recognized as admin endpoint");
+        assertTrue(AdminEndpoints.isMember("/api/v1/genres/456/delete"),
+                "Genre delete with different ID should be recognized as admin endpoint");
+        assertTrue(AdminEndpoints.isMember("/api/v1/genres/abc123/delete"),
+                "Genre delete with alphanumeric ID should be recognized as admin endpoint");
+    }
+
+    @Test
     void isMember_shouldReturnFalse_forNonAdminEndpoints() {
         assertFalse(AdminEndpoints.isMember("/api/v1/dvd"),
                 "DVD list endpoint should not be admin endpoint");
@@ -44,6 +62,10 @@ class AdminEndpointsTest {
                 "User edit endpoint should not be admin endpoint");
         assertFalse(AdminEndpoints.isMember("/api/v1/auth/login"),
                 "Auth login should not be admin endpoint");
+        assertFalse(AdminEndpoints.isMember("/api/v1/genres"),
+                "Genre list endpoint should not be admin endpoint");
+        assertFalse(AdminEndpoints.isMember("/api/v1/genres/123"),
+                "Genre get by ID should not be admin endpoint");
     }
 
     @Test
@@ -54,6 +76,12 @@ class AdminEndpointsTest {
                 "DVD edit without ID should not match");
         assertFalse(AdminEndpoints.isMember("/api/v1/dvd/123/update"),
                 "DVD update (not edit) should not match");
+        assertFalse(AdminEndpoints.isMember("/api/v1/genres/create/extra"),
+                "Genre create with extra path should not match");
+        assertFalse(AdminEndpoints.isMember("/api/v1/genres/delete"),
+                "Genre delete without ID should not match");
+        assertFalse(AdminEndpoints.isMember("/api/v1/genres/123/remove"),
+                "Genre remove (not delete) should not match");
     }
 
     @Test
@@ -70,5 +98,7 @@ class AdminEndpointsTest {
     void enumValues_shouldHaveCorrectPatterns() {
         assertEquals("/api/v1/dvd/create", AdminEndpoints.DVD_CREATE.getPattern());
         assertEquals("/api/v1/dvd/*/edit", AdminEndpoints.DVD_PATCH.getPattern());
+        assertEquals("/api/v1/genres/create", AdminEndpoints.GENRE_CREATE.getPattern());
+        assertEquals("/api/v1/genres/*/delete", AdminEndpoints.GENRE_DELETE.getPattern());
     }
 }
