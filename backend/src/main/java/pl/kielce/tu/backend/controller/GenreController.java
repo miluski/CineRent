@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,8 @@ public class GenreController {
     @Operation(summary = "Get all genres", description = """
             Retrieves a list of all available genres in the system. \
             Returns genre information including ID and name, which can be used \
-            for filtering DVDs or setting user preferences.""")
+            for filtering DVDs or setting user preferences.""", security = {
+            @SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved all genres", content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(example = """
                     [
@@ -64,7 +66,7 @@ public class GenreController {
             Creates a new genre with the provided name. The genre name must be unique \
             and between 5-75 characters. This is typically used by administrators \
             to add new movie categories to the system.""", security = {
-            @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "accessToken") })
+            @SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Genre created successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid JWT token", content = @Content),
@@ -87,7 +89,7 @@ public class GenreController {
             - The genre must not be assigned to any DVDs in the system \
             - The genre must exist in the system \
             This operation is typically restricted to administrators.""", security = {
-            @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "accessToken") })
+            @SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Genre deleted successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid genre ID format or business rule validation failed (minimum genre constraint violated or genre assigned to DVDs)", content = @Content),

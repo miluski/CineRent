@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -87,7 +88,8 @@ public class AuthController {
             Refreshes the user's access and refresh tokens using the current valid refresh token. \
             The old tokens are blacklisted and new tokens are generated. \
             This allows maintaining the user session without requiring re-authentication. \
-            The refresh token must be present in the request cookies and not blacklisted.""")
+            The refresh token must be present in the request cookies and not blacklisted.""", security = {
+            @SecurityRequirement(name = "refreshToken") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tokens successfully refreshed, new tokens set in cookies"),
             @ApiResponse(responseCode = "401", description = "Refresh failed - invalid or expired refresh token, or user not found", content = @Content),
