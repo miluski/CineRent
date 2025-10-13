@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import jakarta.persistence.EntityNotFoundException;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.mapper.GenreMapper;
 import pl.kielce.tu.backend.model.dto.GenreDto;
@@ -157,6 +158,21 @@ class GenreServiceTest {
         verify(genreRepository, never()).deleteById(any());
         verify(userContextLogger).logEndpointAccess("DELETE", "/api/v1/genres/1/delete",
                 "VALIDATION_ERROR: Cannot delete genre: minimum 2 genres must remain");
+    }
+
+    @Test
+    void handleDeleteGenre_entityNotFoundException_returnsNotFound() throws ValidationException {
+        String genreId = "999";
+
+        doThrow(new EntityNotFoundException("Genre not found with ID: 999"))
+                .when(validationService).validateForDeletion(genreId);
+
+        ResponseEntity<Void> response = service.handleDeleteGenre(genreId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(genreRepository, never()).deleteById(any());
+        verify(userContextLogger).logEndpointAccess("DELETE", "/api/v1/genres/999/delete",
+                "NOT_FOUND: Genre not found with ID: 999");
     }
 
     @Test

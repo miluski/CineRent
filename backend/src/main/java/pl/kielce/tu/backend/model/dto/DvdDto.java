@@ -88,4 +88,10 @@ public class DvdDto implements Serializable {
     @Schema(description = "Timestamp when the DVD was added to the system", example = "2025-10-11T14:30:15", accessMode = Schema.AccessMode.READ_ONLY)
     private LocalDateTime addedAt;
 
+    @Schema(description = "Reason for recommendation", example = "Based on your rental history", accessMode = Schema.AccessMode.READ_ONLY)
+    private String recommendationReason;
+
+    @Schema(description = "DVD availability status", example = "AVAILABLE", accessMode = Schema.AccessMode.READ_ONLY)
+    private String availabilityStatus;
+
 }

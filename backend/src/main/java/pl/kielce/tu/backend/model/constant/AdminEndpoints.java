@@ -13,7 +13,13 @@ public enum AdminEndpoints {
     DVD_CREATE("/api/v1/dvd/create"),
     DVD_PATCH("/api/v1/dvd/*/edit"),
     GENRE_CREATE("/api/v1/genres/create"),
-    GENRE_DELETE("/api/v1/genres/*/delete");
+    GENRE_DELETE("/api/v1/genres/*/delete"),
+    RESERVATIONS_ACCEPT("/api/v1/reservations/*/accept"),
+    RESERVATIONS_DECLINE("/api/v1/reservations/*/decline"),
+    RESERVATIONS_ADMIN_ALL("/api/v1/reservations/all"),
+    RETURN_ACCEPT("/api/v1/rentals/*/return-accept"),
+    RETURN_DECLINE("/api/v1/rentals/*/return-decline"),
+    RENTALS_ADMIN_RETURN_REQUESTS("/api/v1/rentals/return-requests");
 
     private final String pattern;
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.service.resource.ResourceService;
@@ -28,9 +29,12 @@ public class ResourceController {
     @Operation(summary = "Download DVD poster image", description = """
             Downloads a DVD poster image by filename. The poster images are cached \
             for optimal performance. Supports JPEG, PNG, and WebP formats. \
-            Returns the image with appropriate Content-Type headers for browser display.""")
+            Returns the image with appropriate Content-Type headers for browser display. \
+            Requires authentication to access poster resources.""", security = {
+            @SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Poster image retrieved successfully", content = @Content(mediaType = "image/jpeg", schema = @Schema(type = "string", format = "binary"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid JWT token", content = @Content),
             @ApiResponse(responseCode = "404", description = "Poster image not found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error occurred", content = @Content)
     })

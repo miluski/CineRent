@@ -23,11 +23,14 @@ class ValidationStrategyTypeTest {
                 ValidationStrategyType.DVD_YEAR,
                 ValidationStrategyType.DVD_DURATION,
                 ValidationStrategyType.DVD_COPIES,
-                ValidationStrategyType.DVD_PRICE
+                ValidationStrategyType.DVD_PRICE,
+                ValidationStrategyType.RESERVATION_DVD_AVAILABILITY,
+                ValidationStrategyType.RESERVATION_COPY_COUNT,
+                ValidationStrategyType.RESERVATION_CANCELLATION
         };
         ValidationStrategyType[] actual = ValidationStrategyType.values();
         assertArrayEquals(expected, actual, "Enum values should match declared order and contents");
-        assertEquals(13, actual.length, "There should be exactly 13 enum constants");
+        assertEquals(16, actual.length, "There should be exactly 16 enum constants");
     }
 
     @Test
@@ -43,7 +46,8 @@ class ValidationStrategyTypeTest {
         String[] expectedNames = {
                 "NICKNAME", "PASSWORD", "AGE", "GENRE", "GENRE_NAME", "GENRE_DELETION",
                 "DVD_TITLE", "DVD_DIRECTORS", "DVD_DESCRIPTION",
-                "DVD_YEAR", "DVD_DURATION", "DVD_COPIES", "DVD_PRICE"
+                "DVD_YEAR", "DVD_DURATION", "DVD_COPIES", "DVD_PRICE",
+                "RESERVATION_DVD_AVAILABILITY", "RESERVATION_COPY_COUNT", "RESERVATION_CANCELLATION"
         };
         String[] actualNames = new String[ValidationStrategyType.values().length];
         for (int i = 0; i < ValidationStrategyType.values().length; i++) {

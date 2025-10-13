@@ -41,7 +41,7 @@ class PublicEndpointsTest {
     @Test
     void isMember_nonMembersReturnFalse() {
         assertFalse(PublicEndpoints.isMember("/api/v1/users"));
-        assertFalse(PublicEndpoints.isMember("/api/v1/auth/logins")); // similar but not exact
+        assertFalse(PublicEndpoints.isMember("/api/v1/auth/logins")); 
         assertFalse(PublicEndpoints.isMember("/private/resource"));
         assertFalse(PublicEndpoints.isMember("/random/swagger-uix"));
     }

@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import pl.kielce.tu.backend.model.dto.UserDto;
+import pl.kielce.tu.backend.service.recommendation.RecommendationService;
 import pl.kielce.tu.backend.service.user.UserService;
 
 @WebMvcTest(UserController.class)
@@ -41,6 +42,11 @@ class UserControllerTest {
         @Bean
         public UserService userService() {
             return Mockito.mock(UserService.class);
+        }
+
+        @Bean
+        public RecommendationService recommendationService() {
+            return Mockito.mock(RecommendationService.class);
         }
     }
 

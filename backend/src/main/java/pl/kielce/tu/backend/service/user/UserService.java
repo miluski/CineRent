@@ -33,8 +33,8 @@ public class UserService {
     private final UserMapper userMapper;
     private final CookieService cookieService;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final ClaimsExtractor claimsExtractor;
+    private final PasswordEncoder passwordEncoder;
     private final ValidationStrategyFactory validationStrategyFactory;
 
     public ResponseEntity<UserDto> handleGetUser(HttpServletRequest httpServletRequest) {

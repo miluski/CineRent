@@ -80,17 +80,21 @@ public class ResourceService {
 
     public String savePosterImage(String base64Image) throws ValidationException {
         try {
-            validateBase64Image(base64Image);
-            String[] imageParts = parseBase64Image(base64Image);
-            String filename = generateFilenameFromImage(imageParts[0]);
-            byte[] imageBytes = decodeAndValidateImage(imageParts[1]);
-            saveImageToFile(imageBytes, filename);
-            userContextLogger.logUserOperation("SAVE_POSTER", "Saved poster: " + filename);
-            return filename;
+            return processPosterImageSave(base64Image);
         } catch (IOException e) {
             userContextLogger.logUserOperation("SAVE_POSTER", "Error: " + e.getMessage());
             throw new ValidationException("Failed to save poster image");
         }
+    }
+
+    private String processPosterImageSave(String base64Image) throws ValidationException, IOException {
+        validateBase64Image(base64Image);
+        String[] imageParts = parseBase64Image(base64Image);
+        String filename = generateFilenameFromImage(imageParts[0]);
+        byte[] imageBytes = decodeAndValidateImage(imageParts[1]);
+        saveImageToFile(imageBytes, filename);
+        userContextLogger.logUserOperation("SAVE_POSTER", "Saved poster: " + filename);
+        return filename;
     }
 
     private void validateBase64Image(String base64Image) throws ValidationException {

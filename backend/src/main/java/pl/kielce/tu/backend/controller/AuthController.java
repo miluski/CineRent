@@ -44,7 +44,7 @@ public class AuthController {
                       "password": "Serduszko223",
                       "age": 24,
                       "preferredGenresIdentifiers": [1, 10, 21, 37]
-                    }"""))) @RequestBody UserDto userDto) {
+                    }"""))) @RequestBody(required = true) UserDto userDto) {
         return authService.handleRegister(userDto);
     }
 
@@ -56,14 +56,15 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User successfully authenticated, tokens set in cookies"),
             @ApiResponse(responseCode = "401", description = "Authentication failed - invalid credentials or user not found", content = @Content),
-            @ApiResponse(responseCode = "422", description = "Validation failed - invalid user data format", content = @Content)
+            @ApiResponse(responseCode = "422", description = "Validation failed - invalid user data format", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred during login", content = @Content)
     })
     public ResponseEntity<Void> login(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User login credentials", required = true, content = @Content(schema = @Schema(example = """
                     {
                       "nickname": "FilmLover99",
                       "password": "Serduszko223"
-                    }"""))) @RequestBody UserDto userDto,
+                    }"""))) @RequestBody(required = true) UserDto userDto,
             HttpServletResponse httpServletResponse) {
         return authService.handleLogin(userDto, httpServletResponse);
     }
@@ -89,7 +90,8 @@ public class AuthController {
             The refresh token must be present in the request cookies and not blacklisted.""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tokens successfully refreshed, new tokens set in cookies"),
-            @ApiResponse(responseCode = "401", description = "Refresh failed - invalid or expired refresh token, or user not found", content = @Content)
+            @ApiResponse(responseCode = "401", description = "Refresh failed - invalid or expired refresh token, or user not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred during token refresh", content = @Content)
     })
     public ResponseEntity<Void> refreshTokens(HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {

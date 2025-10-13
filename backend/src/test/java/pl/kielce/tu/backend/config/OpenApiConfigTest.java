@@ -2,6 +2,7 @@ package pl.kielce.tu.backend.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,10 @@ public class OpenApiConfigTest {
         assertNotNull(openAPI.getInfo(), "Info should not be null");
         assertEquals("CineRent API", openAPI.getInfo().getTitle());
         assertEquals("1.0.0", openAPI.getInfo().getVersion());
-        assertEquals("Backend API for DVD rental application", openAPI.getInfo().getDescription());
+        assertTrue(openAPI.getInfo().getDescription().contains("CineRent - DVD Rental System API"),
+                "Description should contain the main API title");
+        assertTrue(openAPI.getInfo().getDescription().contains("User Authentication"),
+                "Description should mention authentication features");
     }
 
     @Test
@@ -33,13 +37,15 @@ public class OpenApiConfigTest {
         assertEquals(SecurityScheme.Type.APIKEY, access.getType());
         assertEquals(SecurityScheme.In.COOKIE, access.getIn());
         assertEquals("ACCESS_TOKEN", access.getName());
-        assertEquals("JWT access token stored in HTTP-only, secure cookie", access.getDescription());
+        assertEquals("JWT access token stored in HTTP-only, secure cookie. Required for authenticated endpoints.",
+                access.getDescription());
 
         SecurityScheme refresh = openAPI.getComponents().getSecuritySchemes().get("refreshToken");
         assertNotNull(refresh, "refreshToken scheme should be present");
         assertEquals(SecurityScheme.Type.APIKEY, refresh.getType());
         assertEquals(SecurityScheme.In.COOKIE, refresh.getIn());
         assertEquals("REFRESH_TOKEN", refresh.getName());
-        assertEquals("JWT refresh token stored in HTTP-only, secure cookie", refresh.getDescription());
+        assertEquals("JWT refresh token stored in HTTP-only, secure cookie. Used for token refresh operations.",
+                refresh.getDescription());
     }
 }
