@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -87,14 +88,17 @@ public class DvdController {
     }
 
     @PostMapping("/create")
-    @Operation(summary = "Create a new DVD", description = """
+    @Operation(summary = "Create a new DVD (Admin only)", description = """
             Creates a new DVD entry in the rental system with the provided information. \
             Required fields: title, at least one genre identifier that exists in the database, \
             release year, at least one director, description, duration in minutes, \
             number of available copies, and rental price per day. \
             Optional: poster image as base64 encoded string. The genres must exist in the system.""")
+    @SecurityRequirement(name = "accessToken")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "DVD successfully created"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid JWT token", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required", content = @Content),
             @ApiResponse(responseCode = "422", description = "Validation failed - invalid DVD data (title too short/long, invalid release year, empty directors list, invalid description length, invalid duration, negative copies, invalid price, or non-existent genre identifiers)", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error occurred during DVD creation", content = @Content)
     })
@@ -116,14 +120,17 @@ public class DvdController {
     }
 
     @PatchMapping("{id}/edit")
-    @Operation(summary = "Update DVD information", description = """
+    @Operation(summary = "Update DVD information (Admin only)", description = """
             Partially updates an existing DVD's information. The DVD must exist in the system. \
             All fields are optional but at least one field must be provided for the update. \
             Field validations are the same as for creation. Poster image can be provided \
             as base64 encoded string.""")
+    @SecurityRequirement(name = "accessToken")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "DVD successfully updated"),
             @ApiResponse(responseCode = "400", description = "Invalid DVD ID format", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid JWT token", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required", content = @Content),
             @ApiResponse(responseCode = "404", description = "DVD not found with the specified ID", content = @Content),
             @ApiResponse(responseCode = "422", description = "Validation error - invalid field value, no fields provided, or non-existent genre identifiers", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error occurred during DVD update", content = @Content)

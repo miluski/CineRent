@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.mapper.GenreMapper;
@@ -62,6 +63,10 @@ public class GenreService {
             deleteGenre(Long.parseLong(id));
             userContextLogger.logEndpointAccess("DELETE", "/api/v1/genres/" + id + "/delete", "SUCCESS");
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (EntityNotFoundException e) {
+            userContextLogger.logEndpointAccess("DELETE", "/api/v1/genres/" + id + "/delete",
+                    "NOT_FOUND: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (ValidationException e) {
             userContextLogger.logEndpointAccess("DELETE", "/api/v1/genres/" + id + "/delete",
                     "VALIDATION_ERROR: " + e.getMessage());

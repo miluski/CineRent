@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import jakarta.persistence.EntityNotFoundException;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
 import pl.kielce.tu.backend.repository.DvdRepository;
@@ -50,11 +51,11 @@ class GenreDeletionValidationStrategyTest {
     }
 
     @Test
-    void validate_genreNotExists_shouldThrowValidationException() {
+    void validate_genreNotExists_shouldThrowEntityNotFoundException() {
         Long genreId = 999L;
         when(genreRepository.existsById(genreId)).thenReturn(false);
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> strategy.validate(genreId));
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> strategy.validate(genreId));
         assertEquals("Genre not found with ID: 999", ex.getMessage());
     }
 

@@ -2,6 +2,7 @@ package pl.kielce.tu.backend.service.validation.implementations.genre;
 
 import org.springframework.stereotype.Component;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.model.constant.ValidationStrategyType;
@@ -22,7 +23,6 @@ public class GenreDeletionValidationStrategy implements FieldValidationStrategy<
     public void validate(Long genreId) throws ValidationException {
         String idInfo = genreId != null ? genreId.toString() : "null";
         userContextLogger.logValidationOperation("GENRE_DELETION", "STARTED", idInfo);
-
         try {
             validateNotNull(genreId);
             validateGenreExists(genreId);
@@ -30,6 +30,9 @@ public class GenreDeletionValidationStrategy implements FieldValidationStrategy<
             validateNotAssignedToDvds(genreId);
             userContextLogger.logValidationOperation("GENRE_DELETION", "SUCCESS", idInfo);
         } catch (ValidationException e) {
+            userContextLogger.logValidationOperation("GENRE_DELETION", "FAILURE", e.getMessage());
+            throw e;
+        } catch (EntityNotFoundException e) {
             userContextLogger.logValidationOperation("GENRE_DELETION", "FAILURE", e.getMessage());
             throw e;
         }
@@ -46,10 +49,10 @@ public class GenreDeletionValidationStrategy implements FieldValidationStrategy<
         }
     }
 
-    private void validateGenreExists(Long genreId) throws ValidationException {
+    private void validateGenreExists(Long genreId) throws EntityNotFoundException {
         boolean exists = genreRepository.existsById(genreId);
         if (!exists) {
-            throw new ValidationException("Genre not found with ID: " + genreId);
+            throw new EntityNotFoundException("Genre not found with ID: " + genreId);
         }
     }
 

@@ -33,32 +33,68 @@ public class GenreController {
     private final GenreService genreService;
 
     @GetMapping
-    @Operation(summary = "Get all genres", description = "Retrieves a list of all available genres in the system")
+    @Operation(summary = "Get all genres", description = """
+            Retrieves a list of all available genres in the system. \
+            Returns genre information including ID and name, which can be used \
+            for filtering DVDs or setting user preferences.""")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved all genres", content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = GenreDto.class)))),
-            @ApiResponse(responseCode = "500", description = "Internal server error occurred while retrieving genres")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved all genres", content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(example = """
+                    [
+                      {
+                        "id": 1,
+                        "name": "Science Fiction"
+                      },
+                      {
+                        "id": 2,
+                        "name": "Action"
+                      },
+                      {
+                        "id": 3,
+                        "name": "Drama"
+                      }
+                    ]""")))),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred while retrieving genres", content = @Content)
     })
     public ResponseEntity<List<GenreDto>> getGenres() {
         return genreService.handleGetGenres();
     }
 
     @PostMapping("create")
-    @Operation(summary = "Create a new genre", description = "Creates a new genre with unique name between 5-75 characters")
+    @Operation(summary = "Create a new genre (Admin only)", description = """
+            Creates a new genre with the provided name. The genre name must be unique \
+            and between 5-75 characters. This is typically used by administrators \
+            to add new movie categories to the system.""", security = {
+            @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Genre created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid genre data provided or genre name already exists"),
-            @ApiResponse(responseCode = "500", description = "Internal server error occurred while creating genre")
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid JWT token", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required", content = @Content),
+            @ApiResponse(responseCode = "422", description = "Validation failed - genre name too short/long or already exists", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred while creating genre", content = @Content)
     })
-    public ResponseEntity<Void> createGenre(@Valid @RequestBody GenreDto genreDto) {
+    public ResponseEntity<Void> createGenre(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Genre creation data", required = true, content = @Content(schema = @Schema(example = """
+                    {
+                      "name": "Science Fiction"
+                    }"""))) @Valid @RequestBody(required = true) GenreDto genreDto) {
         return genreService.handleCreateGenre(genreDto);
     }
 
     @DeleteMapping("{id}/delete")
-    @Operation(summary = "Delete a genre", description = "Deletes a genre if minimum 2 genres remain and genre is not assigned to DVDs")
+    @Operation(summary = "Delete a genre (Admin only)", description = """
+            Deletes a genre from the system if certain conditions are met: \
+            - The system must retain at least 2 genres after deletion \
+            - The genre must not be assigned to any DVDs in the system \
+            - The genre must exist in the system \
+            This operation is typically restricted to administrators.""", security = {
+            @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Genre deleted successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid genre ID, genre not found, minimum genre constraint violated, or genre assigned to DVDs"),
-            @ApiResponse(responseCode = "500", description = "Internal server error occurred while deleting genre")
+            @ApiResponse(responseCode = "400", description = "Invalid genre ID format or business rule validation failed (minimum genre constraint violated or genre assigned to DVDs)", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid JWT token", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Genre not found with the specified ID", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred while deleting genre", content = @Content)
     })
     public ResponseEntity<Void> deleteGenre(
             @Parameter(description = "Unique identifier of the genre to delete", example = "1") @PathVariable String id) {
