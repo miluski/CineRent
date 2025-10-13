@@ -9,10 +9,13 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.exception.ValidationException;
+import pl.kielce.tu.backend.mapper.DvdFilterMapper;
 import pl.kielce.tu.backend.mapper.DvdMapper;
 import pl.kielce.tu.backend.model.dto.DvdDto;
+import pl.kielce.tu.backend.model.dto.DvdFilterDto;
 import pl.kielce.tu.backend.model.entity.Dvd;
 import pl.kielce.tu.backend.repository.DvdRepository;
+import pl.kielce.tu.backend.service.dvd.filter.DvdFilterService;
 import pl.kielce.tu.backend.service.resource.ResourceService;
 import pl.kielce.tu.backend.util.UserContextLogger;
 
@@ -23,9 +26,19 @@ public class DvdService {
     private final DvdMapper dvdMapper;
     private final DvdRepository dvdRepository;
     private final DvdUpdateService updateService;
+    private final DvdFilterMapper dvdFilterMapper;
     private final ResourceService resourceService;
+    private final DvdFilterService dvdFilterService;
     private final UserContextLogger userContextLogger;
     private final DvdValidationService validationService;
+
+    public ResponseEntity<List<DvdDto>> handleGetAllDvdsWithOptionalFilters(String searchPhrase,
+            List<String> genreNames, List<Long> genreIds) {
+        if (hasAnyFilterParams(searchPhrase, genreNames, genreIds)) {
+            return handleGetFilteredDvds(searchPhrase, genreNames, genreIds);
+        }
+        return handleGetAllDvds();
+    }
 
     public ResponseEntity<List<DvdDto>> handleGetAllDvds() {
         try {
@@ -35,6 +48,20 @@ public class DvdService {
             return ResponseEntity.status(HttpStatus.OK).body(dvdDtos);
         } catch (Exception e) {
             userContextLogger.logUserOperation("GET_ALL_DVDS", "Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    public ResponseEntity<List<DvdDto>> handleGetFilteredDvds(String searchPhrase, List<String> genreNames,
+            List<Long> genreIds) {
+        try {
+            userContextLogger.logUserOperation("GET_FILTERED_DVDS", "Fetching filtered DVDs");
+            DvdFilterDto filterDto = dvdFilterMapper.mapToFilterDto(searchPhrase, genreNames, genreIds);
+            List<Dvd> dvds = getFilteredDvds(filterDto);
+            List<DvdDto> dvdDtos = convertToDtoList(dvds);
+            return ResponseEntity.status(HttpStatus.OK).body(dvdDtos);
+        } catch (Exception e) {
+            userContextLogger.logUserOperation("GET_FILTERED_DVDS", "Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -117,6 +144,20 @@ public class DvdService {
             String posterUrl = resourceService.generatePosterUrl(savedFilename);
             dvdDto.setPosterUrl(posterUrl);
         }
+    }
+
+    private boolean hasAnyFilterParams(String searchPhrase, List<String> genreNames, List<Long> genreIds) {
+        return (searchPhrase != null && !searchPhrase.trim().isEmpty()) ||
+                (genreNames != null && !genreNames.isEmpty()) ||
+                (genreIds != null && !genreIds.isEmpty());
+    }
+
+    private List<Dvd> getFilteredDvds(DvdFilterDto filterDto) {
+        List<Dvd> allDvds = dvdRepository.findAll();
+        if (dvdFilterMapper.hasAnyFilter(filterDto)) {
+            return dvdFilterService.applyFilters(allDvds, filterDto);
+        }
+        return allDvds;
     }
 
 }

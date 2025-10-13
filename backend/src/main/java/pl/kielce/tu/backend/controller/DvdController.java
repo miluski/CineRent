@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,10 +34,12 @@ public class DvdController {
     private final DvdService dvdService;
 
     @GetMapping
-    @Operation(summary = "Get all DVDs", description = """
-            Retrieves a simplified list of all DVDs available in the rental system. \
+    @Operation(summary = "Get all DVDs with optional filtering", description = """
+            Retrieves a simplified list of all DVDs available in the rental system with optional filtering capabilities. \
             Returns basic information about each DVD including id, title, genres, and availability status. \
-            This is used for browsing the DVD collection.""")
+            Supports filtering by search phrase (matches title/description) and genres (by name or ID). \
+            Multiple filters can be combined for more precise results.""", security = {
+            @SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of DVDs retrieved successfully", content = @Content(schema = @Schema(example = """
                     [
@@ -54,15 +58,19 @@ public class DvdController {
                     ]"""))),
             @ApiResponse(responseCode = "500", description = "Internal server error occurred while retrieving DVDs", content = @Content)
     })
-    public ResponseEntity<List<DvdDto>> getAllDvds() {
-        return dvdService.handleGetAllDvds();
+    public ResponseEntity<List<DvdDto>> getAllDvds(
+            @Parameter(description = "Search phrase to match against DVD title and description", example = "matrix") @RequestParam(name = "search-phrase", required = false) String searchPhrase,
+            @Parameter(description = "List of genre names to filter DVDs by", example = "[\"Action\", \"Sci-Fi\"]") @RequestParam(name = "genres-names", required = false) List<String> genreNames,
+            @Parameter(description = "List of genre identifiers to filter DVDs by", example = "[1, 2]") @RequestParam(name = "genres-ids", required = false) List<Long> genreIds) {
+        return dvdService.handleGetAllDvdsWithOptionalFilters(searchPhrase, genreNames, genreIds);
     }
 
     @GetMapping("{id}")
     @Operation(summary = "Get DVD by ID", description = """
             Retrieves detailed information about a specific DVD by its ID. \
             Returns complete DVD data including all metadata, availability status, \
-            and rental information. The DVD must exist in the system.""")
+            and rental information. The DVD must exist in the system.""", security = {
+            @SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "DVD retrieved successfully", content = @Content(schema = @Schema(example = """
                     {

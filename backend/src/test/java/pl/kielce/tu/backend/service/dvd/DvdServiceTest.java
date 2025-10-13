@@ -20,10 +20,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import pl.kielce.tu.backend.exception.ValidationException;
+import pl.kielce.tu.backend.mapper.DvdFilterMapper;
 import pl.kielce.tu.backend.mapper.DvdMapper;
 import pl.kielce.tu.backend.model.dto.DvdDto;
 import pl.kielce.tu.backend.model.entity.Dvd;
 import pl.kielce.tu.backend.repository.DvdRepository;
+import pl.kielce.tu.backend.service.dvd.filter.DvdFilterService;
 import pl.kielce.tu.backend.service.resource.ResourceService;
 import pl.kielce.tu.backend.util.UserContextLogger;
 
@@ -42,13 +44,17 @@ class DvdServiceTest {
     private UserContextLogger userContextLogger;
     @Mock
     private DvdValidationService validationService;
+    @Mock
+    private DvdFilterMapper dvdFilterMapper;
+    @Mock
+    private DvdFilterService dvdFilterService;
 
     private DvdService dvdService;
 
     @BeforeEach
     void setUp() {
-        dvdService = new DvdService(dvdMapper, dvdRepository, updateService, resourceService, userContextLogger,
-                validationService);
+        dvdService = new DvdService(dvdMapper, dvdRepository, updateService, dvdFilterMapper, resourceService,
+                dvdFilterService, userContextLogger, validationService);
     }
 
     @Test
@@ -167,5 +173,35 @@ class DvdServiceTest {
         doThrow(new ValidationException("bad")).when(validationService).validateForUpdate(dto);
         ResponseEntity<Void> response = dvdService.handleUpdateDvd("1", dto);
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+    }
+
+    @Test
+    void handleGetAllDvdsWithOptionalFilters_noFilters_callsHandleGetAllDvds() {
+        when(dvdRepository.findAll()).thenReturn(Arrays.asList(new Dvd(), new Dvd()));
+        when(dvdMapper.toDto(org.mockito.ArgumentMatchers.any(Dvd.class))).thenReturn(new DvdDto());
+        ResponseEntity<List<DvdDto>> result = dvdService.handleGetAllDvdsWithOptionalFilters(null, null, null);
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void handleGetAllDvdsWithOptionalFilters_withFilters_callsHandleGetFilteredDvds() {
+        String searchPhrase = "test";
+        List<String> genreNames = Arrays.asList("Action");
+        List<Long> genreIds = Arrays.asList(1L);
+
+        when(dvdFilterMapper.mapToFilterDto(searchPhrase, genreNames, genreIds))
+                .thenReturn(mock(pl.kielce.tu.backend.model.dto.DvdFilterDto.class));
+        when(dvdRepository.findAll()).thenReturn(Arrays.asList(new Dvd()));
+        when(dvdFilterMapper.hasAnyFilter(org.mockito.ArgumentMatchers.any())).thenReturn(true);
+        when(dvdFilterService.applyFilters(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(Arrays.asList(new Dvd()));
+        when(dvdMapper.toDto(org.mockito.ArgumentMatchers.any(Dvd.class))).thenReturn(new DvdDto());
+
+        ResponseEntity<List<DvdDto>> result = dvdService.handleGetAllDvdsWithOptionalFilters(searchPhrase, genreNames,
+                genreIds);
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 }

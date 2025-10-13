@@ -31,12 +31,12 @@ class DvdControllerTest {
     void getAllDvds_delegatesToService_andReturnsResponse() {
         List<DvdDto> list = Collections.emptyList();
         ResponseEntity<List<DvdDto>> expected = ResponseEntity.ok(list);
-        when(dvdService.handleGetAllDvds()).thenReturn(expected);
+        when(dvdService.handleGetAllDvdsWithOptionalFilters(null, null, null)).thenReturn(expected);
 
-        ResponseEntity<List<DvdDto>> actual = dvdController.getAllDvds();
+        ResponseEntity<List<DvdDto>> actual = dvdController.getAllDvds(null, null, null);
 
         assertSame(expected, actual);
-        verify(dvdService).handleGetAllDvds();
+        verify(dvdService).handleGetAllDvdsWithOptionalFilters(null, null, null);
     }
 
     @Test
