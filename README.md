@@ -1,4 +1,4 @@
-# DVD Rental
+# CineRent - DVD Rental Management System
 
 ![Java](https://img.shields.io/badge/Java-21-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-green)
@@ -6,24 +6,26 @@
 ![React](https://img.shields.io/badge/React-18-61dafb)
 ![Docker](https://img.shields.io/badge/Docker-enabled-2496ed)
 
-A comprehensive full-stack application for DVD rental management, providing secure and scalable services with SSL encryption, JWT authentication, and modern React frontend.
+A comprehensive full-stack application for DVD rental management, providing secure and scalable services with SSL encryption, JWT authentication, and modern React frontend. CineRent offers complete rental lifecycle management including user authentication, DVD catalog management, reservations, rentals, returns, and automated transaction processing with PDF invoicing.
 
 ## 🏗️ Architecture
 
-DVD Rental consists of:
+CineRent consists of:
 
-- **🔐 Backend Service** (`443`) - REST API with authentication & business logic
-- **⚛️ Frontend Service** (`5173`) - React + TypeScript + Vite
-- **🗄️ PostgreSQL Database** - Production data storage
+- **🔐 Backend Service** (`443`) - REST API with comprehensive business logic
+- **⚛️ Frontend Service** (`5173`) - React + TypeScript + Vite interface
+- **🗄️ PostgreSQL Database** - Production data storage with advanced queries
 - **🧪 H2 Database** - In-memory testing database
 
 ### System Components
 
-- **Backend**: Spring Boot 3.5.6 with SSL/HTTPS
-- **Frontend**: React 18 with Vite dev server
-- **Database**: PostgreSQL with connection pooling
-- **Security**: JWT-based authentication with secure cookies
-- **API Docs**: Swagger/OpenAPI at root path
+- **Backend**: Spring Boot 3.5.6 with SSL/HTTPS and JWT security
+- **Frontend**: React 18 with Vite development server
+- **Database**: PostgreSQL with optimized connection pooling
+- **Security**: JWT-based authentication with HttpOnly cookies
+- **Documentation**: Comprehensive Swagger/OpenAPI at root path
+- **PDF Generation**: iText 5 library for professional invoices and receipts
+- **File Management**: Secure poster image upload and serving
 
 ## 📋 Prerequisites
 

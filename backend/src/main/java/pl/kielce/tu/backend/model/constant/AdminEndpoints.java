@@ -19,7 +19,8 @@ public enum AdminEndpoints {
     RESERVATIONS_ADMIN_ALL("/api/v1/reservations/all"),
     RETURN_ACCEPT("/api/v1/rentals/*/return-accept"),
     RETURN_DECLINE("/api/v1/rentals/*/return-decline"),
-    RENTALS_ADMIN_RETURN_REQUESTS("/api/v1/rentals/return-requests");
+    RENTALS_ADMIN_RETURN_REQUESTS("/api/v1/rentals/return-requests"),
+    TRANSACTIONS_ALL("/api/v1/transactions/all");
 
     private final String pattern;
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();

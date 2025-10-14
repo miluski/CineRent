@@ -17,9 +17,9 @@ public class OpenApiConfigTest {
         OpenAPI openAPI = config.customOpenAPI();
 
         assertNotNull(openAPI.getInfo(), "Info should not be null");
-        assertEquals("CineRent API", openAPI.getInfo().getTitle());
+        assertEquals("CineRent API - Complete DVD Rental Management System", openAPI.getInfo().getTitle());
         assertEquals("1.0.0", openAPI.getInfo().getVersion());
-        assertTrue(openAPI.getInfo().getDescription().contains("CineRent - DVD Rental System API"),
+        assertTrue(openAPI.getInfo().getDescription().contains("CineRent API Documentation"),
                 "Description should contain the main API title");
         assertTrue(openAPI.getInfo().getDescription().contains("User Authentication"),
                 "Description should mention authentication features");
