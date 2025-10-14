@@ -13,7 +13,7 @@ class AdminEndpointsTest {
     void getAllPatterns_shouldReturnAllDefinedPatterns() {
         String[] patterns = AdminEndpoints.getAllPatterns();
         assertNotNull(patterns, "getAllPatterns should not return null");
-        assertEquals(10, patterns.length, "Expected 10 patterns for defined endpoints");
+        assertEquals(11, patterns.length, "Expected 11 patterns for defined endpoints");
         assertEquals("/api/v1/dvd/create", patterns[0]);
         assertEquals("/api/v1/dvd/*/edit", patterns[1]);
         assertEquals("/api/v1/genres/create", patterns[2]);
@@ -24,6 +24,7 @@ class AdminEndpointsTest {
         assertEquals("/api/v1/rentals/*/return-accept", patterns[7]);
         assertEquals("/api/v1/rentals/*/return-decline", patterns[8]);
         assertEquals("/api/v1/rentals/return-requests", patterns[9]);
+        assertEquals("/api/v1/transactions/all", patterns[10]);
     }
 
     @Test

@@ -2,11 +2,13 @@ package pl.kielce.tu.backend.mapper;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
 import pl.kielce.tu.backend.model.constant.BillType;
+import pl.kielce.tu.backend.model.dto.TransactionDto;
 import pl.kielce.tu.backend.model.entity.Rental;
 import pl.kielce.tu.backend.model.entity.Transaction;
 
@@ -34,6 +36,37 @@ public class TransactionMapper {
 
     private BigDecimal calculatePricePerDay(BigDecimal baseAmount, long rentalDays) {
         return baseAmount.divide(BigDecimal.valueOf(rentalDays));
+    }
+
+    public TransactionDto toDto(Rental rental) {
+        if (rental.getTransaction() == null) {
+            return null;
+        }
+        return buildTransactionDto(rental);
+    }
+
+    public List<TransactionDto> toDtoList(List<Rental> rentals) {
+        return rentals.stream()
+                .filter(rental -> rental.getTransaction() != null)
+                .map(this::toDto)
+                .toList();
+    }
+
+    private TransactionDto buildTransactionDto(Rental rental) {
+        Transaction transaction = rental.getTransaction();
+        return TransactionDto.builder()
+                .id(rental.getId())
+                .invoiceId(transaction.getInvoiceId())
+                .dvdTitle(transaction.getDvdTitle())
+                .rentalPeriodDays(transaction.getRentalPeriodDays())
+                .pricePerDay(transaction.getPricePerDay())
+                .lateFee(transaction.getLateFee())
+                .totalAmount(transaction.getTotalAmount())
+                .generatedAt(transaction.getGeneratedAt())
+                .pdfUrl(transaction.getPdfUrl())
+                .billType(transaction.getBillType())
+                .rentalId(rental.getId())
+                .build();
     }
 
     private String generateInvoiceId() {
