@@ -12,8 +12,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useLogin } from "@/hooks/auth/login.mutation";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const formSchema = z.object({
   nickname: z.string().min(3, "Nazwa użytkownika jest za krótka."),
@@ -22,7 +23,8 @@ const formSchema = z.object({
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const loginMutation = useLogin();
+  const { login } = useAuth();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -32,15 +34,16 @@ export function LoginPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    loginMutation.mutate(values, {
-      onSuccess: () => {
-        navigate("/dashboard");
-      },
-      onError: (error) => {
-        console.error("Login failed", error);
-      },
-    });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoggingIn(true);
+    try {
+      await login(values);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login failed", error);
+    } finally {
+      setIsLoggingIn(false);
+    }
   }
 
   return (
@@ -109,9 +112,9 @@ export function LoginPage() {
               <Button
                 type="submit"
                 className="w-full bg-black hover:bg-gray-800 text-white"
-                disabled={loginMutation.isPending}
+                disabled={isLoggingIn}
               >
-                {loginMutation.isPending ? "Logowanie..." : "Zaloguj się"}
+                {isLoggingIn ? "Logowanie..." : "Zaloguj się"}
               </Button>
             </form>
           </Form>
