@@ -61,17 +61,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [isError, isSuccess, user, checkAdminStatus]);
 
   const login = async (values: LoginRequestDto) => {
-    return new Promise<void>((resolve, reject) => {
-      loginMutation.mutate(values, {
-        onSuccess: () => {
-          resolve();
-        },
-        onError: (error) => {
-          console.error("Login failed", error);
-          reject(error);
-        },
-      });
-    });
+    try {
+      await loginMutation.mutateAsync(values);
+    } catch (error) {
+      console.error("Login failed", error);
+      throw error;
+    }
   };
 
   const logout = () => {

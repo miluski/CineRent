@@ -77,7 +77,9 @@ export function RegisterPage() {
       >
         {/* Logo */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold flex items-center">Movie Rent</h1>
+          <h1 className="text-2xl font-bold flex items-center animate-pulse select-none">
+            <span className="text-red-500">O</span>pasRent
+          </h1>
         </div>
 
         {/* Tagline at bottom */}
@@ -203,7 +205,10 @@ export function RegisterPage() {
 
           {/* Login button */}
           <Link to="/login" className="block w-full">
-            <Button variant="outline" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full text-black border-black"
+            >
               Zaloguj się
             </Button>
           </Link>

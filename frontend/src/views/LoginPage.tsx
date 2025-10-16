@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { isAxiosError } from "axios";
 
 const formSchema = z.object({
   nickname: z.string().min(3, "Nazwa użytkownika jest za krótka."),
@@ -40,7 +41,12 @@ export function LoginPage() {
       await login(values);
       navigate("/dashboard");
     } catch (error) {
-      console.error("Login failed", error);
+      if (isAxiosError(error) && error.response?.status === 401) {
+        form.setError("password", {
+          type: "manual",
+          message: "Nieprawidłowa nazwa użytkownika lub hasło.",
+        });
+      }
     } finally {
       setIsLoggingIn(false);
     }
@@ -58,7 +64,9 @@ export function LoginPage() {
       >
         {/* Logo */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold flex items-center">Movie Rent</h1>
+          <h1 className="text-2xl font-bold flex items-center animate-pulse select-none">
+            <span className="text-red-500">O</span>pasRent
+          </h1>
         </div>
 
         {/* Tagline at bottom */}
@@ -128,7 +136,10 @@ export function LoginPage() {
 
           {/* Create account button */}
           <Link to="/register" className="block w-full">
-            <Button variant="outline" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full text-black border-black"
+            >
               Utwórz konto
             </Button>
           </Link>
