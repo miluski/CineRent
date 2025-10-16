@@ -1,12 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
-
-const genres = [
-  { id: 1, label: "Science-Fiction" },
-  { id: 2, label: "Akcja" },
-  { id: 3, label: "Dramat" },
-  { id: 4, label: "Horror" },
-  { id: 5, label: "Thriller" },
-];
+import { genres } from "@/utils/genres";
 
 interface FilterGroupProps {
   isMobile?: boolean;

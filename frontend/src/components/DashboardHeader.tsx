@@ -1,6 +1,5 @@
 import {
   CircleUser,
-  Film,
   History,
   LogOut,
   Menu,
@@ -37,13 +36,11 @@ export function DashboardHeader() {
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col">
           <nav className="grid gap-2 text-lg font-medium">
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-lg font-semibold mb-4"
-            >
-              <Film className="h-6 w-6" />
-              <span>Cine RENT</span>
-            </Link>
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold flex items-center animate-pulse select-none">
+                <span className="text-red-500">O</span>pasRent
+              </h1>
+            </div>
             <FilterGroup isMobile />
           </nav>
         </SheetContent>
@@ -62,7 +59,11 @@ export function DashboardHeader() {
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary" size="icon" className="rounded-full">
+          <Button
+            variant="secondary"
+            size="icon"
+            className="rounded-full cursor-pointer"
+          >
             <CircleUser className="h-5 w-5" />
             <span className="sr-only">Toggle user menu</span>
           </Button>
@@ -70,25 +71,35 @@ export function DashboardHeader() {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Moje konto</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <Ticket className="mr-2 h-4 w-4" />
-            Moje wypożyczenia
+          <DropdownMenuItem asChild>
+            <Link to="#">
+              <Ticket className="mr-2 h-4 w-4" />
+              Moje wypożyczenia
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <History className="mr-2 h-4 w-4" />
-            Historia wypożyczeń
+          <DropdownMenuItem asChild>
+            <Link to="#">
+              <History className="mr-2 h-4 w-4" />
+              Historia wypożyczeń
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <History className="mr-2 h-4 w-4" />
-            Historia rachunków
+          <DropdownMenuItem asChild>
+            <Link to="#">
+              <History className="mr-2 h-4 w-4" />
+              Historia rachunków
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Sparkles className="mr-2 h-4 w-4" />
-            Rekomendacje
+          <DropdownMenuItem asChild>
+            <Link to="#">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Rekomendacje
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CircleUser className="mr-2 h-4 w-4" />
-            Mój profil
+          <DropdownMenuItem asChild>
+            <Link to="/profile">
+              <CircleUser className="mr-2 h-4 w-4" />
+              Mój profil
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={logout}>

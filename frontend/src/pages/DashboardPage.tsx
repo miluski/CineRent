@@ -1,3 +1,5 @@
+import { DashboardHeader } from "@/components/DashboardHeader";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import {
   Card,
   CardContent,
@@ -5,8 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DashboardSidebar } from "./DashboardSidebar";
-import { DashboardHeader } from "./DashboardHeader";
 
 export function DashboardPage() {
   return (
@@ -14,10 +14,13 @@ export function DashboardPage() {
       <DashboardSidebar />
       <div className="flex flex-col">
         <DashboardHeader />
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 fill-mode-backwards">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, index) => (
-              <Card key={index}>
+              <Card
+                key={index}
+                className="cursor-pointer transition-transform duration-200 ease-in-out hover:scale-[.98]"
+              >
                 <CardHeader>
                   <CardTitle>Poster {index + 1}</CardTitle>
                   <CardDescription>Opis filmu</CardDescription>

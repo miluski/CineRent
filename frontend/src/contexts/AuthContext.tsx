@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     data: user,
     isError,
     isSuccess,
+    refetch,
     isLoading: isUserLoading,
   } = useGetUser();
 
@@ -62,7 +63,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (values: LoginRequestDto) => {
     try {
-      await loginMutation.mutateAsync(values);
+      await loginMutation.mutateAsync(values, {
+        onSuccess: async () => {
+          await refetch();
+          await checkAdminStatus();
+        },
+      });
     } catch (error) {
       console.error("Login failed", error);
       throw error;

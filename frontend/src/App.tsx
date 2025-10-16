@@ -5,22 +5,18 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { DashboardPage } from "./views/DashboardPage";
-import { LoginPage } from "./views/LoginPage";
-import { RegisterPage } from "./views/RegisterPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Spinner } from "./components/ui/spinner";
+import { ProfilePage } from "./pages/ProfilePage";
 
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const { user, isLoading } = useAuth();
-
-  console.log({
-    user,
-    isLoading,
-  });
 
   if (isLoading) {
     return (
@@ -40,6 +36,7 @@ const AppRoutes = () => {
       <Route path="/register" element={<RegisterPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
     </Routes>
   );
