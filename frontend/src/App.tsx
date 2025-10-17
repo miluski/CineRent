@@ -14,6 +14,7 @@ import { Spinner } from "./components/ui/spinner";
 import { ProfilePage } from "./pages/ProfilePage";
 import { Toaster } from "sonner";
 import { AddDvdPage } from "./pages/AddDvdPage";
+import { EditDvdPage } from "./pages/EditDvdPage";
 
 const queryClient = new QueryClient();
 
@@ -39,16 +40,14 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+
+        <Route path="/rentals/history" element={<div />} />
+        <Route path="/recommendations" element={<div />} />
+        <Route path="/transactions" element={<div />} />
+        {/* Admin Routes */}
+        <Route path="/admin/dvd/create" element={<AddDvdPage />} />
+        <Route path="/admin/dvd/edit/:id" element={<EditDvdPage />} />
       </Route>
-      <Route path="/rentals/history" element={<div />} />
-      <Route path="/recommendations" element={<div />} />
-      <Route path="/transactions" element={<div />} />
-      {/* Admin Routes */}
-      <Route path="/admin/dvd/create" element={<AddDvdPage />} />
-      <Route path="/admin/dvd/manage" element={<div />} />
-      <Route path="/admin/reservations" element={<div />} />
-      <Route path="/admin/returns" element={<div />} />
-      <Route path="/admin/transactions" element={<div />} />
     </Routes>
   );
 };

@@ -44,16 +44,20 @@ public class DvdController {
             @ApiResponse(responseCode = "200", description = "List of DVDs retrieved successfully", content = @Content(schema = @Schema(example = """
                     [
                       {
-                        "id": 120,
-                        "title": "Incepcja",
-                        "genres": ["Sci-Fi", "Action"],
-                        "status": "AVALAIBLE"
+                          "id": 120,
+                          "title": "Incepcja",
+                          "genres": ["Sci-Fi", "Action"],
+                          "posterUrl": "http://example.com/posters/inception.jpg",
+                          "rentalPricePerDay": 5.99,
+                          "availabilityStatus": "AVAILABLE"
                       },
                       {
-                        "id": 124,
-                        "title": "Powrót do przyszłości",
-                        "genres": ["Sci-Fi"],
-                        "status": "AVALAIBLE"
+                          "id": 124,
+                          "title": "Powrót do przyszłości",
+                          "genres": ["Sci-Fi"],
+                          "posterUrl": "http://example.com/posters/bttf.jpg",
+                          "rentalPricePerDay": 4.99,
+                          "availabilityStatus": "AVAILABLE"
                       }
                     ]"""))),
             @ApiResponse(responseCode = "500", description = "Internal server error occurred while retrieving DVDs", content = @Content)
