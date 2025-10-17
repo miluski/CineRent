@@ -19,13 +19,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera } from "lucide-react";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { genres } from "@/utils/genres";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUpdateUserDetails } from "@/hooks/mutations/useUpdateUserDetails";
+import { toast } from "sonner";
+import type { UpdateUserDetailsRequestDto } from "@/interfaces/requests/UpdateUserDetailsRequestDto";
 
 const formSchema = z.object({
   nickname: z
@@ -48,6 +51,9 @@ const formSchema = z.object({
 export function ProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const updateUserMutation = useUpdateUserDetails(() => {
+    form.reset({ ...form.getValues(), password: "" });
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,14 +61,45 @@ export function ProfilePage() {
       nickname: user?.nickname ?? "",
       password: "",
       age: user?.age ?? 18,
-      // TODO: Map genre names from user object to IDs
-      preferredGenresIdentifiers: [],
+      preferredGenresIdentifiers:
+        (user?.preferredGenres
+          ?.map((genreName) => genres.find((g) => g.label === genreName)?.id)
+          .filter(Boolean) as number[]) ?? [],
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Implement user update mutation
-    console.log("Submitting:", values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const payload: UpdateUserDetailsRequestDto = {};
+
+    if (values.nickname !== user?.nickname) {
+      payload.nickname = values.nickname;
+    }
+
+    if (values.password && values.password !== "") {
+      payload.password = values.password;
+    }
+
+    if (values.age !== user?.age) {
+      payload.age = values.age;
+    }
+
+    const currentGenreIds =
+      user?.preferredGenres
+        ?.map((genreName) => genres.find((g) => g.label === genreName)?.id)
+        .filter(Boolean)
+        .sort() ?? [];
+    const newGenreIds = (values.preferredGenresIdentifiers ?? []).sort();
+
+    if (JSON.stringify(currentGenreIds) !== JSON.stringify(newGenreIds)) {
+      payload.preferredGenresIdentifiers = newGenreIds;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      toast.info("Nie wprowadzono żadnych zmian.");
+      return;
+    }
+
+    updateUserMutation.mutate(payload);
   }
 
   return (
@@ -96,7 +133,10 @@ export function ProfilePage() {
                 >
                   <div className="flex flex-col items-center gap-4 md:col-span-1">
                     <Avatar className="h-40 w-40">
-                      <AvatarImage src="https://github.com/shadcn.png" />
+                      <AvatarImage
+                        draggable="false"
+                        src="https://github.com/shadcn.png"
+                      />
                       <AvatarFallback>
                         {user?.nickname?.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
@@ -191,7 +231,14 @@ export function ProfilePage() {
                   </div>
 
                   <div className="flex flex-col gap-2 md:col-span-3 md:flex-row md:justify-end">
-                    <Button type="submit">Zakończ edycję danych</Button>
+                    <Button
+                      type="submit"
+                      disabled={updateUserMutation.isPending}
+                    >
+                      {updateUserMutation.isPending
+                        ? "Zapisywanie..."
+                        : "Zakończ edycję danych"}
+                    </Button>
                     <Button
                       type="button"
                       variant="outline"

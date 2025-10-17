@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const {
     data: user,
     isError,
-    isSuccess,
+    isSuccess: isUserSuccess,
     refetch,
     isLoading: isUserLoading,
   } = useGetUser();
@@ -51,15 +51,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (isSuccess && user) {
+    if (isUserSuccess && user) {
       checkAdminStatus();
     } else if (isError) {
       setIsAdmin(false);
       setIsLoading(false);
-    } else if (!isSuccess && !isError) {
+    } else if (!isUserSuccess && !isError) {
       setIsLoading(true);
     }
-  }, [isError, isSuccess, user, checkAdminStatus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isUserSuccess]);
 
   const login = async (values: LoginRequestDto) => {
     try {

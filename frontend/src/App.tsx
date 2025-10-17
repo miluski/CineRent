@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Spinner } from "./components/ui/spinner";
 import { ProfilePage } from "./pages/ProfilePage";
+import { Toaster } from "sonner";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ function App() {
           <AppRoutes />
         </AuthProvider>
       </Router>
+      <Toaster />
     </QueryClientProvider>
   );
 }

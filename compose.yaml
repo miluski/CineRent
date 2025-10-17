@@ -19,6 +19,7 @@ services:
     ports:
       - '4443:443'
     volumes:
+      - ./logs:/app/logs
       - ./backend:/app
       - ./certs:/certs
       - ./uploads:/app/uploads

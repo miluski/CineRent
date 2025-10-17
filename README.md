@@ -170,10 +170,10 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
 spring.jpa.hibernate.ddl-auto=create-drop
 
 # Test Server Configuration
-server.port=8080
 server.ssl.enabled=false
 
 # Test JWT Configuration
+jwt.secret=[AUTO-GENERATED-512-BYTES]
 jwt.cookie.secure=false
 
 # Test Logging
