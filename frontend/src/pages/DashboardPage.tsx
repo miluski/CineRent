@@ -1,9 +1,11 @@
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useAuth } from "@/contexts/AuthContext";
 import { useGetDvds } from "@/hooks/queries/useGetDvds";
 import { Link } from "react-router-dom";
 
 export function DashboardPage() {
+  const { isAdmin } = useAuth();
   const { data: dvds, isLoading, isError } = useGetDvds();
 
   return (
@@ -71,10 +73,14 @@ export function DashboardPage() {
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-2 ">
                       <Link
-                        to={`/admin/dvd/edit/${dvd.id}`}
+                        to={
+                          isAdmin
+                            ? `/admin/dvd/edit/${dvd.id}`
+                            : `/dvd/${dvd.id}`
+                        }
                         className="bg-white text-black px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-200 transition-colors text-center w-full"
                       >
-                        Edytuj
+                        {isAdmin ? "Edytuj" : "Sprawdź"}
                       </Link>
                     </div>
                   </div>

@@ -1,7 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FilterGroup } from "./FilterGroup";
 
 export function DashboardSidebar() {
+  const pathname = useLocation().pathname;
+
   return (
     <div className="hidden border-r bg-muted/40 md:block">
       <div className="flex h-full max-h-screen flex-col gap-2">
@@ -17,7 +19,7 @@ export function DashboardSidebar() {
         </div>
         <div className="flex-1">
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            <FilterGroup />
+            {pathname === "/dashboard" && <FilterGroup />}
           </nav>
         </div>
       </div>
