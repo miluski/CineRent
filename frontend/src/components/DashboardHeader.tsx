@@ -2,16 +2,12 @@ import {
   BookCheck,
   BookUp,
   CircleUser,
-  Clapperboard,
   FilePlus,
   History,
   LogOut,
   Menu,
   Search,
-  Sparkles,
   Ticket,
-  Users,
-  Wallet,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -34,24 +30,14 @@ export function DashboardHeader() {
 
   const userLinks = [
     {
-      to: "/rentals",
+      to: "/reservations",
       label: "Moje wypożyczenia",
       icon: <Ticket className="mr-2 h-4 w-4" />,
     },
     {
-      to: "/rentals/history",
+      to: "/reservations/history",
       label: "Historia wypożyczeń",
       icon: <History className="mr-2 h-4 w-4" />,
-    },
-    {
-      to: "/transactions",
-      label: "Historia rachunków",
-      icon: <Wallet className="mr-2 h-4 w-4" />,
-    },
-    {
-      to: "/recommendations",
-      label: "Rekomendacje",
-      icon: <Sparkles className="mr-2 h-4 w-4" />,
     },
   ];
 
@@ -70,16 +56,6 @@ export function DashboardHeader() {
       to: "/admin/returns",
       label: "Zarządzanie zwrotami",
       icon: <BookUp className="mr-2 h-4 w-4" />,
-    },
-    {
-      to: "/admin/dvd/manage",
-      label: "Edycja DVD",
-      icon: <Clapperboard className="mr-2 h-4 w-4" />,
-    },
-    {
-      to: "/admin/transactions",
-      label: "Historia rachunków",
-      icon: <Users className="mr-2 h-4 w-4" />,
     },
   ];
 

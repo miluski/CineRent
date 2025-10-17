@@ -16,6 +16,8 @@ import { Toaster } from "sonner";
 import { AddDvdPage } from "./pages/AddDvdPage";
 import { EditDvdPage } from "./pages/EditDvdPage";
 import { RentDvdPage } from "./pages/RentDvdPage";
+import { UserReservationsPage } from "./pages/UserReservationsPage";
+import { ReservationManagementPage } from "./pages/ReservationManagementPage";
 
 const queryClient = new QueryClient();
 
@@ -43,13 +45,17 @@ const AppRoutes = () => {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/dvd/:id" element={<RentDvdPage />} />
 
-        <Route path="/rentals/history" element={<div />} />
+        <Route path="/reservations" element={<UserReservationsPage />} />
         <Route path="/recommendations" element={<div />} />
         <Route path="/transactions" element={<div />} />
 
         {/* Admin Routes */}
         <Route path="/admin/dvd/create" element={<AddDvdPage />} />
         <Route path="/admin/dvd/edit/:id" element={<EditDvdPage />} />
+        <Route
+          path="/admin/reservations"
+          element={<ReservationManagementPage />}
+        />
       </Route>
     </Routes>
   );
