@@ -12,8 +12,12 @@ export const createAxiosInterceptor = () => {
     async (error) => {
       const originalRequest = error.config;
 
-      // Check if error is due to expired token (403) and we haven't retried yet
-      if (error.response?.status === 403 && !originalRequest._retry) {
+      // Check if error is due to expired token (401) and we haven't retried yet
+      if (
+        location.pathname !== "/" &&
+        error.response?.status === 401 &&
+        !originalRequest._retry
+      ) {
         originalRequest._retry = true;
 
         try {

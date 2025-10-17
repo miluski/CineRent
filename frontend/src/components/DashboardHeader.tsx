@@ -1,11 +1,17 @@
 import {
+  BookCheck,
+  BookUp,
   CircleUser,
+  Clapperboard,
+  FilePlus,
   History,
   LogOut,
   Menu,
   Search,
   Sparkles,
   Ticket,
+  Users,
+  Wallet,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -23,7 +29,58 @@ import { useAuth } from "@/contexts/AuthContext";
 import { FilterGroup } from "./FilterGroup";
 
 export function DashboardHeader() {
-  const { logout } = useAuth();
+  const { logout, isAdmin } = useAuth();
+
+  const userLinks = [
+    {
+      to: "/rentals",
+      label: "Moje wypożyczenia",
+      icon: <Ticket className="mr-2 h-4 w-4" />,
+    },
+    {
+      to: "/rentals/history",
+      label: "Historia wypożyczeń",
+      icon: <History className="mr-2 h-4 w-4" />,
+    },
+    {
+      to: "/transactions",
+      label: "Historia rachunków",
+      icon: <Wallet className="mr-2 h-4 w-4" />,
+    },
+    {
+      to: "/recommendations",
+      label: "Rekomendacje",
+      icon: <Sparkles className="mr-2 h-4 w-4" />,
+    },
+  ];
+
+  const adminLinks = [
+    {
+      to: "/admin/dvd/create",
+      label: "Dodaj nowe DVD",
+      icon: <FilePlus className="mr-2 h-4 w-4" />,
+    },
+    {
+      to: "/admin/reservations",
+      label: "Zarządzanie rezerwacjami",
+      icon: <BookCheck className="mr-2 h-4 w-4" />,
+    },
+    {
+      to: "/admin/returns",
+      label: "Zarządzanie zwrotami",
+      icon: <BookUp className="mr-2 h-4 w-4" />,
+    },
+    {
+      to: "/admin/dvd/manage",
+      label: "Edycja DVD",
+      icon: <Clapperboard className="mr-2 h-4 w-4" />,
+    },
+    {
+      to: "/admin/transactions",
+      label: "Historia rachunków",
+      icon: <Users className="mr-2 h-4 w-4" />,
+    },
+  ];
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
@@ -71,30 +128,15 @@ export function DashboardHeader() {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Moje konto</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link to="#">
-              <Ticket className="mr-2 h-4 w-4" />
-              Moje wypożyczenia
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="#">
-              <History className="mr-2 h-4 w-4" />
-              Historia wypożyczeń
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="#">
-              <History className="mr-2 h-4 w-4" />
-              Historia rachunków
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="#">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Rekomendacje
-            </Link>
-          </DropdownMenuItem>
+          {(isAdmin ? adminLinks : userLinks).map((link) => (
+            <DropdownMenuItem key={link.to} asChild>
+              <Link to={link.to}>
+                {link.icon}
+                {link.label}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link to="/profile">
               <CircleUser className="mr-2 h-4 w-4" />
@@ -102,7 +144,10 @@ export function DashboardHeader() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={logout}>
+          <DropdownMenuItem
+            onClick={logout}
+            className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
+          >
             <LogOut className="mr-2 h-4 w-4" />
             Wyloguj
           </DropdownMenuItem>

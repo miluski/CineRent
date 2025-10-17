@@ -25,7 +25,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   const navigate = useNavigate();
   const loginMutation = useLogin();
@@ -45,8 +44,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error("Admin check failed", error);
       setIsAdmin(false);
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -55,9 +52,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       checkAdminStatus();
     } else if (isError) {
       setIsAdmin(false);
-      setIsLoading(false);
-    } else if (!isUserSuccess && !isError) {
-      setIsLoading(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isUserSuccess]);
@@ -92,7 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const value = {
     isAdmin,
-    isLoading: isLoading || isUserLoading,
+    isLoading: isUserLoading,
     login,
     logout,
     user,
