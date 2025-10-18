@@ -1,13 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
 import { FilterGroup } from "./FilterGroup";
+import { WordRotate } from "./ui/word-rotate";
 
 export function DashboardSidebar({
   selectedGenres,
   onGenreChange,
-}: {
+}: Partial<{
   selectedGenres: number[];
   onGenreChange: (genreId: number, checked: boolean) => void;
-}) {
+}>) {
   const pathname = useLocation().pathname;
   const shouldShowFilterGroup = pathname === "/dashboard";
 
@@ -17,11 +18,12 @@ export function DashboardSidebar({
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <Link
             to="/dashboard"
-            className="flex items-center gap-2 font-semibold"
+            className="flex items-center gap-2 font-semibold w-full"
           >
-            <h1 className="text-2xl font-bold flex items-center animate-pulse select-none text-black">
-              <span className="text-red-500">O</span>pasRent
-            </h1>
+            <WordRotate
+              words={["O.P.A.S.", "One Place, All Studios"]}
+              className="text-xl lg:text-xl font-bold text-indigo-500"
+            />
           </Link>
         </div>
         <div className="flex-1">

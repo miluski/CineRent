@@ -16,6 +16,10 @@ import { useRegister } from "@/hooks/mutations/auth/useRegister";
 import { useNavigate } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { genres } from "@/utils/genres";
+import { Meteors } from "@/components/ui/meteors";
+import { useState } from "react";
+import { ConfettiButton } from "@/components/ui/confetti";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   nickname: z
@@ -36,6 +40,7 @@ const formSchema = z.object({
 export function RegisterPage() {
   const registerMutation = useRegister();
   const navigate = useNavigate();
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,7 +55,13 @@ export function RegisterPage() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     registerMutation.mutate(values, {
       onSuccess: () => {
-        navigate("/login");
+        setIsSuccess(true);
+        toast.success(
+          "Rejestracja zakończona sukcesem! Za chwilę zostaniesz przekierowany do strony logowania."
+        );
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       },
       onError: (error) => {
         console.error("Registration failed", error);
@@ -60,6 +71,7 @@ export function RegisterPage() {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
+      <Meteors />
       {/* Left section - Background image with branding */}
       <div
         className="relative w-full md:w-1/2 bg-slate-900 text-white p-8 flex flex-col bg-cover bg-center"
@@ -71,7 +83,7 @@ export function RegisterPage() {
         {/* Logo */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold flex items-center animate-pulse select-none">
-            <span className="text-red-500">O</span>pasRent
+            <span className="text-indigo-500">O</span>pasRent
           </h1>
         </div>
 
@@ -177,15 +189,16 @@ export function RegisterPage() {
                 </div>
               </div>
 
-              <Button
+              <ConfettiButton
                 type="submit"
                 className="w-full bg-black hover:bg-gray-800 text-white"
-                disabled={registerMutation.isPending}
+                disabled={registerMutation.isPending || isSuccess}
+                active={isSuccess}
               >
                 {registerMutation.isPending
                   ? "Rejestrowanie..."
                   : "Utwórz konto"}
-              </Button>
+              </ConfettiButton>
             </form>
           </Form>
 

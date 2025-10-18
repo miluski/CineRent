@@ -159,7 +159,7 @@ export function EditDvdPage() {
       <DashboardSidebar />
       <div className="flex flex-col">
         <DashboardHeader />
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 fill-mode-backwards">
           <div className="flex items-center">
             <h1 className="text-lg font-semibold md:text-2xl">Edytuj DVD</h1>
           </div>

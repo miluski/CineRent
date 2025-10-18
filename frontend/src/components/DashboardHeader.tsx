@@ -31,12 +31,12 @@ export function DashboardHeader({
   onSearchChange,
   selectedGenres,
   onGenreChange,
-}: {
+}: Partial<{
   searchPhrase: string;
   onSearchChange: (phrase: string) => void;
   selectedGenres: number[];
   onGenreChange: (genreId: number, checked: boolean) => void;
-}) {
+}>) {
   const { logout, isAdmin } = useAuth();
   const pathname = useLocation().pathname;
   const shouldShowFilterGroup = pathname === "/dashboard";
@@ -92,17 +92,19 @@ export function DashboardHeader({
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col">
-          <nav className="grid gap-2 text-lg font-medium">
+          <nav className="grid gap-2 text-lg font-medium p-2">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold flex items-center animate-pulse select-none">
-                <span className="text-red-500">O</span>pasRent
+              <h1 className="text-2xl font-bold flex items-center animate-pulse select-none p-2">
+                <span className="text-indigo-500">O</span>pasRent
               </h1>
             </div>
-            <FilterGroup
-              isMobile
-              selectedGenres={selectedGenres}
-              onGenreChange={onGenreChange}
-            />
+            {shouldShowFilterGroup && (
+              <FilterGroup
+                isMobile
+                selectedGenres={selectedGenres}
+                onGenreChange={onGenreChange}
+              />
+            )}
           </nav>
         </SheetContent>
       </Sheet>
@@ -115,8 +117,8 @@ export function DashboardHeader({
                 type="search"
                 placeholder="Szukaj filmów..."
                 className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-                value={searchPhrase}
-                onChange={(e) => onSearchChange(e.target.value)}
+                value={searchPhrase ?? ""}
+                onChange={(e) => onSearchChange?.(e.target.value)}
               />
             </div>
           </form>

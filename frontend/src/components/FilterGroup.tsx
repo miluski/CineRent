@@ -2,13 +2,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { genres } from "@/utils/genres";
 
 interface FilterGroupProps {
-  selectedGenres: number[];
-  onGenreChange: (genreId: number, checked: boolean) => void;
+  selectedGenres?: number[];
+  onGenreChange?: (genreId: number, checked: boolean) => void;
   isMobile?: boolean;
 }
 
 export function FilterGroup({
-  selectedGenres,
+  selectedGenres = [],
   onGenreChange,
   isMobile = false,
 }: FilterGroupProps) {
@@ -20,7 +20,7 @@ export function FilterGroup({
           <Checkbox
             id={`${isMobile ? "mobile-" : ""}${genre.id}`}
             checked={selectedGenres.includes(genre.id)}
-            onCheckedChange={(checked) => onGenreChange(genre.id, !!checked)}
+            onCheckedChange={(checked) => onGenreChange?.(genre.id, !!checked)}
           />
           <label
             htmlFor={`${isMobile ? "mobile-" : ""}${genre.id}`}

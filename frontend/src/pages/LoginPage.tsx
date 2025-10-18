@@ -16,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAxiosError } from "axios";
+import { Meteors } from "@/components/ui/meteors";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   nickname: z.string().min(3, "Nazwa użytkownika jest za krótka."),
@@ -39,6 +41,7 @@ export function LoginPage() {
     setIsLoggingIn(true);
     try {
       await login(values);
+      toast.success("Zalogowano pomyślnie!");
       navigate("/dashboard");
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 401) {
@@ -54,6 +57,7 @@ export function LoginPage() {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
+      <Meteors />
       {/* Left section - Background image with branding */}
       <div
         className="relative w-full md:w-1/2 bg-slate-900 text-white p-8 flex flex-col bg-cover bg-center"
@@ -65,7 +69,7 @@ export function LoginPage() {
         {/* Logo */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold flex items-center animate-pulse select-none">
-            <span className="text-red-500">O</span>pasRent
+            <span className="text-indigo-500">O</span>pasRent
           </h1>
         </div>
 

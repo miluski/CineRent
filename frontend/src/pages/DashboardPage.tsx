@@ -27,14 +27,12 @@ export function DashboardPage() {
     "search-phrase": searchPhrase || undefined,
   });
 
-  // Obsługa zmiany filtrów
   const handleGenreChange = (genreId: number, checked: boolean) => {
     setSelectedGenres((prev) =>
       checked ? [...prev, genreId] : prev.filter((id) => id !== genreId)
     );
   };
 
-  // Obsługa zmiany wyszukiwanej frazy
   const handleSearchChange = (phrase: string) => {
     setSearchPhrase(phrase);
   };
