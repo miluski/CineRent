@@ -15,11 +15,11 @@ import { Input } from "@/components/ui/input";
 import { useRegister } from "@/hooks/mutations/auth/useRegister";
 import { useNavigate } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
-import { genres } from "@/utils/genres";
 import { Meteors } from "@/components/ui/meteors";
 import { useState } from "react";
 import { ConfettiButton } from "@/components/ui/confetti";
 import { toast } from "sonner";
+import { useGetAllGenres } from "@/hooks/queries/useGetAllGenres";
 
 const formSchema = z.object({
   nickname: z
@@ -41,6 +41,7 @@ export function RegisterPage() {
   const registerMutation = useRegister();
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
+  const { data: genres } = useGetAllGenres();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -160,7 +161,7 @@ export function RegisterPage() {
               <div className="space-y-2">
                 <FormLabel>Preferencje filmowe</FormLabel>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {genres.map((genre) => (
+                  {genres?.map((genre) => (
                     <div key={genre.id} className="flex items-center space-x-2">
                       <Checkbox
                         id={`genre-${genre.id}`}
@@ -182,7 +183,7 @@ export function RegisterPage() {
                         htmlFor={`genre-${genre.id}`}
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        {genre.label}
+                        {genre.name}
                       </label>
                     </div>
                   ))}

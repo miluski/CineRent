@@ -3,14 +3,15 @@ import { isAxiosError } from "axios";
 import { toast } from "sonner";
 import type { UpdateUserDetailsRequestDto } from "@/interfaces/requests/UpdateUserDetailsRequestDto";
 import type { UserDto } from "@/interfaces/responses/UserDto";
-import { genres } from "@/utils/genres";
 import { axiosInstance } from "@/interceptor";
+import { useGetAllGenres } from "../queries/useGetAllGenres";
 
 export const useUpdateUserDetails = (
   onSuccessCallback?: () => void,
   onErrorCallback?: () => void
 ) => {
   const queryClient = useQueryClient();
+  const { data: genres } = useGetAllGenres();
 
   return useMutation({
     mutationFn: async (data: UpdateUserDetailsRequestDto) => {
@@ -32,7 +33,7 @@ export const useUpdateUserDetails = (
           }
           if (payload.preferredGenresIdentifiers !== undefined) {
             updatedUser.preferredGenres = payload.preferredGenresIdentifiers
-              .map((id) => genres.find((g) => g.id === id)?.label)
+              .map((id) => genres?.find((g) => g.id === id)?.name)
               .filter(Boolean) as string[];
           }
           return updatedUser;

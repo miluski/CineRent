@@ -24,11 +24,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera } from "lucide-react";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
-import { genres } from "@/utils/genres";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateUserDetails } from "@/hooks/mutations/useUpdateUserDetails";
 import { toast } from "sonner";
 import type { UpdateUserDetailsRequestDto } from "@/interfaces/requests/UpdateUserDetailsRequestDto";
+import { useGetAllGenres } from "@/hooks/queries/useGetAllGenres";
 
 const formSchema = z.object({
   nickname: z
@@ -51,6 +51,7 @@ const formSchema = z.object({
 export function ProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { data: genres } = useGetAllGenres();
   const updateUserMutation = useUpdateUserDetails(() => {
     form.reset({ ...form.getValues(), password: "" });
   });
@@ -63,7 +64,7 @@ export function ProfilePage() {
       age: user?.age ?? 18,
       preferredGenresIdentifiers:
         (user?.preferredGenres
-          ?.map((genreName) => genres.find((g) => g.label === genreName)?.id)
+          ?.map((genreName) => genres?.find((g) => g.name === genreName)?.id)
           .filter(Boolean) as number[]) ?? [],
     },
   });
@@ -85,7 +86,7 @@ export function ProfilePage() {
 
     const currentGenreIds =
       user?.preferredGenres
-        ?.map((genreName) => genres.find((g) => g.label === genreName)?.id)
+        ?.map((genreName) => genres?.find((g) => g.name === genreName)?.id)
         .filter(Boolean)
         .sort() ?? [];
     const newGenreIds = (values.preferredGenresIdentifiers ?? []).sort();
@@ -195,7 +196,7 @@ export function ProfilePage() {
                     <div>
                       <FormLabel>Edytuj preferencje filmowe</FormLabel>
                       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                        {genres.map((genre) => (
+                        {genres?.map((genre) => (
                           <FormField
                             key={genre.id}
                             control={form.control}
@@ -220,7 +221,7 @@ export function ProfilePage() {
                                   />
                                 </FormControl>
                                 <FormLabel className="font-normal">
-                                  {genre.label}
+                                  {genre.name}
                                 </FormLabel>
                               </FormItem>
                             )}

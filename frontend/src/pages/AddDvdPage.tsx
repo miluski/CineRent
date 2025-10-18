@@ -30,7 +30,7 @@ import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { useNavigate } from "react-router-dom";
 import { UploadCloud } from "lucide-react";
 import { useCreateDvd } from "@/hooks/mutations/useCreateDvd";
-import { useGetGenres } from "@/hooks/queries/useGetGenres";
+import { useGetAllGenres } from "@/hooks/queries/useGetAllGenres";
 import { DashboardHeader } from "../components/DashboardHeader";
 import { Switch } from "@/components/ui/switch";
 
@@ -82,7 +82,7 @@ const formSchema = z.object({
 
 export function AddDvdPage() {
   const navigate = useNavigate();
-  const { data: genres, isLoading: isLoadingGenres } = useGetGenres();
+  const { data: genres, isLoading: isLoadingGenres } = useGetAllGenres();
   const createDvdMutation = useCreateDvd();
 
   const form = useForm<z.infer<typeof formSchema>>({

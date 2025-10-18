@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { toast } from "sonner";
-import { Check, Download, Loader, X } from "lucide-react";
+import { Check, Loader, X } from "lucide-react";
 
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
@@ -27,8 +26,6 @@ import type { ReservationStatus } from "@/enums/ReservationStatus";
 import { useAcceptReservation } from "@/hooks/mutations/useAcceptReservation";
 import { useDeclineReservation } from "@/hooks/mutations/useDeclineReservation";
 import { useGetAllReservations } from "@/hooks/queries/useGetAllReservations";
-import { axiosInstance } from "@/interceptor";
-import type { TransactionDto } from "@/interfaces/responses/TransactionDto";
 
 const statusConfig: Record<
   ReservationStatus,
@@ -64,56 +61,6 @@ export const ReservationManagementPage = () => {
     useAcceptReservation();
   const { mutate: declineReservation, isPending: isDeclining } =
     useDeclineReservation();
-
-  const handleDownloadInvoice = async (reservationId: number) => {
-    try {
-      // First, fetch the user's transactions to find the transaction ID
-      const transactionsResponse = await axiosInstance.get<TransactionDto[]>(
-        "/transactions"
-      );
-      const transactions = transactionsResponse.data;
-
-      // Find the transaction associated with this reservation
-      const transaction = transactions.find(
-        (t) => t.rentalId === reservationId
-      );
-
-      if (!transaction) {
-        toast.error(
-          "Nie znaleziono transakcji dla tej rezerwacji. Wypożyczenie może nie być jeszcze zakończone."
-        );
-        return;
-      }
-
-      // Now fetch the invoice using the transaction ID
-      const response = await axiosInstance.post<Blob>(
-        `/transactions/bill/${transaction.id}`,
-        {
-          billType: "INVOICE",
-        },
-        {
-          responseType: "blob",
-        }
-      );
-
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `faktura_${transaction.invoiceId || reservationId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
-      toast.success("Faktura została pobrana!");
-    } catch (error) {
-      console.error("Błąd pobierania faktury:", error);
-      toast.error(
-        "Wystąpił błąd podczas pobierania faktury. Wypożyczenie musi być zakończone, aby wygenerować fakturę."
-      );
-    }
-  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -219,21 +166,6 @@ export const ReservationManagementPage = () => {
                               <X className="mr-2 size-4" />
                             )}
                             Odrzuć
-                          </Button>
-                        </div>
-                      )}
-                      {reservation.status === "ACCEPTED" && (
-                        <div className="flex justify-end whitespace-nowrap">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              handleDownloadInvoice(reservation.id)
-                            }
-                            className="border-black text-black hover:bg-pink-50 hover:text-pink-800"
-                          >
-                            <Download className="mr-2 size-4" />
-                            Pobierz fakturę
                           </Button>
                         </div>
                       )}
