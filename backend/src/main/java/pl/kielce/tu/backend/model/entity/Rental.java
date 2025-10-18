@@ -1,6 +1,5 @@
 package pl.kielce.tu.backend.model.entity;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -32,13 +31,13 @@ public class Rental {
     private Long id;
 
     @Column(name = "rental_start", nullable = false)
-    private Date rentalStart;
+    private LocalDateTime rentalStart;
 
     @Column(name = "rental_end", nullable = false)
-    private Date rentalEnd;
+    private LocalDateTime rentalEnd;
 
     @Column(name = "return_date", nullable = true)
-    private Date returnDate;
+    private LocalDateTime returnDate;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -60,8 +61,8 @@ class RentalRepositoryTest {
 
     @Test
     void shouldHave_findByUserIdAndDateRange_withQuery() throws NoSuchMethodException {
-        Method m = RentalRepository.class.getMethod("findByUserIdAndDateRange", Long.class, java.sql.Date.class,
-                java.sql.Date.class);
+        Method m = RentalRepository.class.getMethod("findByUserIdAndDateRange", Long.class, LocalDateTime.class,
+                LocalDateTime.class);
         assertNotNull(m);
         assertTrue(List.class.isAssignableFrom(m.getReturnType()), "Return type should be List");
         Query q = m.getAnnotation(Query.class);

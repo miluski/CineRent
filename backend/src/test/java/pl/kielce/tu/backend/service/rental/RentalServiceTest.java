@@ -33,6 +33,7 @@ import pl.kielce.tu.backend.model.entity.Rental;
 import pl.kielce.tu.backend.repository.RentalRepository;
 import pl.kielce.tu.backend.service.auth.CookieService;
 import pl.kielce.tu.backend.service.dvd.DvdAvailabilityService;
+import pl.kielce.tu.backend.service.rental.strategy.ReturnRequestStrategy;
 import pl.kielce.tu.backend.service.rental.transaction.TransactionGeneratorService;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +53,8 @@ class RentalServiceTest {
     private DvdAvailabilityService dvdAvailabilityService;
     @Mock
     private TransactionGeneratorService transactionGenerator;
+    @Mock
+    private ReturnRequestStrategy returnRequestStrategy;
     @InjectMocks
     private RentalService rentalService;
 
@@ -103,8 +106,7 @@ class RentalServiceTest {
         ResponseEntity<Void> response = rentalService.handleReturnDvd("1");
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-        assertEquals(RentalStatus.RETURN_REQUESTED, rental.getStatus());
-        verify(rentalRepository).save(rental);
+        verify(returnRequestStrategy).processReturnRequest(rental);
     }
 
     @Test

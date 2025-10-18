@@ -55,7 +55,6 @@ export function DashboardPage() {
                 key={dvd.id}
                 className="group relative rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
               >
-                {/* Poster Image */}
                 <div className="aspect-[2/3] bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden">
                   {dvd.posterUrl ? (
                     <img
@@ -69,29 +68,18 @@ export function DashboardPage() {
                       <p>No Poster</p>
                     </div>
                   )}
-
-                  {/* Overlay with gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                  {/* Content Overlay */}
                   <div className="absolute inset-0 flex flex-col justify-end p-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    {/* Director/Year Info */}
                     <div className="text-white mb-2">
                       <p className="text-sm font-medium text-gray-300">
                         {dvd.directors?.join(', ') || 'Unknown Director'}
                       </p>
                       <p className="text-sm text-gray-400">{dvd.releaseYear || 'Unknown Year'}</p>
                     </div>
-
-                    {/* Title */}
                     <h3 className="text-white font-bold text-lg mb-1 line-clamp-2">{dvd.title}</h3>
-
-                    {/* Genre */}
                     <p className="text-yellow-400 text-sm font-medium mb-3">
                       {dvd.genres?.join(', ') || 'Genre'}
                     </p>
-
-                    {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-2 ">
                       <Link
                         to={isAdmin ? `/admin/dvd/edit/${dvd.id}` : `/dvd/${dvd.id}`}

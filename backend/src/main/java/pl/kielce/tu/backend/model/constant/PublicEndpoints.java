@@ -13,6 +13,7 @@ public enum PublicEndpoints {
     AUTH_LOGIN("/api/v1/auth/login"),
     AUTH_REGISTER("/api/v1/auth/register"),
     AUTH_LOGOUT("/api/v1/auth/logout"),
+    GENRES("/api/v1/genres"),
     API_DOCS("/v3/api-docs/**"),
     API_DOCS_LEGACY("/api-docs/**"),
     SWAGGER_UI("/swagger-ui/**"),

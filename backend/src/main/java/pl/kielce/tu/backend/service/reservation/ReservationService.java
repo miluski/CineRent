@@ -176,7 +176,7 @@ public class ReservationService {
     }
 
     private void validateDateRange(ReservationDto reservationDto) {
-        if (reservationDto.getRentalStart().after(reservationDto.getRentalEnd())) {
+        if (reservationDto.getRentalStart().isAfter(reservationDto.getRentalEnd())) {
             throw new IllegalArgumentException("Start date must be before end date");
         }
     }

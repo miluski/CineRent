@@ -37,7 +37,8 @@ public class InvoiceController {
     @Operation(summary = "Get user transactions", description = """
             Retrieves all transactions for the authenticated user. \
             Returns transaction history sorted by generation date (newest first). \
-            Only shows transactions belonging to the current user based on JWT token.""", security = {
+            Only shows transactions belonging to the current user based on JWT token. \
+            Note: billType is null for active rentals (not yet returned) and set to RECEIPT/INVOICE when rental is completed.""", security = {
             @SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Transactions retrieved successfully", content = @Content(schema = @Schema(example = """
@@ -52,7 +53,7 @@ public class InvoiceController {
                         "totalAmount": 28.00,
                         "generatedAt": "2025-10-01T14:30:00",
                         "pdfUrl": null,
-                        "billType": "RECEIPT",
+                        "billType": null,
                         "rentalId": 1
                       }
                     ]"""))),

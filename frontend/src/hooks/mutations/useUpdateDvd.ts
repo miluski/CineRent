@@ -22,7 +22,6 @@ export const useUpdateDvd = (
     },
     onSuccess: (_, { id }) => {
       toast.success("Film zaktualizowano pomyślnie!");
-      // Invalidate queries to refetch data
       queryClient.invalidateQueries({ queryKey: ["dvds"] });
       queryClient.invalidateQueries({ queryKey: ["dvd", id] });
       onSuccessCallback?.();

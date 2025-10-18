@@ -1,14 +1,12 @@
 package pl.kielce.tu.backend.service.rental.factory;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
 import pl.kielce.tu.backend.model.constant.BillType;
-import pl.kielce.tu.backend.model.constant.CalculationConstants;
 import pl.kielce.tu.backend.model.constant.RentalStatus;
 import pl.kielce.tu.backend.model.entity.Dvd;
 import pl.kielce.tu.backend.model.entity.Rental;
@@ -22,30 +20,31 @@ public class RentalFactory {
     public Rental createFromReservation(Reservation reservation) {
         User user = reservation.getUser();
         Dvd dvd = reservation.getDvd();
+        LocalDateTime rentalStart = reservation.getRentalStart();
+        LocalDateTime rentalEnd = reservation.getRentalEnd();
+        int count = reservation.getCount();
 
-        return buildRental(user, dvd, reservation.getCount());
+        return buildRentalFromReservation(user, dvd, count, rentalStart, rentalEnd);
     }
 
-    private Rental buildRental(User user, Dvd dvd, int count) {
-        Date currentDate = new Date(System.currentTimeMillis());
-        Date endDate = calculateEndDate(currentDate);
-        Transaction transaction = createTransaction(dvd, count);
-
+    private Rental buildRentalFromReservation(User user, Dvd dvd, int count, LocalDateTime rentalStart,
+            LocalDateTime rentalEnd) {
+        Transaction transaction = createTransaction(dvd, count, rentalStart, rentalEnd);
         return Rental.builder()
                 .user(user)
                 .dvd(dvd)
                 .count(count)
                 .status(RentalStatus.ACTIVE)
-                .rentalStart(currentDate)
-                .rentalEnd(endDate)
+                .rentalStart(rentalStart)
+                .rentalEnd(rentalEnd)
                 .createdAt(LocalDateTime.now())
                 .transaction(transaction)
                 .build();
     }
 
-    private Transaction createTransaction(Dvd dvd, int count) {
+    private Transaction createTransaction(Dvd dvd, int count, LocalDateTime rentalStart, LocalDateTime rentalEnd) {
         BigDecimal pricePerDay = BigDecimal.valueOf(dvd.getRentalPricePerDay());
-        int rentalPeriodDays = CalculationConstants.RENTAL_PERIOD_DAYS.getValue().intValue();
+        int rentalPeriodDays = calculateRentalPeriodDays(rentalStart, rentalEnd);
         BigDecimal totalAmount = pricePerDay.multiply(BigDecimal.valueOf(rentalPeriodDays * count));
 
         return Transaction.builder()
@@ -60,14 +59,14 @@ public class RentalFactory {
                 .build();
     }
 
-    private String generateInvoiceId() {
-        return "INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    private int calculateRentalPeriodDays(LocalDateTime startDate, LocalDateTime endDate) {
+        long diffInHours = java.time.Duration.between(startDate, endDate).toHours();
+        int days = (int) Math.ceil(diffInHours / 24.0);
+        return Math.max(0, days);
     }
 
-    private Date calculateEndDate(Date startDate) {
-        long rentalDays = CalculationConstants.RENTAL_PERIOD_DAYS.getValue().longValue();
-        long rentalPeriodMillis = rentalDays * 24L * 60L * 60L * 1000L;
-        return new Date(startDate.getTime() + rentalPeriodMillis);
+    private String generateInvoiceId() {
+        return "INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
 }

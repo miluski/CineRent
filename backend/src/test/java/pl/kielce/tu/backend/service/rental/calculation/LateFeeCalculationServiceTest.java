@@ -5,8 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,11 +28,11 @@ class LateFeeCalculationServiceTest {
     @Test
     void shouldReturnZeroForOnTimeReturn() {
         Rental rental = createTestRental();
-        LocalDate dueDate = LocalDate.now();
-        LocalDate returnDate = LocalDate.now().minusDays(1);
+        LocalDateTime dueDate = LocalDateTime.now();
+        LocalDateTime returnDate = LocalDateTime.now().minusDays(1);
 
-        rental.setRentalEnd(Date.valueOf(dueDate));
-        rental.setReturnDate(Date.valueOf(returnDate));
+        rental.setRentalEnd(dueDate);
+        rental.setReturnDate(returnDate);
 
         BigDecimal lateFee = lateFeeService.calculateLateFee(rental);
 
@@ -43,11 +42,11 @@ class LateFeeCalculationServiceTest {
     @Test
     void shouldCalculateLateFeeForOverdueReturn() {
         Rental rental = createTestRental();
-        LocalDate dueDate = LocalDate.now().minusDays(5);
-        LocalDate returnDate = LocalDate.now();
+        LocalDateTime dueDate = LocalDateTime.now().minusDays(5);
+        LocalDateTime returnDate = LocalDateTime.now();
 
-        rental.setRentalEnd(Date.valueOf(dueDate));
-        rental.setReturnDate(Date.valueOf(returnDate));
+        rental.setRentalEnd(dueDate);
+        rental.setReturnDate(returnDate);
 
         BigDecimal lateFee = lateFeeService.calculateLateFee(rental);
 

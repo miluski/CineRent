@@ -1,6 +1,6 @@
 package pl.kielce.tu.backend.repository;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -41,13 +41,18 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
             AND r.rentalEnd <= :endDate \
             ORDER BY r.createdAt DESC""")
     List<Rental> findByUserIdAndDateRange(@Param("userId") Long userId,
-            @Param("startDate") Date startDate,
-            @Param("endDate") Date endDate);
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
     @Query("SELECT r FROM Rental r WHERE r.status = :status")
     List<Rental> findByStatus(@Param("status") RentalStatus status);
 
     @Query("SELECT COUNT(r) FROM Rental r WHERE r.dvd.id = :dvdId AND r.status = :status")
     Long countByDvdIdAndStatus(@Param("dvdId") Long dvdId, @Param("status") RentalStatus status);
-    
+
+    @Query("""
+            SELECT r FROM Rental r WHERE r.status = pl.kielce.tu.backend.model.constant.RentalStatus.ACTIVE \
+            AND r.rentalEnd < :currentDateTime""")
+    List<Rental> findExpiredActiveRentals(@Param("currentDateTime") LocalDateTime currentDateTime);
+
 }

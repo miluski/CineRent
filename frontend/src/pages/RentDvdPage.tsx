@@ -80,7 +80,6 @@ export function RentDvdPage() {
         <DashboardHeader />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 fill-mode-backwards">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-            {/* Left Column: Poster */}
             <div className="md:col-span-1">
               <img
                 draggable={false}
@@ -93,8 +92,6 @@ export function RentDvdPage() {
                 className="w-full h-auto object-cover rounded-lg shadow-xl"
               />
             </div>
-
-            {/* Right Column: Details */}
             <div className="md:col-span-2 flex flex-col gap-6">
               <div>
                 <h1 className="text-4xl font-bold tracking-tight">{dvd.title}</h1>
@@ -143,8 +140,6 @@ export function RentDvdPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Availability and Actions */}
               <div className="mt-auto pt-6">
                 {isAvailable ? (
                   <form onSubmit={handleSubmit} className="flex flex-col gap-4">

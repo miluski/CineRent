@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -24,9 +22,9 @@ class RentalTest {
     @Test
     void gettersAndSetters() {
         Rental r = new Rental();
-        Date start = Date.valueOf(LocalDate.of(2025, 1, 1));
-        Date end = Date.valueOf(LocalDate.of(2025, 1, 10));
-        Date ret = Date.valueOf(LocalDate.of(2025, 1, 9));
+        LocalDateTime start = LocalDateTime.of(2025, 1, 1, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2025, 1, 10, 18, 0);
+        LocalDateTime ret = LocalDateTime.of(2025, 1, 9, 16, 30);
         LocalDateTime created = LocalDateTime.of(2025, 1, 1, 12, 0);
         Integer count = 3;
 
@@ -55,8 +53,8 @@ class RentalTest {
 
     @Test
     void equalsAndHashCode_consistentForSameFieldValues() {
-        Date start = Date.valueOf(LocalDate.of(2025, 2, 1));
-        Date end = Date.valueOf(LocalDate.of(2025, 2, 5));
+        LocalDateTime start = LocalDateTime.of(2025, 2, 1, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2025, 2, 5, 18, 0);
         LocalDateTime created = LocalDateTime.of(2025, 2, 1, 10, 0);
 
         Rental a = Rental.builder()

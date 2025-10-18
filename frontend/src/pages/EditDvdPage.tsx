@@ -120,7 +120,6 @@ export function EditDvdPage() {
       genresIdentifiers: values.genresIdentifiers.map(Number),
     };
 
-    // Don't send posterImage if it's the original URL
     if (payload.posterImage?.startsWith('https://')) {
       delete payload.posterImage;
     }

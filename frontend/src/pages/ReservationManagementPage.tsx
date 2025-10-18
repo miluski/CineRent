@@ -67,13 +67,11 @@ export const ReservationManagementPage = () => {
 
   const handleDownloadInvoice = async (reservationId: number) => {
     try {
-      // First, fetch the user's transactions to find the transaction ID
       const transactionsResponse = await axiosInstance.get<TransactionDto[]>(
         "/transactions"
       );
       const transactions = transactionsResponse.data;
 
-      // Find the transaction associated with this reservation
       const transaction = transactions.find(
         (t) => t.rentalId === reservationId
       );
@@ -85,7 +83,6 @@ export const ReservationManagementPage = () => {
         return;
       }
 
-      // Now fetch the invoice using the transaction ID
       const response = await axiosInstance.post<Blob>(
         `/transactions/bill/${transaction.id}`,
         {

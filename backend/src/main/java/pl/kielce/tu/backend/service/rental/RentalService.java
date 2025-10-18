@@ -1,6 +1,6 @@
 package pl.kielce.tu.backend.service.rental;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +24,7 @@ import pl.kielce.tu.backend.model.entity.Rental;
 import pl.kielce.tu.backend.repository.RentalRepository;
 import pl.kielce.tu.backend.service.auth.CookieService;
 import pl.kielce.tu.backend.service.dvd.DvdAvailabilityService;
+import pl.kielce.tu.backend.service.rental.strategy.ReturnRequestStrategy;
 import pl.kielce.tu.backend.service.rental.transaction.TransactionGeneratorService;
 
 @Service
@@ -38,6 +39,7 @@ public class RentalService {
     private final ClaimsExtractor claimsExtractor;
     private final RentalFilterMapper filterMapper;
     private final RentalRepository rentalRepository;
+    private final ReturnRequestStrategy returnRequestStrategy;
     private final DvdAvailabilityService dvdAvailabilityService;
     private final TransactionGeneratorService transactionGenerator;
 
@@ -58,7 +60,7 @@ public class RentalService {
             Long rentalId = filterMapper.parseRentalId(id);
             Rental rental = findRentalById(rentalId);
             validateRentalForReturn(rental);
-            updateRentalStatus(rental, RentalStatus.RETURN_REQUESTED);
+            returnRequestStrategy.processReturnRequest(rental);
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -149,7 +151,7 @@ public class RentalService {
 
     private void completeRental(Rental rental) {
         rental.setStatus(RentalStatus.INACTIVE);
-        rental.setReturnDate(new Date(System.currentTimeMillis()));
+        rental.setReturnDate(LocalDateTime.now());
         rental.setTransaction(transactionGenerator.generateTransaction(rental));
         dvdAvailabilityService.increaseAvailability(rental.getDvd(), rental.getCount());
         rentalRepository.save(rental);
