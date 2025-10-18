@@ -1,5 +1,6 @@
 import {
   BookCheck,
+  BookOpen,
   BookUp,
   CircleUser,
   FilePlus,
@@ -79,6 +80,11 @@ export function DashboardHeader({
       to: "/admin/returns",
       label: "Zarządzanie zwrotami",
       icon: <BookUp className="mr-2 h-4 w-4" />,
+    },
+    {
+      to: "/admin/genres",
+      label: "Zarządzanie gatunkami",
+      icon: <BookOpen className="mr-2 h-4 w-4" />,
     },
   ];
 

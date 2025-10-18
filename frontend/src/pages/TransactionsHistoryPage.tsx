@@ -1,9 +1,17 @@
+import { useState } from "react";
 import { format } from "date-fns";
-import { Download } from "lucide-react";
+import { Download, Loader } from "lucide-react";
 import { toast } from "sonner";
 
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -24,11 +32,15 @@ export const TransactionsHistoryPage = () => {
     isError,
   } = useGetTransactionsHistory();
 
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
+
   const handleDownloadBill = async (
     transactionId: number,
     billType: string,
     invoiceId: string
   ) => {
+    if (!billType) return;
+    setDownloadingId(transactionId);
     try {
       const response = await axiosInstance.post<Blob>(
         `/transactions/bill/${transactionId}`,
@@ -54,6 +66,8 @@ export const TransactionsHistoryPage = () => {
     } catch (error) {
       console.error("Błąd pobierania dokumentu:", error);
       toast.error("Wystąpił błąd podczas pobierania dokumentu.");
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -106,24 +120,63 @@ export const TransactionsHistoryPage = () => {
                     {format(new Date(transaction.generatedAt), "dd.MM.yyyy")}
                   </TableCell>
                   <TableCell>{transaction.totalAmount.toFixed(2)} zł</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        handleDownloadBill(
-                          transaction.id,
-                          transaction.billType,
-                          transaction.invoiceId
-                        )
-                      }
-                    >
-                      <Download className="mr-2 size-4" />
-                      Pobierz{" "}
-                      {transaction.billType === "INVOICE"
-                        ? "Fakturę"
-                        : "Paragon"}
-                    </Button>
+                  <TableCell className="flex justify-end">
+                    {transaction.billType && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-[180px]"
+                            disabled={downloadingId === transaction.id}
+                          >
+                            {downloadingId === transaction.id ? (
+                              <>
+                                <Loader className="mr-2 size-4 animate-spin" />
+                                Pobieranie...
+                              </>
+                            ) : (
+                              <>
+                                <Download className="mr-2 size-4" />
+                                Pobierz dokument
+                              </>
+                            )}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {downloadingId === transaction.id ? (
+                            <DropdownMenuItem disabled>
+                              <Loader className="mr-2 h-4 w-4 animate-spin" />
+                              <span>Pobieranie...</span>
+                            </DropdownMenuItem>
+                          ) : (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleDownloadBill(
+                                    transaction.id,
+                                    "INVOICE",
+                                    transaction.invoiceId
+                                  )
+                                }
+                              >
+                                Pobierz Fakturę
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleDownloadBill(
+                                    transaction.id,
+                                    "RECEIPT",
+                                    transaction.invoiceId
+                                  )
+                                }
+                              >
+                                Pobierz Paragon
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

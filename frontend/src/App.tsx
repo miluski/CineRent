@@ -22,6 +22,7 @@ import { TransactionsHistoryPage } from "./pages/TransactionsHistoryPage";
 import { ReservationManagementPage } from "./pages/ReservationManagementPage";
 import { RecommendationsPage } from "./pages/RecommendationsPage";
 import { ReturnRequestsPage } from "./pages/ReturnRequestsPage";
+import { GenresManagementPage } from "./pages/GenresManagementPage";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const AppRoutes = () => {
           element={<ReservationManagementPage />}
         />
         <Route path="/admin/returns" element={<ReturnRequestsPage />} />
+        <Route path="/admin/genres" element={<GenresManagementPage />} />
       </Route>
     </Routes>
   );
