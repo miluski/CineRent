@@ -123,7 +123,7 @@ export const RentalsPage = () => {
                 <CardFooter className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <Button
                     variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary/10 hover:text-primary"
+                    className="w-full border-primary text-primary hover:bg-secondary hover:text-primary"
                     onClick={() => handleReturnRequest(rental.id)}
                     disabled={isReturning}
                   >
