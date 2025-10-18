@@ -26,11 +26,20 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { FilterGroup } from "./FilterGroup";
 
-export function DashboardHeader() {
+export function DashboardHeader({
+  searchPhrase,
+  onSearchChange,
+  selectedGenres,
+  onGenreChange,
+}: {
+  searchPhrase: string;
+  onSearchChange: (phrase: string) => void;
+  selectedGenres: number[];
+  onGenreChange: (genreId: number, checked: boolean) => void;
+}) {
   const { logout, isAdmin } = useAuth();
   const pathname = useLocation().pathname;
-  const shouldShowFilterGroup =
-    pathname === "/dashboard" || pathname.startsWith("/recommendations");
+  const shouldShowFilterGroup = pathname === "/dashboard";
 
   const userLinks = [
     {
@@ -89,19 +98,25 @@ export function DashboardHeader() {
                 <span className="text-red-500">O</span>pasRent
               </h1>
             </div>
-            <FilterGroup isMobile />
+            <FilterGroup
+              isMobile
+              selectedGenres={selectedGenres}
+              onGenreChange={onGenreChange}
+            />
           </nav>
         </SheetContent>
       </Sheet>
       <div className="w-full flex-1">
         {shouldShowFilterGroup && (
-          <form>
+          <form onSubmit={(e) => e.preventDefault()}>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Szukaj filmów..."
                 className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
+                value={searchPhrase}
+                onChange={(e) => onSearchChange(e.target.value)}
               />
             </div>
           </form>

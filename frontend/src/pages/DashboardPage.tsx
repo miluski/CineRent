@@ -1,28 +1,62 @@
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGetDvds } from "@/hooks/queries/useGetDvds";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+
+function DvdCardSkeleton() {
+  return (
+    <Skeleton className="group relative rounded-lg overflow-hidden shadow-lg aspect-[2/3]" />
+  );
+}
 
 export function DashboardPage() {
   const { isAdmin } = useAuth();
-  const { data: dvds, isLoading, isError } = useGetDvds();
+
+  const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
+  const [searchPhrase, setSearchPhrase] = useState("");
+
+  const {
+    data: dvds,
+    isLoading,
+    isError,
+  } = useGetDvds({
+    "genres-ids": selectedGenres.length > 0 ? selectedGenres : undefined,
+    "search-phrase": searchPhrase || undefined,
+  });
+
+  // Obsługa zmiany filtrów
+  const handleGenreChange = (genreId: number, checked: boolean) => {
+    setSelectedGenres((prev) =>
+      checked ? [...prev, genreId] : prev.filter((id) => id !== genreId)
+    );
+  };
+
+  // Obsługa zmiany wyszukiwanej frazy
+  const handleSearchChange = (phrase: string) => {
+    setSearchPhrase(phrase);
+  };
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <DashboardSidebar />
+      <DashboardSidebar
+        selectedGenres={selectedGenres}
+        onGenreChange={handleGenreChange}
+      />
       <div className="flex flex-col">
-        <DashboardHeader />
+        <DashboardHeader
+          searchPhrase={searchPhrase}
+          onSearchChange={handleSearchChange}
+          selectedGenres={selectedGenres}
+          onGenreChange={handleGenreChange}
+        />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 fill-mode-backwards">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {isLoading &&
-              Array.from({ length: 8 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="relative rounded-lg overflow-hidden shadow-lg"
-                >
-                  <div className="aspect-[2/3] bg-muted animate-pulse" />
-                </div>
+              Array.from({ length: 8 }).map((_, i) => (
+                <DvdCardSkeleton key={i} />
               ))}
             {isError && <p>Error fetching data.</p>}
             {dvds?.map((dvd) => (

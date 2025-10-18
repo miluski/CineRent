@@ -1,10 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
 import { FilterGroup } from "./FilterGroup";
 
-export function DashboardSidebar() {
+export function DashboardSidebar({
+  selectedGenres,
+  onGenreChange,
+}: {
+  selectedGenres: number[];
+  onGenreChange: (genreId: number, checked: boolean) => void;
+}) {
   const pathname = useLocation().pathname;
-  const shouldShowFilterGroup =
-    pathname === "/dashboard" || pathname.startsWith("/recommendations");
+  const shouldShowFilterGroup = pathname === "/dashboard";
 
   return (
     <div className="hidden border-r bg-muted/40 md:block">
@@ -21,7 +26,12 @@ export function DashboardSidebar() {
         </div>
         <div className="flex-1">
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            {shouldShowFilterGroup && <FilterGroup />}
+            {shouldShowFilterGroup && (
+              <FilterGroup
+                selectedGenres={selectedGenres}
+                onGenreChange={onGenreChange}
+              />
+            )}
           </nav>
         </div>
       </div>
