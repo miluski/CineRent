@@ -1,53 +1,39 @@
-import * as React from "react";
-import { useParams } from "react-router-dom";
-import {
-  Bell,
-  Calendar,
-  CheckCircle,
-  Clock,
-  Film,
-  User,
-  Wallet,
-  XCircle,
-} from "lucide-react";
+import { Bell, Calendar, CheckCircle, Clock, Film, User, Wallet, XCircle } from 'lucide-react';
+import * as React from 'react';
+import { useParams } from 'react-router-dom';
 
-import { useGetDvdById } from "@/hooks/queries/useGetDvdById";
-import { useRentDvd } from "@/hooks/mutations/useRentDvd";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
-import { DashboardHeader } from "@/components/DashboardHeader";
-import { toast } from "sonner";
-import { addDays } from "date-fns";
-import { DatePicker } from "@/components/DatePicker";
+import { DashboardHeader } from '@/components/DashboardHeader';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { DatePicker } from '@/components/DatePicker';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { STATIC_BASE_URL } from '@/config/constants';
+import { useRentDvd } from '@/hooks/mutations/useRentDvd';
+import { useGetDvdById } from '@/hooks/queries/useGetDvdById';
+import { addDays } from 'date-fns';
+import { toast } from 'sonner';
 
 export function RentDvdPage() {
   const { id } = useParams<{ id: string }>();
   const { data: dvd, isLoading, isError, refetch } = useGetDvdById(id!);
   const rentDvdMutation = useRentDvd(() => refetch());
 
-  const [startDate, setStartDate] = React.useState<Date | undefined>(
-    new Date()
-  );
-  const [endDate, setEndDate] = React.useState<Date | undefined>(
-    addDays(new Date(), 7)
-  );
+  const [startDate, setStartDate] = React.useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = React.useState<Date | undefined>(addDays(new Date(), 7));
   const [count, setCount] = React.useState(1);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!id || !startDate || !endDate) {
-      toast.error("Proszę wybrać poprawny zakres dat.");
+      toast.error('Proszę wybrać poprawny zakres dat.');
       return;
     }
     if (startDate > endDate) {
-      toast.error(
-        "Data zakończenia nie może być wcześniejsza niż rozpoczęcia."
-      );
+      toast.error('Data zakończenia nie może być wcześniejsza niż rozpoczęcia.');
       return;
     }
 
@@ -60,7 +46,7 @@ export function RentDvdPage() {
   };
 
   const handleNotify = () => {
-    toast.info("Zostaniesz powiadomiony o dostępności filmu za pomocą e-mail.");
+    toast.info('Zostaniesz powiadomiony o dostępności filmu za pomocą e-mail.');
   };
 
   if (isLoading) {
@@ -100,8 +86,8 @@ export function RentDvdPage() {
                 draggable={false}
                 src={
                   dvd.posterUrl
-                    ? `https://localhost:4443${dvd.posterUrl}`
-                    : "https://placehold.co/400x600?text=Brak\\nOkładki"
+                    ? `${STATIC_BASE_URL}${dvd.posterUrl}`
+                    : 'https://placehold.co/400x600?text=Brak\\nOkładki'
                 }
                 alt={`Okładka filmu ${dvd.title}`}
                 className="w-full h-auto object-cover rounded-lg shadow-xl"
@@ -111,13 +97,11 @@ export function RentDvdPage() {
             {/* Right Column: Details */}
             <div className="md:col-span-2 flex flex-col gap-6">
               <div>
-                <h1 className="text-4xl font-bold tracking-tight">
-                  {dvd.title}
-                </h1>
+                <h1 className="text-4xl font-bold tracking-tight">{dvd.title}</h1>
                 <div className="mt-2 flex items-center gap-4 text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <User className="size-4" />
-                    <span>{dvd.directors.join(", ")}</span>
+                    <span>{dvd.directors.join(', ')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="size-4" />
@@ -148,18 +132,14 @@ export function RentDvdPage() {
                   <Clock className="size-5 text-primary" />
                   <div>
                     <span className="font-semibold">Czas trwania</span>
-                    <p className="text-muted-foreground">
-                      {dvd.durationMinutes} min
-                    </p>
+                    <p className="text-muted-foreground">{dvd.durationMinutes} min</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                   <Wallet className="size-5 text-primary" />
                   <div>
                     <span className="font-semibold">Cena za dzień</span>
-                    <p className="text-muted-foreground">
-                      {dvd.rentalPricePerDay.toFixed(2)} zł
-                    </p>
+                    <p className="text-muted-foreground">{dvd.rentalPricePerDay.toFixed(2)} zł</p>
                   </div>
                 </div>
               </div>
@@ -190,9 +170,7 @@ export function RentDvdPage() {
                         <DatePicker
                           date={endDate}
                           setDate={setEndDate}
-                          disabled={(date) =>
-                            startDate ? date < startDate : date < new Date()
-                          }
+                          disabled={(date) => (startDate ? date < startDate : date < new Date())}
                           className="mt-2"
                         />
                       </div>
@@ -217,7 +195,7 @@ export function RentDvdPage() {
                       disabled={rentDvdMutation.isPending}
                     >
                       {rentDvdMutation.isPending ? (
-                        "Przetwarzanie..."
+                        'Przetwarzanie...'
                       ) : (
                         <>
                           <Film className="mr-2 size-5" />
@@ -239,12 +217,7 @@ export function RentDvdPage() {
                       <Button size="lg" disabled className="w-full">
                         Wypożycz
                       </Button>
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        className="w-full"
-                        onClick={handleNotify}
-                      >
+                      <Button size="lg" variant="outline" className="w-full" onClick={handleNotify}>
                         <Bell className="mr-2 size-5" />
                         Powiadom o dostępności
                       </Button>

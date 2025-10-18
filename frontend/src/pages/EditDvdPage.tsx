@@ -1,11 +1,7 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Camera, UploadCloud } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -13,54 +9,49 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
-import { DashboardHeader } from "../components/DashboardHeader";
-import { useGetGenres } from "@/hooks/queries/useGetGenres";
-import { useGetDvdById } from "@/hooks/queries/useGetDvdById";
-import { useUpdateDvd } from "@/hooks/mutations/useUpdateDvd";
-import type { DvdDto } from "@/interfaces/responses/DvdDto";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { STATIC_BASE_URL } from '@/config/constants';
+import { useUpdateDvd } from '@/hooks/mutations/useUpdateDvd';
+import { useGetDvdById } from '@/hooks/queries/useGetDvdById';
+import { useGetGenres } from '@/hooks/queries/useGetGenres';
+import type { DvdDto } from '@/interfaces/responses/DvdDto';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Camera, UploadCloud } from 'lucide-react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate, useParams } from 'react-router-dom';
+import * as z from 'zod';
+import { DashboardHeader } from '../components/DashboardHeader';
 
 const formSchema = z.object({
   title: z
     .string()
-    .min(1, "Tytuł jest wymagany.")
-    .max(100, "Tytuł nie może być dłuższy niż 100 znaków."),
+    .min(1, 'Tytuł jest wymagany.')
+    .max(100, 'Tytuł nie może być dłuższy niż 100 znaków.'),
   directors: z
     .string()
-    .min(1, "Reżyser jest wymagany.")
+    .min(1, 'Reżyser jest wymagany.')
     .max(100, "Pole 'Reżyser' nie może być dłuższe niż 100 znaków."),
   releaseYear: z.coerce
     .number<number>()
-    .min(1888, "Rok produkcji musi być po 1888.")
-    .max(
-      new Date().getFullYear() + 1,
-      "Rok produkcji nie może być z przyszłości."
-    ),
+    .min(1888, 'Rok produkcji musi być po 1888.')
+    .max(new Date().getFullYear() + 1, 'Rok produkcji nie może być z przyszłości.'),
   description: z
     .string()
-    .min(10, "Opis musi mieć co najmniej 10 znaków.")
-    .max(1000, "Opis nie może być dłuższy niż 1000 znaków."),
-  durationMinutes: z.coerce
-    .number<number>()
-    .min(1, "Czas trwania musi być większy od 0."),
+    .min(10, 'Opis musi mieć co najmniej 10 znaków.')
+    .max(1000, 'Opis nie może być dłuższy niż 1000 znaków.'),
+  durationMinutes: z.coerce.number<number>().min(1, 'Czas trwania musi być większy od 0.'),
   rentalPricePerDay: z.coerce
     .number<number>()
-    .min(0, "Cena nie może być ujemna.")
-    .positive("Cena musi być większa od zera."),
-  copiesAvailable: z.coerce
-    .number<number>()
-    .min(0, "Liczba kopii nie może być ujemna."),
+    .min(0, 'Cena nie może być ujemna.')
+    .positive('Cena musi być większa od zera.'),
+  copiesAvailable: z.coerce.number<number>().min(0, 'Liczba kopii nie może być ujemna.'),
   available: z.boolean(),
-  genresIdentifiers: z
-    .array(z.string())
-    .nonempty("Musisz wybrać co najmniej jeden gatunek."),
+  genresIdentifiers: z.array(z.string()).nonempty('Musisz wybrać co najmniej jeden gatunek.'),
   posterImage: z.string().optional(),
 });
 
@@ -75,10 +66,10 @@ export function EditDvdPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      directors: "",
+      title: '',
+      directors: '',
       releaseYear: new Date().getFullYear(),
-      description: "",
+      description: '',
       rentalPricePerDay: 0,
       genresIdentifiers: [],
       durationMinutes: 0,
@@ -96,7 +87,7 @@ export function EditDvdPage() {
 
       form.reset({
         title: dvd.title,
-        directors: dvd.directors.join(", "),
+        directors: dvd.directors.join(', '),
         releaseYear: dvd.releaseYear,
         description: dvd.description,
         durationMinutes: dvd.durationMinutes,
@@ -104,9 +95,7 @@ export function EditDvdPage() {
         copiesAvailable: dvd.copiesAvailable,
         available: dvd.available,
         genresIdentifiers: genreIds as string[],
-        posterImage: dvd.posterUrl
-          ? `https://localhost:4443${dvd.posterUrl}`
-          : undefined,
+        posterImage: dvd.posterUrl ? `${STATIC_BASE_URL}${dvd.posterUrl}` : undefined,
       });
     }
   }, [dvd, genres, form]);
@@ -116,23 +105,23 @@ export function EditDvdPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        form.setValue("posterImage", reader.result as string);
+        form.setValue('posterImage', reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const posterImageValue = form.watch("posterImage");
+  const posterImageValue = form.watch('posterImage');
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const payload: Partial<DvdDto> = {
       ...values,
-      directors: values.directors.split(",").map((d) => d.trim()),
+      directors: values.directors.split(',').map((d) => d.trim()),
       genresIdentifiers: values.genresIdentifiers.map(Number),
     };
 
     // Don't send posterImage if it's the original URL
-    if (payload.posterImage?.startsWith("https://")) {
+    if (payload.posterImage?.startsWith('https://')) {
       delete payload.posterImage;
     }
 
@@ -140,7 +129,7 @@ export function EditDvdPage() {
       { id: id!, dvdData: payload },
       {
         onSuccess: () => {
-          navigate("/dashboard");
+          navigate('/dashboard');
         },
       }
     );
@@ -166,9 +155,7 @@ export function EditDvdPage() {
           <Card>
             <CardHeader>
               <CardTitle>Edycja filmu: {dvd?.title}</CardTitle>
-              <CardDescription>
-                Zaktualizuj poniższe pola, aby zmienić dane filmu.
-              </CardDescription>
+              <CardDescription>Zaktualizuj poniższe pola, aby zmienić dane filmu.</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...form}>
@@ -204,9 +191,7 @@ export function EditDvdPage() {
                                   />
                                   <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     <Camera className="w-12 h-12" />
-                                    <p className="mt-2 text-sm font-semibold">
-                                      Zmień okładkę
-                                    </p>
+                                    <p className="mt-2 text-sm font-semibold">Zmień okładkę</p>
                                   </div>
                                 </>
                               ) : (
@@ -289,27 +274,18 @@ export function EditDvdPage() {
                               <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                                 <FormControl>
                                   <Checkbox
-                                    checked={field.value?.includes(
-                                      String(genre.id)
-                                    )}
+                                    checked={field.value?.includes(String(genre.id))}
                                     onCheckedChange={(checked) => {
                                       const genreIdStr = String(genre.id);
                                       return checked
-                                        ? field.onChange([
-                                            ...(field.value ?? []),
-                                            genreIdStr,
-                                          ])
+                                        ? field.onChange([...(field.value ?? []), genreIdStr])
                                         : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== genreIdStr
-                                            )
+                                            field.value?.filter((value) => value !== genreIdStr)
                                           );
                                     }}
                                   />
                                 </FormControl>
-                                <FormLabel className="font-normal">
-                                  {genre.name}
-                                </FormLabel>
+                                <FormLabel className="font-normal">{genre.name}</FormLabel>
                               </FormItem>
                             )}
                           />
@@ -380,10 +356,7 @@ export function EditDvdPage() {
                           <FormItem className="flex flex-col pt-2">
                             <FormLabel className="mb-2">Dostępność</FormLabel>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -391,20 +364,11 @@ export function EditDvdPage() {
                       />
                     </div>
                     <div className="flex justify-end gap-2 pt-4">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => navigate(-1)}
-                      >
+                      <Button type="button" variant="outline" onClick={() => navigate(-1)}>
                         Anuluj
                       </Button>
-                      <Button
-                        type="submit"
-                        disabled={updateDvdMutation.isPending}
-                      >
-                        {updateDvdMutation.isPending
-                          ? "Zapisywanie..."
-                          : "Zapisz zmiany"}
+                      <Button type="submit" disabled={updateDvdMutation.isPending}>
+                        {updateDvdMutation.isPending ? 'Zapisywanie...' : 'Zapisz zmiany'}
                       </Button>
                     </div>
                   </div>

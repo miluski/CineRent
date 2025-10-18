@@ -1,30 +1,29 @@
-import { DashboardHeader } from "@/components/DashboardHeader";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/contexts/AuthContext";
-import { useGetDvds } from "@/hooks/queries/useGetDvds";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { DashboardHeader } from '@/components/DashboardHeader';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { STATIC_BASE_URL } from '@/config/constants';
+import { useAuth } from '@/contexts/AuthContext';
+import { useGetDvds } from '@/hooks/queries/useGetDvds';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function DvdCardSkeleton() {
-  return (
-    <Skeleton className="group relative rounded-lg overflow-hidden shadow-lg aspect-[2/3]" />
-  );
+  return <Skeleton className="group relative rounded-lg overflow-hidden shadow-lg aspect-[2/3]" />;
 }
 
 export function DashboardPage() {
   const { isAdmin } = useAuth();
 
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
-  const [searchPhrase, setSearchPhrase] = useState("");
+  const [searchPhrase, setSearchPhrase] = useState('');
 
   const {
     data: dvds,
     isLoading,
     isError,
   } = useGetDvds({
-    "genres-ids": selectedGenres.length > 0 ? selectedGenres : undefined,
-    "search-phrase": searchPhrase || undefined,
+    'genres-ids': selectedGenres.length > 0 ? selectedGenres : undefined,
+    'search-phrase': searchPhrase || undefined,
   });
 
   const handleGenreChange = (genreId: number, checked: boolean) => {
@@ -39,10 +38,7 @@ export function DashboardPage() {
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <DashboardSidebar
-        selectedGenres={selectedGenres}
-        onGenreChange={handleGenreChange}
-      />
+      <DashboardSidebar selectedGenres={selectedGenres} onGenreChange={handleGenreChange} />
       <div className="flex flex-col">
         <DashboardHeader
           searchPhrase={searchPhrase}
@@ -52,10 +48,7 @@ export function DashboardPage() {
         />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 fill-mode-backwards">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {isLoading &&
-              Array.from({ length: 8 }).map((_, i) => (
-                <DvdCardSkeleton key={i} />
-              ))}
+            {isLoading && Array.from({ length: 8 }).map((_, i) => <DvdCardSkeleton key={i} />)}
             {isError && <p>Error fetching data.</p>}
             {dvds?.map((dvd) => (
               <div
@@ -67,7 +60,7 @@ export function DashboardPage() {
                   {dvd.posterUrl ? (
                     <img
                       draggable={false}
-                      src={`https://localhost:4443${dvd.posterUrl}`}
+                      src={`${STATIC_BASE_URL}${dvd.posterUrl}`}
                       alt={dvd.title}
                       className="w-full h-full object-cover select-none"
                     />
@@ -85,34 +78,26 @@ export function DashboardPage() {
                     {/* Director/Year Info */}
                     <div className="text-white mb-2">
                       <p className="text-sm font-medium text-gray-300">
-                        {dvd.directors?.join(", ") || "Unknown Director"}
+                        {dvd.directors?.join(', ') || 'Unknown Director'}
                       </p>
-                      <p className="text-sm text-gray-400">
-                        {dvd.releaseYear || "Unknown Year"}
-                      </p>
+                      <p className="text-sm text-gray-400">{dvd.releaseYear || 'Unknown Year'}</p>
                     </div>
 
                     {/* Title */}
-                    <h3 className="text-white font-bold text-lg mb-1 line-clamp-2">
-                      {dvd.title}
-                    </h3>
+                    <h3 className="text-white font-bold text-lg mb-1 line-clamp-2">{dvd.title}</h3>
 
                     {/* Genre */}
                     <p className="text-yellow-400 text-sm font-medium mb-3">
-                      {dvd.genres?.join(", ") || "Genre"}
+                      {dvd.genres?.join(', ') || 'Genre'}
                     </p>
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-2 ">
                       <Link
-                        to={
-                          isAdmin
-                            ? `/admin/dvd/edit/${dvd.id}`
-                            : `/dvd/${dvd.id}`
-                        }
+                        to={isAdmin ? `/admin/dvd/edit/${dvd.id}` : `/dvd/${dvd.id}`}
                         className="bg-white text-black px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-200 transition-colors text-center w-full"
                       >
-                        {isAdmin ? "Edytuj" : "Sprawdź"}
+                        {isAdmin ? 'Edytuj' : 'Sprawdź'}
                       </Link>
                     </div>
                   </div>
