@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Loader } from "lucide-react";
+import { Download, Loader } from "lucide-react";
 import { toast } from "sonner";
 
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
@@ -121,35 +122,60 @@ export const TransactionsHistoryPage = () => {
                   <TableCell>{transaction.totalAmount.toFixed(2)} zł</TableCell>
                   <TableCell className="flex justify-end">
                     {transaction.billType && (
-                      <Select
-                        onValueChange={(value) =>
-                          handleDownloadBill(
-                            transaction.id,
-                            value,
-                            transaction.invoiceId
-                          )
-                        }
-                        disabled={downloadingId === transaction.id}
-                      >
-                        <SelectTrigger className="w-[180px]">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-[180px]"
+                            disabled={downloadingId === transaction.id}
+                          >
+                            {downloadingId === transaction.id ? (
+                              <>
+                                <Loader className="mr-2 size-4 animate-spin" />
+                                Pobieranie...
+                              </>
+                            ) : (
+                              <>
+                                <Download className="mr-2 size-4" />
+                                Pobierz dokument
+                              </>
+                            )}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
                           {downloadingId === transaction.id ? (
-                            <>
-                              <Loader className="mr-2 size-4 animate-spin" />
-                              Pobieranie...
-                            </>
+                            <DropdownMenuItem disabled>
+                              <Loader className="mr-2 h-4 w-4 animate-spin" />
+                              <span>Pobieranie...</span>
+                            </DropdownMenuItem>
                           ) : (
-                            <SelectValue placeholder="Pobierz dokument" />
+                            <>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleDownloadBill(
+                                    transaction.id,
+                                    "INVOICE",
+                                    transaction.invoiceId
+                                  )
+                                }
+                              >
+                                Pobierz Fakturę
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleDownloadBill(
+                                    transaction.id,
+                                    "RECEIPT",
+                                    transaction.invoiceId
+                                  )
+                                }
+                              >
+                                Pobierz Paragon
+                              </DropdownMenuItem>
+                            </>
                           )}
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="INVOICE">
-                            Pobierz Fakturę
-                          </SelectItem>
-                          <SelectItem value="RECEIPT">
-                            Pobierz Paragon
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     )}
                   </TableCell>
                 </TableRow>
