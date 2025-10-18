@@ -17,7 +17,10 @@ import { AddDvdPage } from "./pages/AddDvdPage";
 import { EditDvdPage } from "./pages/EditDvdPage";
 import { RentDvdPage } from "./pages/RentDvdPage";
 import { UserReservationsPage } from "./pages/UserReservationsPage";
+import { RentalsPage } from "./pages/RentalsPage";
+import { TransactionsHistoryPage } from "./pages/TransactionsHistoryPage";
 import { ReservationManagementPage } from "./pages/ReservationManagementPage";
+import { RecommendationsPage } from "./pages/RecommendationsPage";
 
 const queryClient = new QueryClient();
 
@@ -46,8 +49,12 @@ const AppRoutes = () => {
         <Route path="/dvd/:id" element={<RentDvdPage />} />
 
         <Route path="/reservations" element={<UserReservationsPage />} />
-        <Route path="/recommendations" element={<div />} />
-        <Route path="/transactions" element={<div />} />
+        <Route path="/rentals" element={<RentalsPage />} />
+        <Route path="/recommendations" element={<RecommendationsPage />} />
+        <Route
+          path="/transactions-history"
+          element={<TransactionsHistoryPage />}
+        />
 
         {/* Admin Routes */}
         <Route path="/admin/dvd/create" element={<AddDvdPage />} />

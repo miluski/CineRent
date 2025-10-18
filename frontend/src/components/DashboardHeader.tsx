@@ -3,10 +3,12 @@ import {
   BookUp,
   CircleUser,
   FilePlus,
+  Film,
   History,
   LogOut,
   Menu,
   Search,
+  Sparkles,
   Ticket,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -27,15 +29,27 @@ import { FilterGroup } from "./FilterGroup";
 export function DashboardHeader() {
   const { logout, isAdmin } = useAuth();
   const pathname = useLocation().pathname;
+  const shouldShowFilterGroup =
+    pathname === "/dashboard" || pathname.startsWith("/recommendations");
 
   const userLinks = [
     {
       to: "/reservations",
-      label: "Moje wypożyczenia",
+      label: "Moje rezerwacje",
       icon: <Ticket className="mr-2 h-4 w-4" />,
     },
     {
-      to: "/reservations/history",
+      to: "/rentals",
+      label: "Moje wypożyczenia",
+      icon: <Film className="mr-2 h-4 w-4" />,
+    },
+    {
+      to: "/recommendations",
+      label: "Moje rekomendacje",
+      icon: <Sparkles className="mr-2 h-4 w-4" />,
+    },
+    {
+      to: "/transactions-history",
       label: "Historia wypożyczeń",
       icon: <History className="mr-2 h-4 w-4" />,
     },
@@ -80,7 +94,7 @@ export function DashboardHeader() {
         </SheetContent>
       </Sheet>
       <div className="w-full flex-1">
-        {pathname === "/dashboard" && (
+        {shouldShowFilterGroup && (
           <form>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

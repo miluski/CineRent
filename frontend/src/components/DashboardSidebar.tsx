@@ -3,6 +3,8 @@ import { FilterGroup } from "./FilterGroup";
 
 export function DashboardSidebar() {
   const pathname = useLocation().pathname;
+  const shouldShowFilterGroup =
+    pathname === "/dashboard" || pathname.startsWith("/recommendations");
 
   return (
     <div className="hidden border-r bg-muted/40 md:block">
@@ -19,7 +21,7 @@ export function DashboardSidebar() {
         </div>
         <div className="flex-1">
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            {pathname === "/dashboard" && <FilterGroup />}
+            {shouldShowFilterGroup && <FilterGroup />}
           </nav>
         </div>
       </div>
