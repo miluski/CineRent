@@ -10,9 +10,9 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   adminOnly = false,
 }) => {
-  const { isAdmin, isLoading } = useAuth();
+  const { isAdmin, isLoading, isAdminStatusLoading } = useAuth();
 
-  if (isLoading) {
+  if (isLoading || isAdminStatusLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner className="size-10 text-primary" />
@@ -20,7 +20,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  if (adminOnly && !isAdmin) {
+  if (adminOnly && !isAdmin && !isAdminStatusLoading) {
     return <Navigate to="/login" replace />;
   }
 

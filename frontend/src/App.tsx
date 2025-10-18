@@ -21,6 +21,7 @@ import { RentalsPage } from "./pages/RentalsPage";
 import { TransactionsHistoryPage } from "./pages/TransactionsHistoryPage";
 import { ReservationManagementPage } from "./pages/ReservationManagementPage";
 import { RecommendationsPage } from "./pages/RecommendationsPage";
+import { ReturnRequestsPage } from "./pages/ReturnRequestsPage";
 
 const queryClient = new QueryClient();
 
@@ -43,11 +44,11 @@ const AppRoutes = () => {
       />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/dvd/:id" element={<RentDvdPage />} />
-
         <Route path="/reservations" element={<UserReservationsPage />} />
         <Route path="/rentals" element={<RentalsPage />} />
         <Route path="/recommendations" element={<RecommendationsPage />} />
@@ -55,14 +56,16 @@ const AppRoutes = () => {
           path="/transactions-history"
           element={<TransactionsHistoryPage />}
         />
+      </Route>
 
-        {/* Admin Routes */}
+      <Route element={<ProtectedRoute adminOnly />}>
         <Route path="/admin/dvd/create" element={<AddDvdPage />} />
         <Route path="/admin/dvd/edit/:id" element={<EditDvdPage />} />
         <Route
           path="/admin/reservations"
           element={<ReservationManagementPage />}
         />
+        <Route path="/admin/returns" element={<ReturnRequestsPage />} />
       </Route>
     </Routes>
   );

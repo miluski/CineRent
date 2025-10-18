@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   isAdmin: boolean;
+  isAdminStatusLoading: boolean;
   isLoading: boolean;
   login: (values: LoginRequestDto) => Promise<void>;
   logout: () => void;
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminStatusLoading, setIsAdminStatusLoading] = useState(true);
 
   const navigate = useNavigate();
   const loginMutation = useLogin();
@@ -38,23 +40,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   } = useGetUser();
 
   const checkAdminStatus = useCallback(async () => {
+    setIsAdminStatusLoading(true);
     try {
       await axiosInstance.get("/transactions/all");
       setIsAdmin(true);
     } catch (error) {
       console.error("Admin check failed", error);
       setIsAdmin(false);
+    } finally {
+      setIsAdminStatusLoading(false);
     }
   }, []);
 
   useEffect(() => {
     if (isUserSuccess && user) {
       checkAdminStatus();
-    } else if (isError) {
+    } else if (isError || (!isUserLoading && !user)) {
       setIsAdmin(false);
+      setIsAdminStatusLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isUserSuccess]);
+  }, [isUserSuccess, user, isError, isUserLoading, checkAdminStatus]);
 
   const login = async (values: LoginRequestDto) => {
     try {
@@ -86,6 +91,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const value = {
     isAdmin,
+    isAdminStatusLoading,
     isLoading: isUserLoading,
     login,
     logout,

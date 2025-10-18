@@ -22,8 +22,8 @@ import { Label } from "@/components/ui/label";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { toast } from "sonner";
-import { DatePicker } from "./date-picker";
 import { addDays } from "date-fns";
+import { DatePicker } from "@/components/DatePicker";
 
 export function RentDvdPage() {
   const { id } = useParams<{ id: string }>();

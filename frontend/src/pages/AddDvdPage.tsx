@@ -38,12 +38,20 @@ import { Switch } from "@/components/ui/switch";
 const formSchema = z.object({
   title: z
     .string()
-    .min(1, "Tytuł jest wymagany.")
-    .max(100, "Tytuł nie może być dłuższy niż 100 znaków."),
+    .min(5, "Tytuł musi mieć co najmniej 5 znaków.")
+    .max(75, "Tytuł nie może być dłuższy niż 75 znaków."),
   directors: z
     .string()
     .min(1, "Reżyser jest wymagany.")
-    .max(100, "Pole 'Reżyser' nie może być dłuższe niż 100 znaków."),
+    .max(100, "Pole 'Reżyser' nie może być dłuższe niż 100 znaków.")
+    .refine(
+      (value) =>
+        value.split(",").every((director) => director.trim().length >= 10),
+      {
+        message:
+          "Każde imię i nazwisko reżysera musi mieć co najmniej 10 znaków.",
+      }
+    ),
   releaseYear: z.coerce
     .number<number>()
     .min(1888, "Rok produkcji musi być po 1888.")
@@ -53,8 +61,8 @@ const formSchema = z.object({
     ),
   description: z
     .string()
-    .min(10, "Opis musi mieć co najmniej 10 znaków.")
-    .max(1000, "Opis nie może być dłuższy niż 1000 znaków."),
+    .min(25, "Opis musi mieć co najmniej 25 znaków.")
+    .max(500, "Opis nie może być dłuższy niż 500 znaków."),
   durationMinutes: z.coerce
     .number<number>()
     .min(1, "Czas trwania musi być większy od 0."),
@@ -203,7 +211,7 @@ export function AddDvdPage() {
                             <FormControl>
                               <Input placeholder="Wpisz tytuł" {...field} />
                             </FormControl>
-                            <FormMessage className="h-5" />
+                            <FormMessage className="h-8" />
                           </FormItem>
                         )}
                       />
