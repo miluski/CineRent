@@ -1,7 +1,7 @@
 package pl.kielce.tu.backend.service.rental.calculation;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import org.springframework.stereotype.Component;
@@ -20,9 +20,9 @@ public class LateFeeCalculationService {
     public BigDecimal calculateLateFee(Rental rental) {
         logStart(rental);
 
-        Date returnDate = rental.getReturnDate();
-        Date dueDate = rental.getRentalEnd();
-        
+        LocalDateTime returnDate = rental.getReturnDate();
+        LocalDateTime dueDate = rental.getRentalEnd();
+
         if (isReturnOnTime(returnDate, dueDate)) {
             logOnTimeCompletion(rental);
             return BigDecimal.ZERO;
@@ -56,12 +56,13 @@ public class LateFeeCalculationService {
                         rental.getId(), overdueDays, lateFee));
     }
 
-    private boolean isReturnOnTime(Date returnDate, Date dueDate) {
+    private boolean isReturnOnTime(LocalDateTime returnDate, LocalDateTime dueDate) {
         return returnDate.compareTo(dueDate) <= 0;
     }
 
-    private long calculateOverdueDays(Date returnDate, Date dueDate) {
-        return ChronoUnit.DAYS.between(dueDate.toLocalDate(), returnDate.toLocalDate());
+    private long calculateOverdueDays(LocalDateTime returnDate, LocalDateTime dueDate) {
+        long overdueHours = ChronoUnit.HOURS.between(dueDate, returnDate);
+        return (long) Math.ceil(overdueHours / 24.0);
     }
 
     private BigDecimal getBasisPricePerDay(Rental rental) {

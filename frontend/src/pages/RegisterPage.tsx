@@ -73,7 +73,6 @@ export function RegisterPage() {
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
       <Meteors />
-      {/* Left section - Background image with branding */}
       <div
         className="relative w-full md:w-1/2 bg-slate-900 text-white p-8 flex flex-col bg-cover bg-center"
         style={{
@@ -81,22 +80,17 @@ export function RegisterPage() {
             "linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('/auth-overlay.jpg')",
         }}
       >
-        {/* Logo */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold flex items-center animate-pulse select-none">
             <span className="text-indigo-500">O</span>pasRent
           </h1>
         </div>
-
-        {/* Tagline at bottom */}
         <div className="mt-auto mb-24">
           <h2 className="text-2xl md:text-4xl font-bold leading-snug">
             "Twoje wszystkie filmy, które szukasz bez szukania."
           </h2>
         </div>
       </div>
-
-      {/* Right section - Registration form */}
       <div className="w-full md:w-1/2 bg-white p-8 flex items-center justify-center">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center">
@@ -202,15 +196,11 @@ export function RegisterPage() {
               </ConfettiButton>
             </form>
           </Form>
-
-          {/* Divider */}
           <div className="relative flex items-center">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="flex-shrink mx-4 text-gray-500 text-sm">lub</span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
-
-          {/* Login button */}
           <Link to="/login" className="block w-full">
             <Button
               variant="outline"

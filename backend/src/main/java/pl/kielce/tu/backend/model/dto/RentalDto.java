@@ -1,6 +1,5 @@
 package pl.kielce.tu.backend.model.dto;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,18 +23,18 @@ public class RentalDto {
     @Schema(description = "Unique identifier of the rental", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
-    @NotNull(message = "Rental start date is required")
-    @FutureOrPresent(message = "Rental start date must be in the present or future")
-    @Schema(description = "Start date of the rental period", example = "2024-01-15", required = true)
-    private Date rentalStart;
+    @NotNull(message = "Rental start date and time is required")
+    @FutureOrPresent(message = "Rental start date and time must be in the present or future")
+    @Schema(description = "Start date and time of the rental period", example = "2024-01-15T10:00:00", required = true)
+    private LocalDateTime rentalStart;
 
-    @NotNull(message = "Rental end date is required")
-    @Future(message = "Rental end date must be in the future")
-    @Schema(description = "End date of the rental period", example = "2024-01-22", required = true)
-    private Date rentalEnd;
+    @NotNull(message = "Rental end date and time is required")
+    @Future(message = "Rental end date and time must be in the future")
+    @Schema(description = "End date and time of the rental period", example = "2024-01-22T10:00:00", required = true)
+    private LocalDateTime rentalEnd;
 
-    @Schema(description = "Actual return date of the rental", example = "2024-01-20")
-    private Date returnDate;
+    @Schema(description = "Actual return date and time of the rental", example = "2024-01-20T14:30:00")
+    private LocalDateTime returnDate;
 
     @Schema(description = "Creation timestamp of the rental", example = "2024-01-10T10:30:00", accessMode = Schema.AccessMode.READ_ONLY)
     private LocalDateTime createdAt;
@@ -55,5 +54,5 @@ public class RentalDto {
 
     @Schema(description = "Current status of the rental", example = "ACTIVE", accessMode = Schema.AccessMode.READ_ONLY)
     private RentalStatus status;
-    
+
 }

@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -106,8 +106,8 @@ class ReservationServiceTest {
 
         ReservationDto dto = new ReservationDto();
         dto.setDvdId(11L);
-        dto.setRentalStart(new Date(System.currentTimeMillis()));
-        dto.setRentalEnd(new Date(System.currentTimeMillis() + 1000L));
+        dto.setRentalStart(LocalDateTime.now());
+        dto.setRentalEnd(LocalDateTime.now().plusDays(7));
         dto.setCount(1);
 
         User user = mock(User.class);

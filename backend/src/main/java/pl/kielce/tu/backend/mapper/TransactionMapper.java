@@ -24,7 +24,7 @@ public class TransactionMapper {
             BigDecimal lateFee, BigDecimal totalAmount) {
         return Transaction.builder()
                 .invoiceId(generateInvoiceId())
-                .billType(BillType.RECEIPT)
+                .billType(rental.getReturnDate() != null ? BillType.RECEIPT : null)
                 .dvdTitle(rental.getDvd().getTitle())
                 .rentalPeriodDays((int) rentalDays)
                 .pricePerDay(calculatePricePerDay(baseAmount, rentalDays))
@@ -35,6 +35,9 @@ public class TransactionMapper {
     }
 
     private BigDecimal calculatePricePerDay(BigDecimal baseAmount, long rentalDays) {
+        if (rentalDays == 0) {
+            return BigDecimal.ZERO;
+        }
         return baseAmount.divide(BigDecimal.valueOf(rentalDays));
     }
 
@@ -64,7 +67,7 @@ public class TransactionMapper {
                 .totalAmount(transaction.getTotalAmount())
                 .generatedAt(transaction.getGeneratedAt())
                 .pdfUrl(transaction.getPdfUrl())
-                .billType(transaction.getBillType())
+                .billType(rental.getReturnDate() != null ? transaction.getBillType() : null)
                 .rentalId(rental.getId())
                 .build();
     }

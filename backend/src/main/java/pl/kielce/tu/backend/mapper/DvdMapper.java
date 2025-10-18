@@ -18,6 +18,7 @@ public class DvdMapper {
             return null;
         }
 
+        String statusValue = determineStatus(dvd);
         return DvdDto.builder()
                 .id(dvd.getId())
                 .title(dvd.getTitle())
@@ -26,7 +27,8 @@ public class DvdMapper {
                 .releaseYear(dvd.getReleaseYear())
                 .directors(dvd.getDirectors())
                 .rentalPricePerDay(dvd.getRentalPricePerDay())
-                .availabilityStatus(determineStatus(dvd))
+                .status(statusValue)
+                .availabilityStatus(statusValue)
                 .build();
     }
 

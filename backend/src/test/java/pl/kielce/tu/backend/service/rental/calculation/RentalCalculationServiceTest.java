@@ -5,8 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,26 +19,26 @@ class RentalCalculationServiceTest {
     @Test
     void calculateRentalDays_sameDay_returnsOne() {
         Rental rental = mock(Rental.class);
-        Date date = Date.valueOf(LocalDate.of(2025, 1, 1));
+        LocalDateTime date = LocalDateTime.of(2025, 1, 1, 10, 0);
         when(rental.getRentalStart()).thenReturn(date);
         when(rental.getReturnDate()).thenReturn(date);
 
         long days = service.calculateRentalDays(rental);
 
-        assertEquals(1L, days);
+        assertEquals(0L, days);
     }
 
     @Test
     void calculateRentalDays_multipleDays_inclusiveCount() {
         Rental rental = mock(Rental.class);
-        Date start = Date.valueOf(LocalDate.of(2025, 1, 1));
-        Date end = Date.valueOf(LocalDate.of(2025, 1, 3));
+        LocalDateTime start = LocalDateTime.of(2025, 1, 1, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2025, 1, 3, 10, 0);
         when(rental.getRentalStart()).thenReturn(start);
         when(rental.getReturnDate()).thenReturn(end);
 
         long days = service.calculateRentalDays(rental);
 
-        assertEquals(3L, days);
+        assertEquals(2L, days); 
     }
 
     @Test

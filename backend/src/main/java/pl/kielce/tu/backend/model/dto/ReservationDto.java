@@ -1,6 +1,5 @@
 package pl.kielce.tu.backend.model.dto;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,12 +26,12 @@ public class ReservationDto {
     @NotNull(message = "Reservation start date is required")
     @FutureOrPresent(message = "Reservation start date must be in the present or future")
     @Schema(description = "Start date of the reservation period", example = "2024-01-15", required = true)
-    private Date rentalStart;
+    private LocalDateTime rentalStart;
 
     @NotNull(message = "Reservation end date is required")
     @Future(message = "Reservation end date must be in the future")
     @Schema(description = "End date of the reservation period", example = "2024-01-22", required = true)
-    private Date rentalEnd;
+    private LocalDateTime rentalEnd;
 
     @Schema(description = "Creation timestamp of the reservation", example = "2024-01-10T10:30:00", accessMode = Schema.AccessMode.READ_ONLY)
     private LocalDateTime createdAt;

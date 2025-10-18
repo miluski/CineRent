@@ -34,7 +34,6 @@ import { useGetAllGenres } from "@/hooks/queries/useGetAllGenres";
 import { DashboardHeader } from "../components/DashboardHeader";
 import { Switch } from "@/components/ui/switch";
 
-// Define schema with required available (no ?)
 const formSchema = z.object({
   title: z
     .string()
@@ -73,7 +72,7 @@ const formSchema = z.object({
   copiesAvailable: z.coerce
     .number<number>()
     .min(0, "Liczba kopii nie może być ujemna."),
-  available: z.boolean(), // required boolean no optional
+  available: z.boolean(), 
   genresIdentifiers: z
     .array(z.string())
     .nonempty("Musisz wybrać co najmniej jeden gatunek."),
@@ -96,7 +95,7 @@ export function AddDvdPage() {
       genresIdentifiers: [],
       durationMinutes: 120,
       copiesAvailable: 1,
-      available: true, // must match non-optional boolean
+      available: true,
     },
   });
 
@@ -116,8 +115,8 @@ export function AddDvdPage() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const payload = {
       ...values,
-      directors: values.directors.split(",").map((d) => d.trim()), // convert string to array
-      genresIdentifiers: values.genresIdentifiers.map(Number), // convert string[] to number[]
+      directors: values.directors.split(",").map((d) => d.trim()),
+      genresIdentifiers: values.genresIdentifiers.map(Number),
     };
     createDvdMutation.mutate(payload, {
       onSuccess: () => {
@@ -154,7 +153,6 @@ export function AddDvdPage() {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="grid grid-cols-1 gap-8 md:grid-cols-3"
                 >
-                  {/* Column for poster image */}
                   <div className="md:col-span-1">
                     <FormField
                       control={form.control}
@@ -198,8 +196,6 @@ export function AddDvdPage() {
                       )}
                     />
                   </div>
-
-                  {/* Form fields column */}
                   <div className="space-y-4 md:col-span-2">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <FormField

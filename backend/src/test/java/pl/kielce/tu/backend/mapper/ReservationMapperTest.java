@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -29,8 +27,8 @@ class ReservationMapperTest {
     void toDto_mapsAllFieldsCorrectly() {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
-        Date start = Date.valueOf(LocalDate.of(2023, 1, 2));
-        Date end = Date.valueOf(LocalDate.of(2023, 1, 5));
+        LocalDateTime start = LocalDateTime.of(2023, 1, 2, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2023, 1, 5, 18, 0);
         LocalDateTime created = LocalDateTime.of(2022, 12, 31, 12, 0);
         reservation.setRentalStart(start);
         reservation.setRentalEnd(end);

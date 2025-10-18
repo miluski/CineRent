@@ -33,12 +33,10 @@ export type ConfettiRef = Api | null;
 
 const ConfettiContext = createContext<Api>({} as Api);
 
-// Define component first
 const ConfettiComponent = forwardRef<ConfettiRef, Props>((props, ref) => {
   const {
     options,
     globalOptions = { resize: true, useWorker: true },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     manualstart = false,
     active,
     children,
@@ -106,10 +104,8 @@ const ConfettiComponent = forwardRef<ConfettiRef, Props>((props, ref) => {
   );
 });
 
-// Set display name immediately
 ConfettiComponent.displayName = "Confetti";
 
-// Export as Confetti
 export const Confetti = ConfettiComponent;
 
 interface ConfettiButtonProps extends React.ComponentProps<"button"> {
@@ -151,7 +147,6 @@ const ConfettiButtonComponent = ({
   }, [active, fire]);
 
   const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    // Fire on click only if not controlled by `active` prop
     if (active === undefined) {
       await fire();
     }

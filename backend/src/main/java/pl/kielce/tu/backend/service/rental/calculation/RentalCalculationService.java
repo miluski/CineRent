@@ -1,7 +1,7 @@
 package pl.kielce.tu.backend.service.rental.calculation;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import org.springframework.stereotype.Component;
@@ -12,10 +12,10 @@ import pl.kielce.tu.backend.model.entity.Rental;
 public class RentalCalculationService {
 
     public long calculateRentalDays(Rental rental) {
-        Date startDate = rental.getRentalStart();
-        Date endDate = rental.getReturnDate();
-
-        return ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate()) + 1;
+        LocalDateTime startDate = rental.getRentalStart();
+        LocalDateTime endDate = rental.getReturnDate();
+        long hours = ChronoUnit.HOURS.between(startDate, endDate);
+        return (long) Math.ceil(hours / 24.0);
     }
 
     public BigDecimal calculateBaseAmount(Rental rental, long rentalDays) {

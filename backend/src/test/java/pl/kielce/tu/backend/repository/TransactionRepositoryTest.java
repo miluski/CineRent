@@ -2,6 +2,7 @@ package pl.kielce.tu.backend.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -12,11 +13,16 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import pl.kielce.tu.backend.model.constant.BillType;
+import pl.kielce.tu.backend.model.constant.RankType;
+import pl.kielce.tu.backend.model.constant.RentalStatus;
+import pl.kielce.tu.backend.model.entity.Dvd;
 import pl.kielce.tu.backend.model.entity.Rental;
 import pl.kielce.tu.backend.model.entity.Transaction;
 import pl.kielce.tu.backend.model.entity.User;
@@ -30,14 +36,14 @@ class TransactionRepositoryTest {
     private TransactionRepository repository;
 
     @Autowired
-    private org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager em;
+    private TestEntityManager em;
 
     private User createUser(String name) {
         User u = new User();
         u.setNickname(name);
         u.setPassword("password");
         u.setAge(25);
-        u.setRank(pl.kielce.tu.backend.model.constant.RankType.USER);
+        u.setRank(RankType.USER);
         em.persist(u);
         em.flush();
         return u;
@@ -48,17 +54,16 @@ class TransactionRepositoryTest {
                 .invoiceId("INV-" + System.nanoTime())
                 .dvdTitle("Test DVD")
                 .rentalPeriodDays(7)
-                .pricePerDay(java.math.BigDecimal.valueOf(5.00))
-                .lateFee(java.math.BigDecimal.ZERO)
-                .totalAmount(java.math.BigDecimal.valueOf(35.00))
+                .pricePerDay(BigDecimal.valueOf(5.00))
+                .lateFee(BigDecimal.ZERO)
+                .totalAmount(BigDecimal.valueOf(35.00))
                 .generatedAt(generatedAt)
-                .billType(pl.kielce.tu.backend.model.constant.BillType.RECEIPT)
+                .billType(BillType.RECEIPT)
                 .build();
     }
 
     private Rental createRental(User user, Transaction tx) {
-        // Create a test DVD
-        pl.kielce.tu.backend.model.entity.Dvd dvd = new pl.kielce.tu.backend.model.entity.Dvd();
+        Dvd dvd = new Dvd();
         dvd.setTitle("Test DVD");
         dvd.setDescription("Test Description");
         dvd.setReleaseYear(2020);
@@ -67,19 +72,19 @@ class TransactionRepositoryTest {
         dvd.setCopiesAvalaible(5);
         dvd.setRentalPricePerDay(5.00f);
         dvd.setPosterUrl("test-poster.jpg");
-        dvd.setDirectors(java.util.List.of("Test Director"));
-        dvd.setAddedAt(java.time.LocalDateTime.now());
+        dvd.setDirectors(List.of("Test Director"));
+        dvd.setAddedAt(LocalDateTime.now());
         em.persist(dvd);
 
         Rental r = Rental.builder()
                 .user(user)
                 .dvd(dvd)
                 .transaction(tx)
-                .rentalStart(java.sql.Date.valueOf("2024-01-01"))
-                .rentalEnd(java.sql.Date.valueOf("2024-01-07"))
-                .createdAt(java.time.LocalDateTime.now())
+                .rentalStart(LocalDateTime.of(2024, 1, 1, 10, 0))
+                .rentalEnd(LocalDateTime.of(2024, 1, 7, 18, 0))
+                .createdAt(LocalDateTime.now())
                 .count(1)
-                .status(pl.kielce.tu.backend.model.constant.RentalStatus.INACTIVE)
+                .status(RentalStatus.INACTIVE)
                 .build();
 
         em.persist(r);
