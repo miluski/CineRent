@@ -4,7 +4,7 @@ services:
     env_file:
       - .env
     ports:
-      - '5432:5432'
+      - '5435:5432'
     networks:
       - cine-rent-network
 
@@ -17,7 +17,7 @@ services:
       - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
       - SPRING_DOCKER_COMPOSE_ENABLED=false
     ports:
-      - '4443:443'
+      - '10443:443'
     volumes:
       - ./logs:/app/logs
       - ./backend:/app

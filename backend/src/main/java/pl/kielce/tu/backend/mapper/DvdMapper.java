@@ -23,6 +23,8 @@ public class DvdMapper {
                 .title(dvd.getTitle())
                 .genres(genreMappingService.mapGenresToNames(dvd.getGenres()))
                 .posterUrl(dvd.getPosterUrl())
+                .releaseYear(dvd.getReleaseYear())
+                .directors(dvd.getDirectors())
                 .rentalPricePerDay(dvd.getRentalPricePerDay())
                 .availabilityStatus(determineStatus(dvd))
                 .build();
