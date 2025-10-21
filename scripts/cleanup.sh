@@ -1,5 +1,9 @@
 #!/bin/bash
+# -*- coding: utf-8 -*-
 set -euo pipefail
+
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
 
 detect_os() {
     case "$OSTYPE" in
@@ -61,12 +65,21 @@ else
 fi
 
 echo "📝 Removing environment configuration..."
-ENV_FILE="$BASE_DIR/.env"
-if [ -f "$ENV_FILE" ]; then
-    rm -f "$ENV_FILE"
-    echo "   ✅ Environment file removed: $ENV_FILE"
+DOCKER_ENV_FILE="$BASE_DIR/.env"
+if [ -f "$DOCKER_ENV_FILE" ]; then
+    rm -f "$DOCKER_ENV_FILE"
+    echo "   ✅ Docker Compose environment file removed: $DOCKER_ENV_FILE"
 else
-    echo "   ℹ️ Environment file not found (already clean)"
+    echo "   ℹ️ Docker Compose environment file not found (already clean)"
+fi
+
+FRONTEND_DIR="$BASE_DIR/frontend"
+FRONTEND_ENV_FILE="$FRONTEND_DIR/.env"
+if [ -f "$FRONTEND_ENV_FILE" ]; then
+    rm -f "$FRONTEND_ENV_FILE"
+    echo "   ✅ Frontend environment file removed: $FRONTEND_ENV_FILE"
+else
+    echo "   ℹ️ Frontend environment file not found (already clean)"
 fi
 
 echo "⚙️ Removing application properties..."

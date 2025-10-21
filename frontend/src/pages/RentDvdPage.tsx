@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { STATIC_BASE_URL } from '@/config/constants';
+import { useCreateReminder } from '@/hooks/mutations/useCreateReminder';
 import { useRentDvd } from '@/hooks/mutations/useRentDvd';
 import { useGetDvdById } from '@/hooks/queries/useGetDvdById';
 import { addDays } from 'date-fns';
@@ -21,6 +22,7 @@ export function RentDvdPage() {
   const { id } = useParams<{ id: string }>();
   const { data: dvd, isLoading, isError, refetch } = useGetDvdById(id!);
   const rentDvdMutation = useRentDvd(() => refetch());
+  const createReminderMutation = useCreateReminder();
 
   const [startDate, setStartDate] = React.useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = React.useState<Date | undefined>(addDays(new Date(), 7));
@@ -46,7 +48,11 @@ export function RentDvdPage() {
   };
 
   const handleNotify = () => {
-    toast.info('Zostaniesz powiadomiony o dostępności filmu za pomocą e-mail.');
+    if (!id) {
+      toast.error('Nie można ustawić powiadomienia dla tego filmu.');
+      return;
+    }
+    createReminderMutation.mutate({ dvdId: Number(id) });
   };
 
   if (isLoading) {
@@ -212,9 +218,17 @@ export function RentDvdPage() {
                       <Button size="lg" disabled className="w-full">
                         Wypożycz
                       </Button>
-                      <Button size="lg" variant="outline" className="w-full" onClick={handleNotify}>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleNotify}
+                        disabled={createReminderMutation.isPending}
+                      >
                         <Bell className="mr-2 size-5" />
-                        Powiadom o dostępności
+                        {createReminderMutation.isPending
+                          ? 'Ustawianie...'
+                          : 'Powiadom o dostępności'}
                       </Button>
                     </div>
                   </div>

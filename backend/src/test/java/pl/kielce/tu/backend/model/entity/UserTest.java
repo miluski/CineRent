@@ -51,8 +51,8 @@ class UserTest {
 
     @Test
     void equalsAndHashCodeForSameFieldValues() {
-        User u1 = new User(3L, "alice", "pw", 28, null, RankType.USER);
-        User u2 = new User(3L, "alice", "pw", 28, null, RankType.USER);
+        User u1 = new User(3L, "alice", "alice@test.com", "pw", 28, null, RankType.USER, false, null, null);
+        User u2 = new User(3L, "alice", "alice@test.com", "pw", 28, null, RankType.USER, false, null, null);
 
         assertEquals(u1, u2);
         assertEquals(u1.hashCode(), u2.hashCode());
@@ -136,10 +136,12 @@ class UserTest {
         Genre genre = Genre.builder().id(1L).name("Drama").build();
         List<Genre> genres = Arrays.asList(genre);
 
-        User user = new User(9L, "constructor", "pwd", 33, genres, RankType.USER);
+        User user = new User(9L, "constructor", "constructor@test.com", "pwd", 33, genres, RankType.USER, false, null,
+                null);
 
         assertEquals(9L, user.getId());
         assertEquals("constructor", user.getNickname());
+        assertEquals("constructor@test.com", user.getEmail());
         assertEquals("pwd", user.getPassword());
         assertEquals(33, user.getAge());
         assertEquals(1, user.getPreferredGenres().size());

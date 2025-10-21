@@ -41,9 +41,11 @@ class TransactionRepositoryTest {
     private User createUser(String name) {
         User u = new User();
         u.setNickname(name);
+        u.setEmail(name + "@test.com");
         u.setPassword("password");
         u.setAge(25);
         u.setRank(RankType.USER);
+        u.setIsVerified(true);
         em.persist(u);
         em.flush();
         return u;

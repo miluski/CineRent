@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -27,6 +28,14 @@ public class UserDto implements Serializable {
     @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Nickname can only contain letters, numbers, underscores, and hyphens")
     @Schema(description = "User's unique nickname used for authentication and identification. Must contain only letters, numbers, underscores, and hyphens", example = "john_doe_123", requiredMode = Schema.RequiredMode.REQUIRED)
     private String nickname;
+
+    @NotBlank(message = "Email is required and cannot be blank")
+    @Email(message = "Email must be a valid email address")
+    @Schema(description = "User's email address for verification and communication", example = "user@example.com", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String email;
+
+    @Schema(description = "Indicates whether the user's email address has been verified", example = "true", accessMode = Schema.AccessMode.READ_ONLY)
+    private Boolean isVerified;
 
     @NotBlank(message = "Password is required and cannot be blank")
     @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")

@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByNickname(String nickname);
 
+    Optional<User> findByEmail(String email);
+
     @Query("SELECT u FROM User u JOIN u.preferredGenres g WHERE g.id = :genreId")
     List<User> findUsersByPreferredGenreId(@Param("genreId") Long genreId);
 

@@ -70,12 +70,16 @@ class UserMapperTest {
         User user = User.builder()
                 .nickname("alice")
                 .password("hidden")
+                .email("alice@example.com")
+                .isVerified(true)
                 .build();
 
         UserDto dto = mapper.toDto(user);
 
         assertNotNull(dto);
         assertEquals("alice", dto.getNickname());
+        assertEquals("alice@example.com", dto.getEmail());
+        assertEquals(true, dto.getIsVerified());
         assertNull(dto.getPassword());
     }
 
@@ -87,7 +91,9 @@ class UserMapperTest {
 
         User user = User.builder()
                 .nickname("FilmLover99")
+                .email("film@example.com")
                 .age(24)
+                .isVerified(false)
                 .preferredGenres(Arrays.asList(comedy, sciFi, action))
                 .build();
 
@@ -98,7 +104,9 @@ class UserMapperTest {
 
         assertNotNull(dto);
         assertEquals("FilmLover99", dto.getNickname());
+        assertEquals("film@example.com", dto.getEmail());
         assertEquals(24, dto.getAge());
+        assertEquals(false, dto.getIsVerified());
         assertNotNull(dto.getPreferredGenres());
         assertEquals(3, dto.getPreferredGenres().size());
         assertTrue(dto.getPreferredGenres().contains("Komedia"));

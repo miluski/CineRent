@@ -40,15 +40,19 @@ class GenreDeletionIntegrationTest {
 
         User user1 = User.builder()
                 .nickname("testuser1")
+                .email("testuser1@test.com")
                 .password("password123")
                 .age(25)
+                .isVerified(true)
                 .preferredGenres(new ArrayList<>(Arrays.asList(actionGenre, comedyGenre)))
                 .build();
 
         User user2 = User.builder()
                 .nickname("testuser2")
+                .email("testuser2@test.com")
                 .password("password456")
                 .age(30)
+                .isVerified(true)
                 .preferredGenres(new ArrayList<>(Arrays.asList(actionGenre)))
                 .build();
 
@@ -80,15 +84,19 @@ class GenreDeletionIntegrationTest {
 
         User user1 = User.builder()
                 .nickname("dramauser1")
+                .email("dramauser1@test.com")
                 .password("password123")
                 .age(25)
+                .isVerified(true)
                 .preferredGenres(new ArrayList<>(Arrays.asList(dramaGenre)))
                 .build();
 
         User user2 = User.builder()
                 .nickname("dramauser2")
+                .email("dramauser2@test.com")
                 .password("password456")
                 .age(30)
+                .isVerified(true)
                 .preferredGenres(new ArrayList<>(Arrays.asList(dramaGenre)))
                 .build();
 

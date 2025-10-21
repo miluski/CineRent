@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import pl.kielce.tu.backend.exception.EmailSendingException;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.mapper.UserMapper;
 import pl.kielce.tu.backend.model.constant.CookieNames;
@@ -17,6 +18,7 @@ import pl.kielce.tu.backend.model.dto.UserDto;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
 import pl.kielce.tu.backend.service.validation.factory.ValidationStrategyFactory;
+import pl.kielce.tu.backend.service.verification.VerificationService;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class AuthService {
     private final CookieService cookieService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationService verificationService;
     private final ValidationStrategyFactory validationFactory;
 
     public ResponseEntity<Void> handleLogin(UserDto userDto, HttpServletResponse httpServletResponse) {
@@ -57,7 +60,10 @@ public class AuthService {
     public ResponseEntity<Void> handleRegister(UserDto userDto) {
         try {
             validateForRegistration(userDto);
-            register(userDto);
+            User user = register(userDto);
+            sendVerificationEmail(user);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (EmailSendingException e) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
@@ -80,13 +86,13 @@ public class AuthService {
         }
     }
 
-    private void register(UserDto userDto) throws ValidationException {
+    private User register(UserDto userDto) throws ValidationException {
         try {
             User user = userMapper.toUser(userDto);
             user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-            userRepository.save(user);
+            return userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("User with this nickname already exists");
+            throw new ValidationException("User with this credentials already exists");
         }
     }
 
@@ -135,6 +141,10 @@ public class AuthService {
         validateForLogin(userDto);
         validationFactory.getStrategy(ValidationStrategyType.AGE).validate(userDto.getAge());
         validationFactory.getStrategy(ValidationStrategyType.GENRE).validate(userDto.getPreferredGenresIdentifiers());
+    }
+
+    private void sendVerificationEmail(User user) {
+        verificationService.generateAndSendVerificationCode(user.getEmail());
     }
 
 }

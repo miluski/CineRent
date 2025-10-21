@@ -1,8 +1,4 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,44 +6,54 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { isAxiosError } from "axios";
-import { Meteors } from "@/components/ui/meteors";
-import { toast } from "sonner";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Meteors } from '@/components/ui/meteors';
+import { useAuth } from '@/contexts/AuthContext';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { isAxiosError } from 'axios';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import * as z from 'zod';
 
 const formSchema = z.object({
-  nickname: z.string().min(3, "Nazwa użytkownika jest za krótka."),
-  password: z.string().min(8, "Hasło jest za krótkie."),
+  nickname: z.string().min(3, 'Nazwa użytkownika jest za krótka.'),
+  password: z.string().min(8, 'Hasło jest za krótkie.'),
 });
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nickname: "",
-      password: "",
+      nickname: '',
+      password: '',
     },
   });
+
+  useEffect(() => {
+    if (location.state?.verified) {
+      toast.success('Email zweryfikowany pomyślnie! Możesz się teraz zalogować.');
+    }
+  }, [location]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoggingIn(true);
     try {
       await login(values);
-      toast.success("Zalogowano pomyślnie!");
-      navigate("/dashboard");
+      toast.success('Zalogowano pomyślnie!');
+      navigate('/dashboard');
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 401) {
-        form.setError("password", {
-          type: "manual",
-          message: "Nieprawidłowa nazwa użytkownika lub hasło.",
+        form.setError('password', {
+          type: 'manual',
+          message: 'Nieprawidłowa nazwa użytkownika lub hasło.',
         });
       }
     } finally {
@@ -120,7 +126,7 @@ export function LoginPage() {
                 className="w-full bg-black hover:bg-gray-800 text-white"
                 disabled={isLoggingIn}
               >
-                {isLoggingIn ? "Logowanie..." : "Zaloguj się"}
+                {isLoggingIn ? 'Logowanie...' : 'Zaloguj się'}
               </Button>
             </form>
           </Form>
@@ -130,10 +136,7 @@ export function LoginPage() {
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
           <Link to="/register" className="block w-full">
-            <Button
-              variant="outline"
-              className="w-full text-black border-black"
-            >
+            <Button variant="outline" className="w-full text-black border-black">
               Utwórz konto
             </Button>
           </Link>

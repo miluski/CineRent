@@ -25,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import pl.kielce.tu.backend.exception.EmailSendingException;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.mapper.UserMapper;
 import pl.kielce.tu.backend.model.constant.CookieNames;
@@ -34,6 +35,7 @@ import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
 import pl.kielce.tu.backend.service.validation.FieldValidationStrategy;
 import pl.kielce.tu.backend.service.validation.factory.ValidationStrategyFactory;
+import pl.kielce.tu.backend.service.verification.VerificationService;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -50,6 +52,8 @@ class AuthServiceTest {
     private UserRepository userRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private VerificationService verificationService;
 
     @InjectMocks
     private AuthService authService;
@@ -76,13 +80,16 @@ class AuthServiceTest {
     void setUp() throws ValidationException {
         userDto = UserDto.builder()
                 .nickname("nick")
+                .email("test@example.com")
                 .password("rawPass")
                 .build();
 
         user = new User();
         user.setId(1L);
         user.setNickname("nick");
+        user.setEmail("test@example.com");
         user.setPassword("encodedPass");
+        user.setIsVerified(true);
 
         nicknameStrategy = mock(FieldValidationStrategy.class);
         passwordStrategy = mock(FieldValidationStrategy.class);
@@ -161,16 +168,18 @@ class AuthServiceTest {
     }
 
     @Test
-    void handleRegister_success_returnsCreated_andSavesUser() throws ValidationException {
+    void handleRegister_success_returnsCreated_andSavesUserAndSendsEmail() throws ValidationException {
         when(userMapper.toUser(userDto)).thenReturn(user);
         when(passwordEncoder.encode("rawPass")).thenReturn("encodedPass");
         when(userRepository.save(user)).thenReturn(user);
+        doNothing().when(verificationService).generateAndSendVerificationCode("test@example.com");
 
         ResponseEntity<Void> responseEntity = authService.handleRegister(userDto);
 
         assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
         verify(passwordEncoder).encode("rawPass");
         verify(userRepository).save(user);
+        verify(verificationService).generateAndSendVerificationCode("test@example.com");
     }
 
     @SuppressWarnings("unchecked")
@@ -193,6 +202,20 @@ class AuthServiceTest {
         ResponseEntity<Void> responseEntity = authService.handleRegister(userDto);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void handleRegister_emailSendingFails_returnsCreated() throws ValidationException {
+        when(userMapper.toUser(userDto)).thenReturn(user);
+        when(passwordEncoder.encode("rawPass")).thenReturn("encodedPass");
+        when(userRepository.save(user)).thenReturn(user);
+        doThrow(new EmailSendingException("Email failed")).when(verificationService)
+                .generateAndSendVerificationCode("test@example.com");
+
+        ResponseEntity<Void> responseEntity = authService.handleRegister(userDto);
+
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        verify(userRepository).save(user);
     }
 
     @Test

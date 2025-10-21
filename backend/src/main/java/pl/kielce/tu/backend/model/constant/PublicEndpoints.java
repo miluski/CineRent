@@ -13,6 +13,8 @@ public enum PublicEndpoints {
     AUTH_LOGIN("/api/v1/auth/login"),
     AUTH_REGISTER("/api/v1/auth/register"),
     AUTH_LOGOUT("/api/v1/auth/logout"),
+    AUTH_REFRESH("/api/v1/auth/refresh-tokens"),
+    VERIFICATION("/api/v1/verification/**"),
     GENRES("/api/v1/genres"),
     API_DOCS("/v3/api-docs/**"),
     API_DOCS_LEGACY("/api-docs/**"),

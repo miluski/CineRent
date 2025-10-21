@@ -197,7 +197,29 @@ springdoc.swagger-ui.enabled=false
 
 ### 3. Development Setup (Docker Compose)
 
-#### 3.1 Run Full Stack
+#### 3.1 Configure Email (Optional but Recommended)
+
+CineRent includes email verification functionality. To enable it, configure Gmail SMTP:
+
+```bash
+./scripts/configure-email.sh
+```
+
+The script will guide you through:
+
+- Setting up Gmail App Password
+- Configuring SMTP settings
+- Updating configuration files
+
+> **📧 Detailed Guide**: See [EMAIL_CONFIGURATION.md](docs/EMAIL_CONFIGURATION.md) for complete setup instructions, troubleshooting, and alternative email providers.
+
+**Quick Gmail Setup:**
+
+1. Enable 2FA: https://myaccount.google.com/security
+2. Generate App Password: https://myaccount.google.com/apppasswords
+3. Run `./scripts/configure-email.sh` and follow prompts
+
+#### 3.2 Run Full Stack
 
 From the project root directory:
 
@@ -211,7 +233,21 @@ This starts:
 - **Frontend**: React development server with hot reload
 - **Database**: PostgreSQL with persistent volume
 
-#### 3.2 Access Services
+#### 3.2 Run Full Stack
+
+From the project root directory:
+
+```bash
+docker compose up --build
+```
+
+This starts:
+
+- **Backend**: Spring Boot application with PostgreSQL
+- **Frontend**: React development server with hot reload
+- **Database**: PostgreSQL with persistent volume
+
+#### 3.3 Access Services
 
 Once running, services are available at:
 
@@ -222,7 +258,7 @@ Once running, services are available at:
 
 > **Note**: Accept SSL certificates in your browser for HTTPS endpoints (self-signed certificates for development)
 
-#### 3.3 Stop Services
+#### 3.4 Stop Services
 
 ```bash
 docker compose down

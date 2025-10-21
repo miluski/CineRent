@@ -96,7 +96,7 @@ export const Pagination = ({
   return (
     <div className="flex items-center justify-between border-t border-gray-700 pt-4 mt-8">
       <div className="text-sm text-gray-400">
-        Showing {startItem} to {endItem} of {totalElements} results
+        Wyświetlanie: {startItem} - {endItem} z {totalElements} wyników
       </div>
       <div className="flex items-center gap-2">
         <Button
@@ -106,7 +106,7 @@ export const Pagination = ({
           className="flex items-center gap-1"
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          Poprzednia
         </Button>
         <div className="flex items-center gap-1">{renderPageNumbers()}</div>
         <Button
@@ -115,7 +115,7 @@ export const Pagination = ({
           disabled={!hasNext}
           className="flex items-center gap-1"
         >
-          Next
+          Następna
           <ChevronRight className="w-4 h-4" />
         </Button>
       </div>

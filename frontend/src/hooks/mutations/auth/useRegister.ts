@@ -1,16 +1,11 @@
-import { axiosInstance } from "@/interceptor";
-import { useMutation } from "@tanstack/react-query";
-
-interface RegisterData {
-  nickname: string;
-  password: string;
-  age: number;
-}
+import { axiosInstance } from '@/interceptor';
+import type { RegisterRequestDto } from '@/interfaces/requests/RegisterRequestDto';
+import { useMutation } from '@tanstack/react-query';
 
 export const useRegister = () => {
   return useMutation({
-    mutationFn: async (data: RegisterData) => {
-      const response = await axiosInstance.post("/auth/register", data);
+    mutationFn: async (data: RegisterRequestDto) => {
+      const response = await axiosInstance.post('/auth/register', data);
       return response.data;
     },
   });
