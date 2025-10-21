@@ -14,18 +14,24 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.mapper.DvdFilterMapper;
 import pl.kielce.tu.backend.mapper.DvdMapper;
+import pl.kielce.tu.backend.mapper.PageMapper;
 import pl.kielce.tu.backend.model.dto.DvdDto;
+import pl.kielce.tu.backend.model.dto.PagedResponseDto;
 import pl.kielce.tu.backend.model.entity.Dvd;
 import pl.kielce.tu.backend.repository.DvdRepository;
-import pl.kielce.tu.backend.service.dvd.filter.DvdFilterService;
+import pl.kielce.tu.backend.repository.specification.DvdSpecification;
 import pl.kielce.tu.backend.service.resource.ResourceService;
 import pl.kielce.tu.backend.util.UserContextLogger;
 
@@ -47,30 +53,43 @@ class DvdServiceTest {
     @Mock
     private DvdFilterMapper dvdFilterMapper;
     @Mock
-    private DvdFilterService dvdFilterService;
+    private PageMapper pageMapper;
+    @Mock
+    private DvdSpecification dvdSpecification;
 
     private DvdService dvdService;
 
     @BeforeEach
     void setUp() {
-        dvdService = new DvdService(dvdMapper, dvdRepository, updateService, dvdFilterMapper, resourceService,
-                dvdFilterService, userContextLogger, validationService);
+        dvdService = new DvdService(dvdMapper, pageMapper, dvdRepository, updateService, dvdFilterMapper,
+                resourceService, dvdSpecification, userContextLogger, validationService);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void handleGetAllDvds_returnsOkWithDtos() {
         Dvd dvd = mock(Dvd.class);
         DvdDto dto = mock(DvdDto.class);
-        when(dvdRepository.findAll()).thenReturn(Arrays.asList(dvd));
-        when(dvdMapper.toDto(dvd)).thenReturn(dto);
+        Page<Dvd> page = new PageImpl<>(Arrays.asList(dvd));
+        when(dvdRepository.findAll(ArgumentMatchers.any(Pageable.class))).thenReturn(page);
+        PagedResponseDto<DvdDto> pagedResponse = PagedResponseDto.<DvdDto>builder()
+                .content(Arrays.asList(dto))
+                .totalElements(1)
+                .totalPages(1)
+                .currentPage(0)
+                .pageSize(20)
+                .build();
+        PagedResponseDto<DvdDto> mockResponse = (PagedResponseDto<DvdDto>) (PagedResponseDto<?>) pagedResponse;
+        when(pageMapper.toPagedResponse(ArgumentMatchers.any(), ArgumentMatchers.any()))
+                .thenAnswer(invocation -> mockResponse);
 
-        ResponseEntity<List<DvdDto>> response = dvdService.handleGetAllDvds();
+        ResponseEntity<PagedResponseDto<DvdDto>> response = dvdService.handleGetAllDvds(0, 20);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        List<DvdDto> body = response.getBody();
+        PagedResponseDto<DvdDto> body = response.getBody();
         assertNotNull(body);
-        assertEquals(1, body.size());
-        assertEquals(dto, body.get(0));
+        assertEquals(1, body.getContent().size());
+        assertEquals(dto, body.getContent().get(0));
         verify(userContextLogger).logUserOperation("GET_ALL_DVDS", "Fetching all DVDs");
     }
 
@@ -176,15 +195,25 @@ class DvdServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void handleGetAllDvdsWithOptionalFilters_noFilters_callsHandleGetAllDvds() {
-        when(dvdRepository.findAll()).thenReturn(Arrays.asList(new Dvd(), new Dvd()));
-        when(dvdMapper.toDto(org.mockito.ArgumentMatchers.any(Dvd.class))).thenReturn(new DvdDto());
-        ResponseEntity<List<DvdDto>> result = dvdService.handleGetAllDvdsWithOptionalFilters(null, null, null);
+        Dvd dvd1 = new Dvd();
+        Dvd dvd2 = new Dvd();
+        Page<Dvd> page = new PageImpl<>(Arrays.asList(dvd1, dvd2));
+        when(dvdRepository.findAll(ArgumentMatchers.any(Pageable.class))).thenReturn(page);
+        PagedResponseDto<DvdDto> mockResponse = (PagedResponseDto<DvdDto>) (PagedResponseDto<?>) PagedResponseDto
+                .<DvdDto>builder().build();
+        when(pageMapper.toPagedResponse(ArgumentMatchers.any(Page.class),
+                ArgumentMatchers.any())).thenReturn(mockResponse);
+
+        ResponseEntity<PagedResponseDto<DvdDto>> result = dvdService.handleGetAllDvdsWithOptionalFilters(null, null,
+                null, 0, 20);
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void handleGetAllDvdsWithOptionalFilters_withFilters_callsHandleGetFilteredDvds() {
         String searchPhrase = "test";
         List<String> genreNames = Arrays.asList("Action");
@@ -192,14 +221,18 @@ class DvdServiceTest {
 
         when(dvdFilterMapper.mapToFilterDto(searchPhrase, genreNames, genreIds))
                 .thenReturn(mock(pl.kielce.tu.backend.model.dto.DvdFilterDto.class));
-        when(dvdRepository.findAll()).thenReturn(Arrays.asList(new Dvd()));
-        when(dvdFilterMapper.hasAnyFilter(org.mockito.ArgumentMatchers.any())).thenReturn(true);
-        when(dvdFilterService.applyFilters(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
-                .thenReturn(Arrays.asList(new Dvd()));
-        when(dvdMapper.toDto(org.mockito.ArgumentMatchers.any(Dvd.class))).thenReturn(new DvdDto());
+        when(dvdSpecification.withFilters(ArgumentMatchers.any()))
+                .thenReturn((root, query, cb) -> cb.conjunction());
+        when(dvdRepository.findAll(ArgumentMatchers.any(org.springframework.data.jpa.domain.Specification.class),
+                ArgumentMatchers.any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Arrays.asList(new Dvd())));
+        PagedResponseDto<DvdDto> mockResponse = (PagedResponseDto<DvdDto>) (PagedResponseDto<?>) PagedResponseDto
+                .<DvdDto>builder().build();
+        when(pageMapper.toPagedResponse(ArgumentMatchers.any(Page.class),
+                ArgumentMatchers.any())).thenReturn(mockResponse);
 
-        ResponseEntity<List<DvdDto>> result = dvdService.handleGetAllDvdsWithOptionalFilters(searchPhrase, genreNames,
-                genreIds);
+        ResponseEntity<PagedResponseDto<DvdDto>> result = dvdService.handleGetAllDvdsWithOptionalFilters(searchPhrase,
+                genreNames, genreIds, 0, 20);
 
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatusCode());

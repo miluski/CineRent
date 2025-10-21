@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,9 +17,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.extractor.ClaimsExtractor;
+import pl.kielce.tu.backend.mapper.PageMapper;
 import pl.kielce.tu.backend.mapper.RecommendationMapper;
 import pl.kielce.tu.backend.model.constant.CookieNames;
 import pl.kielce.tu.backend.model.dto.DvdDto;
+import pl.kielce.tu.backend.model.dto.PagedResponseDto;
 import pl.kielce.tu.backend.model.entity.Dvd;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
@@ -31,6 +36,7 @@ public class RecommendationService {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    private final PageMapper pageMapper;
     private final CookieService cookieService;
     private final UserRepository userRepository;
     private final ClaimsExtractor claimsExtractor;
@@ -38,16 +44,28 @@ public class RecommendationService {
     private final List<RecommendationStrategy> strategies;
     private final RecommendationMapper recommendationMapper;
 
-    public ResponseEntity<List<DvdDto>> handleGetDvdRecommendations(HttpServletRequest request) {
+    public ResponseEntity<PagedResponseDto<DvdDto>> handleGetDvdRecommendations(HttpServletRequest request, int page,
+            int size) {
         try {
             Long userId = extractUserIdFromRequest(request);
             User user = findUserById(userId);
-            List<DvdDto> recommendations = generateRecommendations(user);
-            return ResponseEntity.status(HttpStatus.OK).body(recommendations);
+            List<DvdDto> allRecommendations = generateRecommendations(user);
+            PagedResponseDto<DvdDto> pagedResponse = createPagedResponse(allRecommendations, page, size);
+            return ResponseEntity.status(HttpStatus.OK).body(pagedResponse);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    private PagedResponseDto<DvdDto> createPagedResponse(List<DvdDto> allRecommendations, int page, int size) {
+        int validatedSize = Math.min(size, 20);
+        Pageable pageable = PageRequest.of(page, validatedSize);
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), allRecommendations.size());
+        List<DvdDto> pagedList = allRecommendations.subList(start, end);
+        PageImpl<DvdDto> pageImpl = new PageImpl<>(pagedList, pageable, allRecommendations.size());
+        return pageMapper.toPagedResponse(pageImpl);
     }
 
     private Long extractUserIdFromRequest(HttpServletRequest request) {

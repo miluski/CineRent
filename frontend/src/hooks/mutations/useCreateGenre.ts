@@ -21,7 +21,6 @@ export const useCreateGenre = () => {
       queryClient.setQueryData<GenreDto[]>(["genres"], (oldData) => {
         return oldData ? [...oldData, newGenre] : [newGenre];
       });
-      // Invalidate to ensure data is fresh from the server in the background
       queryClient.invalidateQueries({ queryKey: ["genres"] });
     },
   });

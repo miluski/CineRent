@@ -7,12 +7,7 @@ const getDvdById = async (dvdId: string): Promise<DvdDto> => {
   return data;
 };
 
-/**
- * React Query hook to get a single DVD by its ID.
- *
- * @param dvdId - The ID of the DVD to fetch.
- * @returns The result of the query, providing the DVD data, loading state, and error information.
- */
+
 export const useGetDvdById = (dvdId: string) => {
   return useQuery({
     queryKey: ["dvd", dvdId],

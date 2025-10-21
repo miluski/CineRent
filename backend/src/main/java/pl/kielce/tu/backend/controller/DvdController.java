@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.model.dto.DvdDto;
+import pl.kielce.tu.backend.model.dto.PagedResponseDto;
 import pl.kielce.tu.backend.service.dvd.DvdService;
 
 @RestController
@@ -34,39 +35,44 @@ public class DvdController {
     private final DvdService dvdService;
 
     @GetMapping
-    @Operation(summary = "Get all DVDs with optional filtering", description = """
-            Retrieves a simplified list of all DVDs available in the rental system with optional filtering capabilities. \
+    @Operation(summary = "Get all DVDs with optional filtering and pagination", description = """
+            Retrieves a paginated list of all DVDs available in the rental system with optional filtering capabilities. \
             Returns basic information about each DVD including id, title, genres, and availability status. \
             Supports filtering by search phrase (matches title/description) and genres (by name or ID). \
-            Multiple filters can be combined for more precise results.""", security = {
+            Multiple filters can be combined for more precise results. \
+            Page size is limited to a maximum of 20 elements per page.""", security = {
             @SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of DVDs retrieved successfully", content = @Content(schema = @Schema(example = """
-                    [
-                      {
+            @ApiResponse(responseCode = "200", description = "Paginated list of DVDs retrieved successfully", content = @Content(schema = @Schema(example = """
+                    {
+                      "content": [
+                        {
                           "id": 120,
                           "title": "Incepcja",
                           "genres": ["Sci-Fi", "Action"],
                           "posterUrl": "http://example.com/posters/inception.jpg",
                           "rentalPricePerDay": 5.99,
                           "availabilityStatus": "AVAILABLE"
-                      },
-                      {
-                          "id": 124,
-                          "title": "Powrót do przyszłości",
-                          "genres": ["Sci-Fi"],
-                          "posterUrl": "http://example.com/posters/bttf.jpg",
-                          "rentalPricePerDay": 4.99,
-                          "availabilityStatus": "AVAILABLE"
-                      }
-                    ]"""))),
+                        }
+                      ],
+                      "totalElements": 150,
+                      "totalPages": 8,
+                      "currentPage": 0,
+                      "pageSize": 20,
+                      "first": true,
+                      "last": false,
+                      "hasNext": true,
+                      "hasPrevious": false
+                    }"""))),
             @ApiResponse(responseCode = "500", description = "Internal server error occurred while retrieving DVDs", content = @Content)
     })
-    public ResponseEntity<List<DvdDto>> getAllDvds(
+    public ResponseEntity<PagedResponseDto<DvdDto>> getAllDvds(
             @Parameter(description = "Search phrase to match against DVD title and description", example = "matrix") @RequestParam(name = "search-phrase", required = false) String searchPhrase,
             @Parameter(description = "List of genre names to filter DVDs by", example = "[\"Action\", \"Sci-Fi\"]") @RequestParam(name = "genres-names", required = false) List<String> genreNames,
-            @Parameter(description = "List of genre identifiers to filter DVDs by", example = "[1, 2]") @RequestParam(name = "genres-ids", required = false) List<Long> genreIds) {
-        return dvdService.handleGetAllDvdsWithOptionalFilters(searchPhrase, genreNames, genreIds);
+            @Parameter(description = "List of genre identifiers to filter DVDs by", example = "[1, 2]") @RequestParam(name = "genres-ids", required = false) List<Long> genreIds,
+            @Parameter(description = "Page number (zero-indexed)", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size (max 20)", example = "20") @RequestParam(defaultValue = "20") int size) {
+        return dvdService.handleGetAllDvdsWithOptionalFilters(searchPhrase, genreNames, genreIds, page, size);
     }
 
     @GetMapping("{id}")

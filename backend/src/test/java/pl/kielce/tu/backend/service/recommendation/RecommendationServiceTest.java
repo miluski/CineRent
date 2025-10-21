@@ -27,9 +27,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import pl.kielce.tu.backend.extractor.ClaimsExtractor;
+import pl.kielce.tu.backend.mapper.PageMapper;
 import pl.kielce.tu.backend.mapper.RecommendationMapper;
 import pl.kielce.tu.backend.model.constant.CookieNames;
 import pl.kielce.tu.backend.model.dto.DvdDto;
+import pl.kielce.tu.backend.model.dto.PagedResponseDto;
 import pl.kielce.tu.backend.model.entity.Dvd;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
@@ -53,6 +55,9 @@ class RecommendationServiceTest {
     private RecommendationMapper recommendationMapper;
 
     @Mock
+    private PageMapper pageMapper;
+
+    @Mock
     private RecommendationStrategy strategy1;
 
     @Mock
@@ -71,18 +76,26 @@ class RecommendationServiceTest {
     @BeforeEach
     void setUp() {
         List<RecommendationStrategy> strategies = Arrays.asList(strategy1, strategy2);
-        recommendationService = new RecommendationService(cookieService, userRepository,
+        recommendationService = new RecommendationService(pageMapper, cookieService, userRepository,
                 claimsExtractor, userContextLogger, strategies, recommendationMapper);
         ReflectionTestUtils.setField(recommendationService, "jwtSecret", jwtSecret);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void shouldHandleGetDvdRecommendations_successfullyGenerateRecommendations() {
         Long userId = 1L;
         String token = "validToken";
         User user = createTestUser(userId);
         List<Dvd> dvds = createTestDvds();
         List<DvdDto> expectedDtos = createTestDvdDtos();
+        PagedResponseDto<DvdDto> pagedResponse = PagedResponseDto.<DvdDto>builder()
+                .content(expectedDtos)
+                .totalElements(2)
+                .totalPages(1)
+                .currentPage(0)
+                .pageSize(20)
+                .build();
 
         when(cookieService.getTokenFromCookie(request, CookieNames.ACCESS_TOKEN)).thenReturn(token);
         when(claimsExtractor.extractUserId(token, jwtSecret)).thenReturn(userId);
@@ -93,15 +106,18 @@ class RecommendationServiceTest {
         when(strategy2.recommend(eq(user), any())).thenReturn(Collections.emptyList());
         when(strategy1.getReason()).thenReturn("Test reason 1");
         when(recommendationMapper.mapToRecommendationDtos(eq(dvds), anyString(), any())).thenReturn(expectedDtos);
+        PagedResponseDto<DvdDto> mockResponse = (PagedResponseDto<DvdDto>) (PagedResponseDto<?>) pagedResponse;
+        when(pageMapper.toPagedResponse(any())).thenAnswer(invocation -> mockResponse);
 
-        ResponseEntity<List<DvdDto>> response = recommendationService.handleGetDvdRecommendations(request);
+        ResponseEntity<PagedResponseDto<DvdDto>> response = recommendationService.handleGetDvdRecommendations(request,
+                0, 20);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        List<DvdDto> responseBody = response.getBody();
+        PagedResponseDto<DvdDto> responseBody = response.getBody();
         assertNotNull(responseBody);
-        assertEquals(2, responseBody.size());
-        assertEquals("Test reason 1", responseBody.get(0).getRecommendationReason());
+        assertEquals(2, responseBody.getContent().size());
+        assertEquals("Test reason 1", responseBody.getContent().get(0).getRecommendationReason());
         verify(userRepository).findById(userId);
         verify(strategy1).recommend(eq(user), any());
     }
@@ -109,7 +125,8 @@ class RecommendationServiceTest {
     @Test
     void shouldHandleGetDvdRecommendations_returnInternalServerError_whenTokenNotFound() {
         when(cookieService.getTokenFromCookie(request, CookieNames.ACCESS_TOKEN)).thenReturn(null);
-        ResponseEntity<List<DvdDto>> response = recommendationService.handleGetDvdRecommendations(request);
+        ResponseEntity<PagedResponseDto<DvdDto>> response = recommendationService.handleGetDvdRecommendations(request,
+                0, 20);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         verify(claimsExtractor, never()).extractUserId(anyString(), anyString());
         verify(userRepository, never()).findById(any());
@@ -124,17 +141,27 @@ class RecommendationServiceTest {
         when(claimsExtractor.extractUserId(token, jwtSecret)).thenReturn(userId);
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        ResponseEntity<List<DvdDto>> response = recommendationService.handleGetDvdRecommendations(request);
+        ResponseEntity<PagedResponseDto<DvdDto>> response = recommendationService.handleGetDvdRecommendations(request,
+                0, 20);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         verify(userRepository).findById(userId);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void shouldGenerateRecommendations_limitToTwentyResults() {
         Long userId = 1L;
         String token = "validToken";
         User user = createTestUser(userId);
         List<Dvd> manyDvds = createManyTestDvds(25);
+        List<DvdDto> manyDtos = createManyTestDtos();
+        PagedResponseDto<DvdDto> pagedResponse = PagedResponseDto.<DvdDto>builder()
+                .content(manyDtos)
+                .totalElements(20)
+                .totalPages(1)
+                .currentPage(0)
+                .pageSize(20)
+                .build();
 
         when(cookieService.getTokenFromCookie(request, CookieNames.ACCESS_TOKEN)).thenReturn(token);
         when(claimsExtractor.extractUserId(token, jwtSecret)).thenReturn(userId);
@@ -146,19 +173,31 @@ class RecommendationServiceTest {
         when(strategy1.getReason()).thenReturn("Test reason");
         when(recommendationMapper.mapToRecommendationDtos(eq(manyDvds), anyString(), any()))
                 .thenReturn(createManyTestDtos());
-        ResponseEntity<List<DvdDto>> response = recommendationService.handleGetDvdRecommendations(request);
+        PagedResponseDto<DvdDto> mockResponse = (PagedResponseDto<DvdDto>) (PagedResponseDto<?>) pagedResponse;
+        when(pageMapper.toPagedResponse(any())).thenAnswer(invocation -> mockResponse);
+
+        ResponseEntity<PagedResponseDto<DvdDto>> response = recommendationService.handleGetDvdRecommendations(request,
+                0, 20);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        List<DvdDto> responseBody = response.getBody();
+        PagedResponseDto<DvdDto> responseBody = response.getBody();
         assertNotNull(responseBody);
-        assertEquals(20, responseBody.size());
+        assertEquals(20, responseBody.getContent().size());
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void shouldHandleGetDvdRecommendations_returnEmptyList_whenNoRecommendations() {
         Long userId = 1L;
         String token = "validToken";
         User user = createTestUser(userId);
+        PagedResponseDto<DvdDto> emptyResponse = PagedResponseDto.<DvdDto>builder()
+                .content(Collections.emptyList())
+                .totalElements(0)
+                .totalPages(0)
+                .currentPage(0)
+                .pageSize(20)
+                .build();
 
         when(cookieService.getTokenFromCookie(request, CookieNames.ACCESS_TOKEN)).thenReturn(token);
         when(claimsExtractor.extractUserId(token, jwtSecret)).thenReturn(userId);
@@ -167,14 +206,17 @@ class RecommendationServiceTest {
         when(strategy2.getPriority()).thenReturn(2);
         when(strategy1.recommend(eq(user), any())).thenReturn(Collections.emptyList());
         when(strategy2.recommend(eq(user), any())).thenReturn(Collections.emptyList());
+        PagedResponseDto<DvdDto> mockResponse = (PagedResponseDto<DvdDto>) (PagedResponseDto<?>) emptyResponse;
+        when(pageMapper.toPagedResponse(any())).thenAnswer(invocation -> mockResponse);
 
-        ResponseEntity<List<DvdDto>> response = recommendationService.handleGetDvdRecommendations(request);
+        ResponseEntity<PagedResponseDto<DvdDto>> response = recommendationService.handleGetDvdRecommendations(request,
+                0, 20);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        List<DvdDto> responseBody = response.getBody();
+        PagedResponseDto<DvdDto> responseBody = response.getBody();
         assertNotNull(responseBody);
-        assertEquals(0, responseBody.size());
+        assertEquals(0, responseBody.getContent().size());
     }
 
     private User createTestUser(Long userId) {

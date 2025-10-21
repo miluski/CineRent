@@ -16,7 +16,7 @@ class RecommendationConstantsTest {
     @Test
     void shouldHaveExpectedValues() {
         assertAll(
-                () -> assertEquals(10, RecommendationConstants.MAX_RECOMMENDATIONS.getValue(),
+                () -> assertEquals(5, RecommendationConstants.MAX_RECOMMENDATIONS.getValue(),
                         "MAX_RECOMMENDATIONS value"),
                 () -> assertEquals(5, RecommendationConstants.MIN_AGE_RANGE.getValue(), "MIN_AGE_RANGE value"),
                 () -> assertEquals(5, RecommendationConstants.MAX_AGE_RANGE.getValue(), "MAX_AGE_RANGE value"),
