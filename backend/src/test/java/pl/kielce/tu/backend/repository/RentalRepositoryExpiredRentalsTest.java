@@ -96,8 +96,10 @@ class RentalRepositoryExpiredRentalsTest {
     private User createAndPersistUser() {
         User user = User.builder()
                 .nickname("testuser")
+                .email("testuser@test.com")
                 .password("password")
                 .age(25)
+                .isVerified(true)
                 .build();
         return entityManager.persist(user);
     }

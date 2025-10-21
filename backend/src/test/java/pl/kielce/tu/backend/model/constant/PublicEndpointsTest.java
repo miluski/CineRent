@@ -25,6 +25,7 @@ class PublicEndpointsTest {
         assertTrue(PublicEndpoints.isMember("/api/v1/auth/login"));
         assertTrue(PublicEndpoints.isMember("/api/v1/auth/register"));
         assertTrue(PublicEndpoints.isMember("/api/v1/auth/logout"));
+        assertTrue(PublicEndpoints.isMember("/api/v1/auth/refresh-tokens"));
         assertTrue(PublicEndpoints.isMember("/swagger-ui.html"));
         assertTrue(PublicEndpoints.isMember("/"));
     }
@@ -36,12 +37,14 @@ class PublicEndpointsTest {
         assertTrue(PublicEndpoints.isMember("/api-docs/some/legacy"));
         assertTrue(PublicEndpoints.isMember("/swagger-ui/index.html"));
         assertTrue(PublicEndpoints.isMember("/swagger-resources/configuration/ui"));
+        assertTrue(PublicEndpoints.isMember("/api/v1/verification/verify"));
+        assertTrue(PublicEndpoints.isMember("/api/v1/verification/resend"));
     }
 
     @Test
     void isMember_nonMembersReturnFalse() {
         assertFalse(PublicEndpoints.isMember("/api/v1/users"));
-        assertFalse(PublicEndpoints.isMember("/api/v1/auth/logins")); 
+        assertFalse(PublicEndpoints.isMember("/api/v1/auth/logins"));
         assertFalse(PublicEndpoints.isMember("/private/resource"));
         assertFalse(PublicEndpoints.isMember("/random/swagger-uix"));
     }

@@ -1,5 +1,9 @@
 #!/bin/bash
+# -*- coding: utf-8 -*-
 set -euo pipefail
+
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
 
 detect_os() {
     case "$OSTYPE" in
@@ -192,6 +196,67 @@ DB_NAME="dvd_rental"
 echo "🔑 Generating JWT secrets..."
 JWT_SECRET=$(openssl rand -base64 684 | tr -d '/+=' | tr -cd '[:alnum:]' | head -c 512)
 
+echo "📧 Configuring email server settings..."
+echo ""
+echo "Gmail SMTP Configuration"
+echo "================================"
+echo ""
+echo "Before starting, make sure you have:"
+echo "1. Enabled 2-Factor Authentication on your Google Account"
+echo "   https://myaccount.google.com/security"
+echo "2. Generated an App Password for CineRent"
+echo "   https://myaccount.google.com/apppasswords"
+echo ""
+echo "Would you like to configure Gmail SMTP now? (recommended)"
+read -p "Configure email? (y/n, default: n): " CONFIGURE_EMAIL
+CONFIGURE_EMAIL="${CONFIGURE_EMAIL:-n}"
+
+if [[ "$CONFIGURE_EMAIL" =~ ^[Yy]$ ]]; then
+    echo ""
+    read -p "Enter your Gmail address (e.g., your-email@gmail.com): " GMAIL_ADDRESS
+    while [[ ! "$GMAIL_ADDRESS" =~ ^[a-zA-Z0-9._%+-]+@gmail\.com$ ]]; do
+        echo "❌ Invalid Gmail address. Please use format: name@gmail.com"
+        read -p "Enter your Gmail address: " GMAIL_ADDRESS
+    done
+
+    echo ""
+    echo "Enter your Gmail App Password (16 characters, no spaces)"
+    echo "Note: This is NOT your regular Gmail password!"
+    read -s -p "App Password: " GMAIL_APP_PASSWORD
+    echo ""
+
+    while [[ ${#GMAIL_APP_PASSWORD} -lt 16 ]]; do
+        echo "❌ App password must be at least 16 characters"
+        read -s -p "App Password: " GMAIL_APP_PASSWORD
+        echo ""
+    done
+
+    GMAIL_APP_PASSWORD=$(echo "$GMAIL_APP_PASSWORD" | tr -d ' ')
+
+    echo ""
+    read -p "Enter sender name (optional, press Enter to use 'CineRent'): " SENDER_NAME
+    if [ -z "$SENDER_NAME" ]; then
+        SENDER_NAME="CineRent"
+    fi
+
+    MAIL_HOST="smtp.gmail.com"
+    MAIL_PORT="587"
+    MAIL_USERNAME="$GMAIL_ADDRESS"
+    MAIL_PASSWORD="$GMAIL_APP_PASSWORD"
+    MAIL_FROM="$SENDER_NAME <$GMAIL_ADDRESS>"
+
+    echo "✅ Email configuration completed!"
+else
+    echo "⚠️  Skipping email configuration. You can configure it later using:"
+    echo "   ./scripts/configure-email.sh"
+    echo ""
+    MAIL_HOST="${MAIL_HOST:-smtp.gmail.com}"
+    MAIL_PORT="${MAIL_PORT:-587}"
+    MAIL_USERNAME="${MAIL_USERNAME:-your-email@gmail.com}"
+    MAIL_PASSWORD="${MAIL_PASSWORD:-your-gmail-app-password}"
+    MAIL_FROM="${MAIL_FROM:-CineRent <your-email@gmail.com>}"
+fi
+
 echo "📁 Configuring media settings..."
 MEDIA_POSTER_DIR="${MEDIA_POSTER_DIR:-/app/uploads/posters}"
 MEDIA_POSTER_BASE_URL="${MEDIA_POSTER_BASE_URL:-/api/v1/resources/posters}"
@@ -199,17 +264,32 @@ MEDIA_POSTER_MAX_SIZE="${MEDIA_POSTER_MAX_SIZE:-5242880}"
 MEDIA_POSTER_CACHE_CONTROL="${MEDIA_POSTER_CACHE_CONTROL:-public, max-age=31536000}"
 MEDIA_POSTER_DEFAULT_CONTENT_TYPE="${MEDIA_POSTER_DEFAULT_CONTENT_TYPE:-application/octet-stream}"
 
-echo "📝 Creating environment configuration..."
-ENV_FILE="$BASE_DIR/.env"
-cat > "$ENV_FILE" <<EOF
+echo "📝 Creating Docker Compose environment configuration..."
+DOCKER_ENV_FILE="$BASE_DIR/.env"
+cat > "$DOCKER_ENV_FILE" <<EOF
 POSTGRES_USER=$DB_USER
 POSTGRES_PASSWORD=$DB_PASSWORD
 POSTGRES_DB=$DB_NAME
 SSL_KEYSTORE_PASSWORD=$SSL_PASSWORD
 JWT_SECRET=$JWT_SECRET
+MAIL_HOST=$MAIL_HOST
+MAIL_PORT=$MAIL_PORT
+MAIL_USERNAME=$MAIL_USERNAME
+MAIL_PASSWORD=$MAIL_PASSWORD
+MAIL_FROM=$MAIL_FROM
 EOF
 
-echo "✅ Environment file created: $ENV_FILE"
+echo "✅ Docker Compose environment file created: $DOCKER_ENV_FILE"
+
+echo "📝 Creating frontend environment configuration..."
+FRONTEND_DIR="$BASE_DIR/frontend"
+FRONTEND_ENV_FILE="$FRONTEND_DIR/.env"
+BACKEND_PORT="${BACKEND_PORT:-10443}"
+cat > "$FRONTEND_ENV_FILE" <<EOF
+VITE_BACKEND_URL=https://localhost:$BACKEND_PORT/api/v1
+EOF
+
+echo "✅ Frontend environment file created: $FRONTEND_ENV_FILE"
 
 echo "⚙️ Configuring application properties..."
 RESOURCES_DIR="$BACKEND_DIR/src/main/resources"
@@ -276,6 +356,21 @@ media.poster.base-url=$MEDIA_POSTER_BASE_URL
 media.poster.max-size=$MEDIA_POSTER_MAX_SIZE
 media.poster.cache-control=$MEDIA_POSTER_CACHE_CONTROL
 media.poster.default-content-type=$MEDIA_POSTER_DEFAULT_CONTENT_TYPE
+spring.mail.host=$MAIL_HOST
+spring.mail.port=$MAIL_PORT
+spring.mail.username=$MAIL_USERNAME
+spring.mail.password=$MAIL_PASSWORD
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.ssl.trust=$MAIL_HOST
+mail.from=$MAIL_FROM
+verification.code.expiration=900000
+email.verification.subject=CineRent - Weryfikacja adresu email
+email.verification.template=classpath:templates/email-verification.html
+email.reminder.subject=CineRent - Film dostępny!
+email.reminder.template=classpath:templates/dvd-availability-notification.html
+server.base-url=https://localhost:10443
 EOF
 
 echo "✅ Application properties configured: $APP_PROPERTIES_FILE"
@@ -306,6 +401,12 @@ logging.level.pl.kielce.tu.backend=WARN
 logging.level.root=WARN
 logging.level.org.springframework.web=WARN
 logging.level.org.hibernate=WARN
+email.verification.subject=CineRent - Weryfikacja adresu email
+email.verification.template=classpath:templates/email-verification.html
+email.reminder.subject=CineRent - Film dostępny!
+email.reminder.template=classpath:templates/dvd-availability-notification.html
+server.base-url=https://localhost:10443
+verification.code.expiration=900000
 EOF
 
 echo "✅ Test properties configured: $APP_TEST_PROPERTIES_FILE"
@@ -327,13 +428,13 @@ echo "🎉 DVD Rental Application initialization completed successfully!"
 echo ""
 echo "📋 Summary of generated files:"
 echo "   • SSL Certificate: $CERT_FILE"
-echo "   • Environment file: $ENV_FILE"
+echo "   • Environment file: $DOCKER_ENV_FILE"
+echo "   • Frontend environment file: $FRONTEND_ENV_FILE"
 echo "   • Application properties: $APP_PROPERTIES_FILE"
 echo "   • Test properties: $APP_TEST_PROPERTIES_FILE"
 echo "   • Logs directory: $LOGS_DIR"
 echo "   • Uploads directory: $UPLOADS_DIR"
 echo "   • Posters directory: $POSTERS_DIR"
-echo "   • Frontend Dockerfiles: $FRONTEND_DIR/Dockerfile, $FRONTEND_DIR/Dockerfile.dev"
 echo ""
 echo "🔐 Generated credentials:"
 echo "   • SSL Keystore password: $SSL_PASSWORD"
@@ -347,6 +448,17 @@ echo "   • Poster directory: $MEDIA_POSTER_DIR"
 echo "   • Poster base URL: $MEDIA_POSTER_BASE_URL"
 echo "   • Max poster size: $MEDIA_POSTER_MAX_SIZE bytes ($(($MEDIA_POSTER_MAX_SIZE / 1024 / 1024))MB)"
 echo "   • Cache control: $MEDIA_POSTER_CACHE_CONTROL"
+echo ""
+echo "📧 Email configuration:"
+echo "   • SMTP Host: $MAIL_HOST"
+echo "   • SMTP Port: $MAIL_PORT"
+echo "   • Email From: $MAIL_FROM"
+echo "   • Username: $MAIL_USERNAME"
+if [[ "$CONFIGURE_EMAIL" =~ ^[Yy]$ ]]; then
+    echo "   • Status: ✅ Configured"
+else
+    echo "   • Status: ⚠️  Not configured - run './scripts/configure-email.sh' to set up"
+fi
 echo ""
 echo "🚀 Next steps:"
 echo "   1. Run 'docker compose up -d' to start all services"

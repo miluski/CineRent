@@ -16,6 +16,7 @@ public class UserMapper {
         return User
                 .builder()
                 .nickname(userDto.getNickname())
+                .email(userDto.getEmail())
                 .password(userDto.getPassword())
                 .age(userDto.getAge())
                 .preferredGenres(genreMappingService.mapGenreIdsToGenres(userDto.getPreferredGenresIdentifiers()))
@@ -26,6 +27,8 @@ public class UserMapper {
         return UserDto
                 .builder()
                 .nickname(user.getNickname())
+                .email(user.getEmail())
+                .isVerified(user.getIsVerified())
                 .age(user.getAge())
                 .preferredGenres(genreMappingService.mapGenresToNames(user.getPreferredGenres()))
                 .build();

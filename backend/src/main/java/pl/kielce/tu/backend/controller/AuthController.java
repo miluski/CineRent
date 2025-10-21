@@ -31,17 +31,19 @@ public class AuthController {
     @Operation(summary = "Register a new user", description = """
             Creates a new user account with the provided credentials and preferences. \
             Required fields: nickname (3-50 characters, alphanumeric with underscores/hyphens), \
-            password (8-100 characters), and age (1-149 years). \
-            Optional: preferred genre identifiers (must exist in the database).""")
+            email (valid email address), password (8-100 characters), and age (1-149 years). \
+            Optional: preferred genre identifiers (must exist in the database). \
+            A verification email with a 6-digit code will be sent to the provided email address.""")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User successfully registered"),
-            @ApiResponse(responseCode = "422", description = "Validation failed - invalid user data (invalid nickname/password format, age out of range 1-149, or non-existent genre identifiers)", content = @Content),
+            @ApiResponse(responseCode = "201", description = "User successfully registered, verification email sent"),
+            @ApiResponse(responseCode = "422", description = "Validation failed - invalid user data (invalid nickname/password/email format, age out of range 1-149, non-existent genre identifiers, or duplicate nickname/email)", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error occurred during registration", content = @Content)
     })
     public ResponseEntity<Void> register(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User registration data", required = true, content = @Content(schema = @Schema(example = """
                     {
                       "nickname": "FilmLover99",
+                      "email": "filmlover99@example.com",
                       "password": "Serduszko223",
                       "age": 24,
                       "preferredGenresIdentifiers": [1, 10, 21, 37]
@@ -53,6 +55,7 @@ public class AuthController {
     @Operation(summary = "Authenticate user", description = """
             Authenticates a user with the provided credentials and returns JWT tokens as HTTP-only cookies. \
             Required fields: nickname and password. Age and preferred genres are not required for login. \
+            Email verification is not required for login - users can log in immediately after registration. \
             On successful login, access and refresh tokens are set as secure HTTP-only cookies.""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User successfully authenticated, tokens set in cookies"),

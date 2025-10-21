@@ -1,5 +1,6 @@
 package pl.kielce.tu.backend.model.entity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -33,6 +34,9 @@ public class User {
     @Column(name = "nickname", nullable = false, unique = true)
     private String nickname;
 
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -47,5 +51,15 @@ public class User {
     @Builder.Default
     @Column(name = "rank", nullable = false)
     private RankType rank = RankType.USER;
+
+    @Builder.Default
+    @Column(name = "is_verified", nullable = false)
+    private Boolean isVerified = false;
+
+    @Column(name = "verification_code")
+    private String verificationCode;
+
+    @Column(name = "verification_code_expiry")
+    private LocalDateTime verificationCodeExpiry;
 
 }

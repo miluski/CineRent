@@ -1,28 +1,23 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import { DashboardPage } from "./pages/DashboardPage";
-import { LoginPage } from "./pages/LoginPage";
-import { RegisterPage } from "./pages/RegisterPage";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Spinner } from "./components/ui/spinner";
-import { ProfilePage } from "./pages/ProfilePage";
-import { Toaster } from "sonner";
-import { AddDvdPage } from "./pages/AddDvdPage";
-import { EditDvdPage } from "./pages/EditDvdPage";
-import { RentDvdPage } from "./pages/RentDvdPage";
-import { UserReservationsPage } from "./pages/UserReservationsPage";
-import { RentalsPage } from "./pages/RentalsPage";
-import { TransactionsHistoryPage } from "./pages/TransactionsHistoryPage";
-import { ReservationManagementPage } from "./pages/ReservationManagementPage";
-import { RecommendationsPage } from "./pages/RecommendationsPage";
-import { ReturnRequestsPage } from "./pages/ReturnRequestsPage";
-import { GenresManagementPage } from "./pages/GenresManagementPage";
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { Spinner } from './components/ui/spinner';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AddDvdPage } from './pages/AddDvdPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { EditDvdPage } from './pages/EditDvdPage';
+import { GenresManagementPage } from './pages/GenresManagementPage';
+import { LoginPage } from './pages/LoginPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { RecommendationsPage } from './pages/RecommendationsPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { RentalsPage } from './pages/RentalsPage';
+import { RentDvdPage } from './pages/RentDvdPage';
+import { ReservationManagementPage } from './pages/ReservationManagementPage';
+import { ReturnRequestsPage } from './pages/ReturnRequestsPage';
+import { TransactionsHistoryPage } from './pages/TransactionsHistoryPage';
+import { UserReservationsPage } from './pages/UserReservationsPage';
 
 const queryClient = new QueryClient();
 
@@ -39,10 +34,7 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />}
-      />
+      <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
@@ -53,19 +45,13 @@ const AppRoutes = () => {
         <Route path="/reservations" element={<UserReservationsPage />} />
         <Route path="/rentals" element={<RentalsPage />} />
         <Route path="/recommendations" element={<RecommendationsPage />} />
-        <Route
-          path="/transactions-history"
-          element={<TransactionsHistoryPage />}
-        />
+        <Route path="/transactions-history" element={<TransactionsHistoryPage />} />
       </Route>
 
       <Route element={<ProtectedRoute adminOnly />}>
         <Route path="/admin/dvd/create" element={<AddDvdPage />} />
         <Route path="/admin/dvd/edit/:id" element={<EditDvdPage />} />
-        <Route
-          path="/admin/reservations"
-          element={<ReservationManagementPage />}
-        />
+        <Route path="/admin/reservations" element={<ReservationManagementPage />} />
         <Route path="/admin/returns" element={<ReturnRequestsPage />} />
         <Route path="/admin/genres" element={<GenresManagementPage />} />
       </Route>
@@ -81,7 +67,7 @@ function App() {
           <AppRoutes />
         </AuthProvider>
       </Router>
-      <Toaster />
+      <Toaster position="top-center" richColors closeButton expand={false} />
     </QueryClientProvider>
   );
 }
