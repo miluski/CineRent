@@ -2,6 +2,10 @@ package pl.kielce.tu.backend.service.dvd;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -11,11 +15,13 @@ import lombok.RequiredArgsConstructor;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.mapper.DvdFilterMapper;
 import pl.kielce.tu.backend.mapper.DvdMapper;
+import pl.kielce.tu.backend.mapper.PageMapper;
 import pl.kielce.tu.backend.model.dto.DvdDto;
 import pl.kielce.tu.backend.model.dto.DvdFilterDto;
+import pl.kielce.tu.backend.model.dto.PagedResponseDto;
 import pl.kielce.tu.backend.model.entity.Dvd;
 import pl.kielce.tu.backend.repository.DvdRepository;
-import pl.kielce.tu.backend.service.dvd.filter.DvdFilterService;
+import pl.kielce.tu.backend.repository.specification.DvdSpecification;
 import pl.kielce.tu.backend.service.resource.ResourceService;
 import pl.kielce.tu.backend.util.UserContextLogger;
 
@@ -24,42 +30,45 @@ import pl.kielce.tu.backend.util.UserContextLogger;
 public class DvdService {
 
     private final DvdMapper dvdMapper;
+    private final PageMapper pageMapper;
     private final DvdRepository dvdRepository;
     private final DvdUpdateService updateService;
     private final DvdFilterMapper dvdFilterMapper;
     private final ResourceService resourceService;
-    private final DvdFilterService dvdFilterService;
+    private final DvdSpecification dvdSpecification;
     private final UserContextLogger userContextLogger;
     private final DvdValidationService validationService;
 
-    public ResponseEntity<List<DvdDto>> handleGetAllDvdsWithOptionalFilters(String searchPhrase,
-            List<String> genreNames, List<Long> genreIds) {
+    public ResponseEntity<PagedResponseDto<DvdDto>> handleGetAllDvdsWithOptionalFilters(String searchPhrase,
+            List<String> genreNames, List<Long> genreIds, int page, int size) {
         if (hasAnyFilterParams(searchPhrase, genreNames, genreIds)) {
-            return handleGetFilteredDvds(searchPhrase, genreNames, genreIds);
+            return handleGetFilteredDvds(searchPhrase, genreNames, genreIds, page, size);
         }
-        return handleGetAllDvds();
+        return handleGetAllDvds(page, size);
     }
 
-    public ResponseEntity<List<DvdDto>> handleGetAllDvds() {
+    public ResponseEntity<PagedResponseDto<DvdDto>> handleGetAllDvds(int page, int size) {
         try {
             userContextLogger.logUserOperation("GET_ALL_DVDS", "Fetching all DVDs");
-            List<Dvd> dvds = dvdRepository.findAll();
-            List<DvdDto> dvdDtos = convertToDtoList(dvds);
-            return ResponseEntity.status(HttpStatus.OK).body(dvdDtos);
+            Pageable pageable = createPageable(page, size);
+            Page<Dvd> dvdPage = dvdRepository.findAll(pageable);
+            PagedResponseDto<DvdDto> response = pageMapper.toPagedResponse(dvdPage, dvdMapper::toDto);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
             userContextLogger.logUserOperation("GET_ALL_DVDS", "Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    public ResponseEntity<List<DvdDto>> handleGetFilteredDvds(String searchPhrase, List<String> genreNames,
-            List<Long> genreIds) {
+    public ResponseEntity<PagedResponseDto<DvdDto>> handleGetFilteredDvds(String searchPhrase, List<String> genreNames,
+            List<Long> genreIds, int page, int size) {
         try {
             userContextLogger.logUserOperation("GET_FILTERED_DVDS", "Fetching filtered DVDs");
             DvdFilterDto filterDto = dvdFilterMapper.mapToFilterDto(searchPhrase, genreNames, genreIds);
-            List<Dvd> dvds = getFilteredDvds(filterDto);
-            List<DvdDto> dvdDtos = convertToDtoList(dvds);
-            return ResponseEntity.status(HttpStatus.OK).body(dvdDtos);
+            Pageable pageable = createPageable(page, size);
+            Page<Dvd> dvdPage = getFilteredDvds(filterDto, pageable);
+            PagedResponseDto<DvdDto> response = pageMapper.toPagedResponse(dvdPage, dvdMapper::toDto);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
             userContextLogger.logUserOperation("GET_FILTERED_DVDS", "Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -123,12 +132,6 @@ public class DvdService {
         }
     }
 
-    private List<DvdDto> convertToDtoList(List<Dvd> dvds) {
-        return dvds.stream()
-                .map(dvdMapper::toDto)
-                .toList();
-    }
-
     private Long parseId(String id) {
         return Long.parseLong(id);
     }
@@ -152,12 +155,14 @@ public class DvdService {
                 (genreIds != null && !genreIds.isEmpty());
     }
 
-    private List<Dvd> getFilteredDvds(DvdFilterDto filterDto) {
-        List<Dvd> allDvds = dvdRepository.findAll();
-        if (dvdFilterMapper.hasAnyFilter(filterDto)) {
-            return dvdFilterService.applyFilters(allDvds, filterDto);
-        }
-        return allDvds;
+    private Pageable createPageable(int page, int size) {
+        int validatedSize = Math.min(size, 20);
+        return PageRequest.of(page, validatedSize);
+    }
+
+    private Page<Dvd> getFilteredDvds(DvdFilterDto filterDto, Pageable pageable) {
+        Specification<Dvd> specification = dvdSpecification.withFilters(filterDto);
+        return dvdRepository.findAll(specification, pageable);
     }
 
 }

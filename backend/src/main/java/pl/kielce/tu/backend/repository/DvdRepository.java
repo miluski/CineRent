@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,7 @@ import pl.kielce.tu.backend.model.entity.Dvd;
 import pl.kielce.tu.backend.model.entity.Genre;
 
 @Repository
-public interface DvdRepository extends JpaRepository<Dvd, Long> {
+public interface DvdRepository extends JpaRepository<Dvd, Long>, JpaSpecificationExecutor<Dvd> {
 
     boolean existsByGenresId(Long genreId);
 
@@ -23,7 +24,7 @@ public interface DvdRepository extends JpaRepository<Dvd, Long> {
     @Query("SELECT d FROM Dvd d WHERE d.avalaible = true ORDER BY d.addedAt DESC")
     Page<Dvd> findAvailableDvdsOrderByNewest(Pageable pageable);
 
-    @Query("SELECT d FROM Dvd d JOIN d.genres g WHERE g IN :genres AND d.avalaible = true ORDER BY d.addedAt DESC")
+    @Query("SELECT DISTINCT d FROM Dvd d JOIN d.genres g WHERE g IN :genres AND d.avalaible = true ORDER BY d.addedAt DESC")
     Page<Dvd> findByPreferredGenresAndAvailable(@Param("genres") List<Genre> genres, Pageable pageable);
 
     @Query("""
