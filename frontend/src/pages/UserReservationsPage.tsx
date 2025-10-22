@@ -1,22 +1,11 @@
-import { useState } from "react";
-import {
-  AlertCircle,
-  Calendar,
-  CheckCircle,
-  Clock,
-  Hash,
-  Loader,
-  XCircle,
-} from "lucide-react";
-import { format } from "date-fns";
+import { format } from 'date-fns';
+import { AlertCircle, Calendar, CheckCircle, Clock, Hash, Loader, XCircle } from 'lucide-react';
+import { useState } from 'react';
 
-import { DashboardHeader } from "@/components/DashboardHeader";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
-import { useGetUserReservations } from "@/hooks/queries/useGetUserReservations";
-import { useCancelReservation } from "@/hooks/mutations/useCancelReservation";
-import type { ReservationStatus } from "@/enums/ReservationStatus";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { DashboardHeader } from '@/components/DashboardHeader';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -24,42 +13,44 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { ReservationStatus } from '@/enums/ReservationStatus';
+import { useCancelReservation } from '@/hooks/mutations/useCancelReservation';
+import { useGetUserReservations } from '@/hooks/queries/useGetUserReservations';
 
 const statusConfig = {
   PENDING: {
-    label: "Oczekująca",
-    color: "bg-yellow-500",
+    label: 'Oczekująca',
+    color: 'bg-yellow-500',
     icon: <Clock className="mr-2 size-4" />,
   },
   ACCEPTED: {
-    label: "Zaakceptowana",
-    color: "bg-green-500",
+    label: 'Zaakceptowana',
+    color: 'bg-green-500',
     icon: <CheckCircle className="mr-2 size-4" />,
   },
   REJECTED: {
-    label: "Odrzucona",
-    color: "bg-red-500",
+    label: 'Odrzucona',
+    color: 'bg-red-500',
     icon: <XCircle className="mr-2 size-4" />,
   },
   CANCELLED: {
-    label: "Anulowana",
-    color: "bg-gray-500",
+    label: 'Anulowana',
+    color: 'bg-gray-500',
     icon: <XCircle className="mr-2 size-4" />,
   },
 };
 
 export function UserReservationsPage() {
-  const [filter, setFilter] = useState<ReservationStatus | "ALL">("ALL");
+  const [filter, setFilter] = useState<ReservationStatus | 'ALL'>('ALL');
   const {
     data: reservations,
     isLoading,
     isError,
-  } = useGetUserReservations(filter === "ALL" ? undefined : filter);
-  const { mutate: cancelReservation, isPending: isCancelling } =
-    useCancelReservation();
+  } = useGetUserReservations(filter === 'ALL' ? undefined : filter);
+  const { mutate: cancelReservation, isPending: isCancelling } = useCancelReservation();
 
   const handleCancel = (reservationId: number) => {
     cancelReservation(String(reservationId));
@@ -76,9 +67,7 @@ export function UserReservationsPage() {
 
     if (isError) {
       return (
-        <div className="text-center text-red-500">
-          Wystąpił błąd podczas pobierania rezerwacji.
-        </div>
+        <div className="text-center text-red-500">Wystąpił błąd podczas pobierania rezerwacji.</div>
       );
     }
 
@@ -93,34 +82,30 @@ export function UserReservationsPage() {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {reservations.map((reservation) => {
-          const statusInfo =
-            statusConfig[reservation.status as keyof typeof statusConfig];
+          const statusInfo = statusConfig[reservation.status as keyof typeof statusConfig];
           return (
             <Card
               key={reservation.id}
-              className="group relative flex flex-col transition-all duration-300 hover:shadow-lg"
+              className="reservation-card relative flex flex-col transition-all duration-300 hover:shadow-lg cursor-pointer"
             >
               <CardHeader>
                 <div className="flex justify-between items-start">
-                  <CardTitle className="line-clamp-2">
-                    {reservation.dvdTitle}
-                  </CardTitle>
+                  <CardTitle className="line-clamp-2">{reservation.dvdTitle}</CardTitle>
                   <Badge className={`${statusInfo.color} text-white`}>
                     {statusInfo.icon}
                     {statusInfo.label}
                   </Badge>
                 </div>
                 <CardDescription>
-                  Złożono:{" "}
-                  {format(new Date(reservation.createdAt), "dd.MM.yyyy")}
+                  Złożono: {format(new Date(reservation.createdAt), 'dd.MM.yyyy')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow space-y-3">
                 <div className="flex items-center text-sm">
                   <Calendar className="mr-2 size-4 text-muted-foreground" />
                   <span>
-                    {format(new Date(reservation.rentalStart), "dd.MM.yyyy")} -{" "}
-                    {format(new Date(reservation.rentalEnd), "dd.MM.yyyy")}
+                    {format(new Date(reservation.rentalStart), 'dd.MM.yyyy')} -{' '}
+                    {format(new Date(reservation.rentalEnd), 'dd.MM.yyyy')}
                   </span>
                 </div>
                 <div className="flex items-center text-sm">
@@ -128,8 +113,8 @@ export function UserReservationsPage() {
                   <span>Liczba sztuk: {reservation.count}</span>
                 </div>
               </CardContent>
-              {reservation.status === "PENDING" && (
-                <CardFooter className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              {reservation.status === 'PENDING' && (
+                <CardFooter className="reservation-footer absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/80 to-transparent opacity-0 transition-opacity duration-300">
                   <Button
                     variant="destructive"
                     className="w-full"
@@ -159,14 +144,10 @@ export function UserReservationsPage() {
         <DashboardHeader />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold md:text-2xl">
-              Moje rezerwacje
-            </h1>
+            <h1 className="text-lg font-semibold md:text-2xl">Moje rezerwacje</h1>
             <Tabs
               defaultValue="ALL"
-              onValueChange={(value) =>
-                setFilter(value as ReservationStatus | "ALL")
-              }
+              onValueChange={(value) => setFilter(value as ReservationStatus | 'ALL')}
             >
               <TabsList>
                 <TabsTrigger value="ALL">Wszystkie</TabsTrigger>

@@ -63,7 +63,7 @@ export const RecommendationsPage = () => {
           {recommendationsData.content.map((dvd) => (
             <div
               key={dvd.id}
-              className="group relative rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
+              className="dvd-card relative rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer"
             >
               <div className="aspect-[2/3] bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden">
                 {dvd.posterUrl ? (
@@ -78,8 +78,8 @@ export const RecommendationsPage = () => {
                     <p>Brak plakatu</p>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 flex flex-col justify-end p-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                <div className="dvd-overlay absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 transition-opacity duration-300" />
+                <div className="dvd-details absolute inset-0 flex flex-col justify-end p-4 translate-y-4 opacity-0 transition-all duration-300">
                   <h3 className="text-white font-bold text-lg mb-1 line-clamp-2">{dvd.title}</h3>
                   <p className="text-yellow-400 text-sm font-medium mb-3">
                     {dvd.genres?.join(', ') || 'Brak gatunku'}

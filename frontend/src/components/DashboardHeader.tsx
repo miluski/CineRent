@@ -108,9 +108,11 @@ export function DashboardHeader({
         <SheetContent side="left" className="flex flex-col">
           <nav className="grid gap-2 text-lg font-medium p-2">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold flex items-center animate-pulse select-none p-2">
-                <span className="text-indigo-500">O</span>pasRent
-              </h1>
+              <Link to="/dashboard" className="block">
+                <h1 className="text-2xl font-bold flex items-center animate-pulse select-none p-2 cursor-pointer hover:opacity-80 transition-opacity">
+                  <span className="text-indigo-500">O</span>pasRent
+                </h1>
+              </Link>
             </div>
             {shouldShowFilterGroup && (
               <FilterGroup isMobile selectedGenres={selectedGenres} onGenreChange={onGenreChange} />

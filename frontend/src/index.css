@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -93,16 +93,16 @@ body {
   --color-sidebar-ring: var(--sidebar-ring);
   --animate-meteor: meteor 5s linear infinite;
   @keyframes meteor {
-  0% {
-    transform: rotate(var(--angle)) translateX(0);
-    opacity: 1;
+    0% {
+      transform: rotate(var(--angle)) translateX(0);
+      opacity: 1;
     }
-  70% {
-    opacity: 1;
+    70% {
+      opacity: 1;
     }
-  100% {
-    transform: rotate(var(--angle)) translateX(-500px);
-    opacity: 0;
+    100% {
+      transform: rotate(var(--angle)) translateX(-500px);
+      opacity: 0;
     }
   }
 }
@@ -148,4 +148,26 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.dvd-card:hover .dvd-overlay {
+  opacity: 1;
+}
+
+.dvd-card:hover .dvd-details {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dvd-details {
+  padding-bottom: 2.5rem !important;
+}
+
+.rental-card:hover .rental-footer,
+.reservation-card:hover .reservation-footer {
+  opacity: 1;
+}
+
+.poster-upload-label:hover .poster-overlay {
+  opacity: 1;
 }

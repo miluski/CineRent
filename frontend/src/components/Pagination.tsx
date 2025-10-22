@@ -39,14 +39,14 @@ export const Pagination = ({
           key={0}
           variant={currentPage === 0 ? 'default' : 'outline'}
           onClick={() => onPageChange(0)}
-          className="min-w-10"
+          className="min-w-8 sm:min-w-10 h-8 sm:h-10 text-xs sm:text-sm px-2 sm:px-3"
         >
           1
         </Button>
       );
       if (startPage > 1) {
         pages.push(
-          <span key="start-ellipsis" className="px-2">
+          <span key="start-ellipsis" className="px-1 sm:px-2 text-xs sm:text-sm">
             ...
           </span>
         );
@@ -59,7 +59,7 @@ export const Pagination = ({
           key={i}
           variant={currentPage === i ? 'default' : 'outline'}
           onClick={() => onPageChange(i)}
-          className="min-w-10"
+          className="min-w-8 sm:min-w-10 h-8 sm:h-10 text-xs sm:text-sm px-2 sm:px-3"
         >
           {i + 1}
         </Button>
@@ -69,7 +69,7 @@ export const Pagination = ({
     if (endPage < totalPages - 1) {
       if (endPage < totalPages - 2) {
         pages.push(
-          <span key="end-ellipsis" className="px-2">
+          <span key="end-ellipsis" className="px-1 sm:px-2 text-xs sm:text-sm">
             ...
           </span>
         );
@@ -79,7 +79,7 @@ export const Pagination = ({
           key={totalPages - 1}
           variant={currentPage === totalPages - 1 ? 'default' : 'outline'}
           onClick={() => onPageChange(totalPages - 1)}
-          className="min-w-10"
+          className="min-w-8 sm:min-w-10 h-8 sm:h-10 text-xs sm:text-sm px-2 sm:px-3"
         >
           {totalPages}
         </Button>
@@ -94,29 +94,31 @@ export const Pagination = ({
   }
 
   return (
-    <div className="flex items-center justify-between border-t border-gray-700 pt-4 mt-8">
-      <div className="text-sm text-gray-400">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-gray-700 pt-4 mt-8">
+      <div className="text-xs sm:text-sm text-gray-400 text-center sm:text-left">
         Wyświetlanie: {startItem} - {endItem} z {totalElements} wyników
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
         <Button
           variant="outline"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={!hasPrevious}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
         >
-          <ChevronLeft className="w-4 h-4" />
-          Poprzednia
+          <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Poprzednia</span>
+          <span className="sm:hidden">Poprz.</span>
         </Button>
         <div className="flex items-center gap-1">{renderPageNumbers()}</div>
         <Button
           variant="outline"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={!hasNext}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
         >
-          Następna
-          <ChevronRight className="w-4 h-4" />
+          <span className="hidden sm:inline">Następna</span>
+          <span className="sm:hidden">Nast.</span>
+          <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
       </div>
     </div>
