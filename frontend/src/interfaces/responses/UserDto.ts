@@ -4,4 +4,5 @@ export interface UserDto {
   isVerified: boolean;
   age: number;
   preferredGenres: string[];
+  avatarPath?: string;
 }

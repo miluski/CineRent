@@ -3,4 +3,5 @@ export interface UpdateUserDetailsRequestDto {
   age?: number;
   preferredGenresIdentifiers?: number[];
   password?: string;
+  base64Avatar?: string;
 }

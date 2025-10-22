@@ -54,4 +54,10 @@ public class UserDto implements Serializable {
     @Schema(description = "List of preferred genre names (read-only). Automatically populated based on preferredGenresIdentifiers", example = "[\"Action\", \"Comedy\", \"Sci-Fi\", \"Drama\"]", accessMode = Schema.AccessMode.READ_ONLY)
     private List<String> preferredGenres;
 
+    @Schema(description = "Base64 encoded avatar image for profile update. Optional field used when changing user avatar", example = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
+    private String base64Avatar;
+
+    @Schema(description = "Path to user's avatar image on server. Read-only field automatically populated after avatar upload", example = "/resources/avatars/user123.png", accessMode = Schema.AccessMode.READ_ONLY)
+    private String avatarPath;
+
 }

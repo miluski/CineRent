@@ -1,3 +1,16 @@
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   BookCheck,
   BookOpen,
@@ -11,21 +24,9 @@ import {
   Search,
   Sparkles,
   Ticket,
-} from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useAuth } from "@/contexts/AuthContext";
-import { FilterGroup } from "./FilterGroup";
+} from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { FilterGroup } from './FilterGroup';
 
 export function DashboardHeader({
   searchPhrase,
@@ -38,52 +39,59 @@ export function DashboardHeader({
   selectedGenres: number[];
   onGenreChange: (genreId: number, checked: boolean) => void;
 }>) {
-  const { logout, isAdmin } = useAuth();
+  const { logout, isAdmin, user } = useAuth();
   const pathname = useLocation().pathname;
-  const shouldShowFilterGroup = pathname === "/dashboard";
+  const shouldShowFilterGroup = pathname === '/dashboard';
+
+  const userInitials = user ? user.nickname.slice(0, 2).toUpperCase() : 'U';
+
+  const avatarTimestamp = localStorage.getItem('avatarTimestamp') || Date.now().toString();
+  const avatarUrl = user?.avatarPath
+    ? `${import.meta.env.VITE_BACKEND_URL}${user.avatarPath}?t=${avatarTimestamp}`
+    : undefined;
 
   const userLinks = [
     {
-      to: "/reservations",
-      label: "Moje rezerwacje",
+      to: '/reservations',
+      label: 'Moje rezerwacje',
       icon: <Ticket className="mr-2 h-4 w-4" />,
     },
     {
-      to: "/rentals",
-      label: "Moje wypożyczenia",
+      to: '/rentals',
+      label: 'Moje wypożyczenia',
       icon: <Film className="mr-2 h-4 w-4" />,
     },
     {
-      to: "/recommendations",
-      label: "Moje rekomendacje",
+      to: '/recommendations',
+      label: 'Moje rekomendacje',
       icon: <Sparkles className="mr-2 h-4 w-4" />,
     },
     {
-      to: "/transactions-history",
-      label: "Historia wypożyczeń",
+      to: '/transactions-history',
+      label: 'Historia wypożyczeń',
       icon: <History className="mr-2 h-4 w-4" />,
     },
   ];
 
   const adminLinks = [
     {
-      to: "/admin/dvd/create",
-      label: "Dodaj nowe DVD",
+      to: '/admin/dvd/create',
+      label: 'Dodaj nowe DVD',
       icon: <FilePlus className="mr-2 h-4 w-4" />,
     },
     {
-      to: "/admin/reservations",
-      label: "Zarządzanie rezerwacjami",
+      to: '/admin/reservations',
+      label: 'Zarządzanie rezerwacjami',
       icon: <BookCheck className="mr-2 h-4 w-4" />,
     },
     {
-      to: "/admin/returns",
-      label: "Zarządzanie zwrotami",
+      to: '/admin/returns',
+      label: 'Zarządzanie zwrotami',
       icon: <BookUp className="mr-2 h-4 w-4" />,
     },
     {
-      to: "/admin/genres",
-      label: "Zarządzanie gatunkami",
+      to: '/admin/genres',
+      label: 'Zarządzanie gatunkami',
       icon: <BookOpen className="mr-2 h-4 w-4" />,
     },
   ];
@@ -105,11 +113,7 @@ export function DashboardHeader({
               </h1>
             </div>
             {shouldShowFilterGroup && (
-              <FilterGroup
-                isMobile
-                selectedGenres={selectedGenres}
-                onGenreChange={onGenreChange}
-              />
+              <FilterGroup isMobile selectedGenres={selectedGenres} onGenreChange={onGenreChange} />
             )}
           </nav>
         </SheetContent>
@@ -123,7 +127,7 @@ export function DashboardHeader({
                 type="search"
                 placeholder="Szukaj filmów..."
                 className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-                value={searchPhrase ?? ""}
+                value={searchPhrase ?? ''}
                 onChange={(e) => onSearchChange?.(e.target.value)}
               />
             </div>
@@ -135,9 +139,12 @@ export function DashboardHeader({
           <Button
             variant="secondary"
             size="icon"
-            className="rounded-full cursor-pointer"
+            className="rounded-full cursor-pointer p-0 overflow-hidden"
           >
-            <CircleUser className="h-5 w-5" />
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={avatarUrl} alt={user?.nickname} />
+              <AvatarFallback className="bg-indigo-500 text-white">{userInitials}</AvatarFallback>
+            </Avatar>
             <span className="sr-only">Toggle user menu</span>
           </Button>
         </DropdownMenuTrigger>

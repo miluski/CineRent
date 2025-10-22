@@ -62,4 +62,7 @@ public class User {
     @Column(name = "verification_code_expiry")
     private LocalDateTime verificationCodeExpiry;
 
+    @Column(name = "avatar_path")
+    private String avatarPath;
+
 }

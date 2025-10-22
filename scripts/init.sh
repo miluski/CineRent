@@ -137,9 +137,10 @@ CERTS_DIR="$BASE_DIR/certs"
 LOGS_DIR="$BASE_DIR/logs"
 UPLOADS_DIR="$BASE_DIR/uploads"
 POSTERS_DIR="$UPLOADS_DIR/posters"
+AVATARS_DIR="$UPLOADS_DIR/avatars"
 
 echo "📁 Creating necessary directories..."
-mkdir -p "$CERTS_DIR" "$LOGS_DIR" "$UPLOADS_DIR" "$POSTERS_DIR"
+mkdir -p "$CERTS_DIR" "$LOGS_DIR" "$UPLOADS_DIR" "$POSTERS_DIR" "$AVATARS_DIR"
 
 echo "🧹 Cleaning up previous Docker containers and volumes..."
 docker compose down -v 2>/dev/null || true
@@ -263,6 +264,8 @@ MEDIA_POSTER_BASE_URL="${MEDIA_POSTER_BASE_URL:-/api/v1/resources/posters}"
 MEDIA_POSTER_MAX_SIZE="${MEDIA_POSTER_MAX_SIZE:-5242880}"
 MEDIA_POSTER_CACHE_CONTROL="${MEDIA_POSTER_CACHE_CONTROL:-public, max-age=31536000}"
 MEDIA_POSTER_DEFAULT_CONTENT_TYPE="${MEDIA_POSTER_DEFAULT_CONTENT_TYPE:-application/octet-stream}"
+MEDIA_AVATAR_UPLOAD_DIR="${MEDIA_AVATAR_UPLOAD_DIR:-/app/uploads/avatars}"
+MEDIA_AVATAR_MAX_SIZE="${MEDIA_AVATAR_MAX_SIZE:-5242880}"
 
 echo "📝 Creating Docker Compose environment configuration..."
 DOCKER_ENV_FILE="$BASE_DIR/.env"
@@ -356,6 +359,8 @@ media.poster.base-url=$MEDIA_POSTER_BASE_URL
 media.poster.max-size=$MEDIA_POSTER_MAX_SIZE
 media.poster.cache-control=$MEDIA_POSTER_CACHE_CONTROL
 media.poster.default-content-type=$MEDIA_POSTER_DEFAULT_CONTENT_TYPE
+media.avatar.upload-dir=$MEDIA_AVATAR_UPLOAD_DIR
+media.avatar.max-size=$MEDIA_AVATAR_MAX_SIZE
 spring.mail.host=$MAIL_HOST
 spring.mail.port=$MAIL_PORT
 spring.mail.username=$MAIL_USERNAME
@@ -435,6 +440,7 @@ echo "   • Test properties: $APP_TEST_PROPERTIES_FILE"
 echo "   • Logs directory: $LOGS_DIR"
 echo "   • Uploads directory: $UPLOADS_DIR"
 echo "   • Posters directory: $POSTERS_DIR"
+echo "   • Avatars directory: $AVATARS_DIR"
 echo ""
 echo "🔐 Generated credentials:"
 echo "   • SSL Keystore password: $SSL_PASSWORD"
@@ -448,6 +454,8 @@ echo "   • Poster directory: $MEDIA_POSTER_DIR"
 echo "   • Poster base URL: $MEDIA_POSTER_BASE_URL"
 echo "   • Max poster size: $MEDIA_POSTER_MAX_SIZE bytes ($(($MEDIA_POSTER_MAX_SIZE / 1024 / 1024))MB)"
 echo "   • Cache control: $MEDIA_POSTER_CACHE_CONTROL"
+echo "   • Avatar directory: $MEDIA_AVATAR_UPLOAD_DIR"
+echo "   • Max avatar size: $MEDIA_AVATAR_MAX_SIZE bytes ($(($MEDIA_AVATAR_MAX_SIZE / 1024 / 1024))MB)"
 echo ""
 echo "📧 Email configuration:"
 echo "   • SMTP Host: $MAIL_HOST"

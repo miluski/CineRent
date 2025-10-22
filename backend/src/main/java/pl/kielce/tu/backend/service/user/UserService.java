@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import pl.kielce.tu.backend.exception.FileStorageException;
 import pl.kielce.tu.backend.exception.ValidationException;
 import pl.kielce.tu.backend.extractor.ClaimsExtractor;
 import pl.kielce.tu.backend.mapper.UserMapper;
@@ -21,6 +22,7 @@ import pl.kielce.tu.backend.model.entity.Genre;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
 import pl.kielce.tu.backend.service.auth.CookieService;
+import pl.kielce.tu.backend.service.avatar.AvatarStorageService;
 import pl.kielce.tu.backend.service.validation.factory.ValidationStrategyFactory;
 
 @Service
@@ -35,6 +37,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final ClaimsExtractor claimsExtractor;
     private final PasswordEncoder passwordEncoder;
+    private final AvatarStorageService avatarStorageService;
     private final ValidationStrategyFactory validationStrategyFactory;
 
     public ResponseEntity<UserDto> handleGetUser(HttpServletRequest httpServletRequest) {
@@ -50,14 +53,16 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<Void> handleEditUser(HttpServletRequest httpServletRequest, UserDto userDto) {
+    public ResponseEntity<UserDto> handleEditUser(HttpServletRequest httpServletRequest, UserDto userDto) {
         try {
             Long userId = extractUserIdFromToken(httpServletRequest);
             validateAtLeastOneField(userDto);
             User user = getUserById(userId);
             validateAndApplyUpdates(user, userDto);
-            userRepository.save(user);
-            return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+            User savedUser = userRepository.save(user);
+            UserDto responseDto = new UserDto();
+            responseDto.setAvatarPath(savedUser.getAvatarPath());
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(responseDto);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (ValidationException e) {
@@ -82,16 +87,36 @@ public class UserService {
 
     private void validateAtLeastOneField(UserDto userDto) throws ValidationException {
         if (userDto.getNickname() == null && userDto.getPassword() == null
-                && userDto.getAge() == null && userDto.getPreferredGenresIdentifiers() == null) {
+                && userDto.getAge() == null && userDto.getPreferredGenresIdentifiers() == null
+                && userDto.getBase64Avatar() == null) {
             throw new ValidationException("At least one field must be provided for update");
         }
     }
 
-    private void validateAndApplyUpdates(User user, UserDto userDto) throws ValidationException {
+    private void validateAndApplyUpdates(User user, UserDto userDto) throws Exception {
         updateNicknameIfPresent(user, userDto);
         updatePasswordIfPresent(user, userDto);
         updateAgeIfPresent(user, userDto);
         updatePreferredGenresIfPresent(user, userDto);
+        updateAvatarIfPresent(user, userDto);
+    }
+
+    private void updateAvatarIfPresent(User user, UserDto userDto) throws FileStorageException {
+        if (userDto.getBase64Avatar() != null) {
+            deleteOldAvatarIfExists(user);
+            String avatarPath = storeNewAvatar(userDto.getBase64Avatar(), user.getId());
+            user.setAvatarPath(avatarPath);
+        }
+    }
+
+    private void deleteOldAvatarIfExists(User user) {
+        if (user.getAvatarPath() != null) {
+            avatarStorageService.deleteAvatar(user.getAvatarPath());
+        }
+    }
+
+    private String storeNewAvatar(String base64Avatar, Long userId) throws FileStorageException {
+        return avatarStorageService.storeAvatar(base64Avatar, userId);
     }
 
     private void updateNicknameIfPresent(User user, UserDto userDto) throws ValidationException {

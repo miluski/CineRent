@@ -39,6 +39,8 @@ class PublicEndpointsTest {
         assertTrue(PublicEndpoints.isMember("/swagger-resources/configuration/ui"));
         assertTrue(PublicEndpoints.isMember("/api/v1/verification/verify"));
         assertTrue(PublicEndpoints.isMember("/api/v1/verification/resend"));
+        assertTrue(PublicEndpoints.isMember("/api/v1/resources/avatars/user_1_avatar.png"));
+        assertTrue(PublicEndpoints.isMember("/api/v1/resources/posters/movie_poster.jpg"));
     }
 
     @Test

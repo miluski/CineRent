@@ -16,6 +16,7 @@ public enum PublicEndpoints {
     AUTH_REFRESH("/api/v1/auth/refresh-tokens"),
     VERIFICATION("/api/v1/verification/**"),
     GENRES("/api/v1/genres"),
+    RESOURCES("/api/v1/resources/**"),
     API_DOCS("/v3/api-docs/**"),
     API_DOCS_LEGACY("/api-docs/**"),
     SWAGGER_UI("/swagger-ui/**"),

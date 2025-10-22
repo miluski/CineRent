@@ -6,7 +6,7 @@
 ![React](https://img.shields.io/badge/React-18-61dafb)
 ![Docker](https://img.shields.io/badge/Docker-enabled-2496ed)
 
-A comprehensive full-stack application for DVD rental management, providing secure and scalable services with SSL encryption, JWT authentication, and modern React frontend. CineRent offers complete rental lifecycle management including user authentication, DVD catalog management, reservations, rentals, returns, and automated transaction processing with PDF invoicing.
+A comprehensive full-stack application for DVD rental management, providing secure and scalable services with SSL encryption, JWT authentication, and modern React frontend. CineRent offers complete rental lifecycle management including user authentication with avatar upload, DVD catalog management with poster images, reservations, rentals, returns, and automated transaction processing with PDF invoicing.
 
 ## 🏗️ Architecture
 
@@ -25,7 +25,11 @@ CineRent consists of:
 - **Security**: JWT-based authentication with HttpOnly cookies
 - **Documentation**: Comprehensive Swagger/OpenAPI at root path
 - **PDF Generation**: iText 5 library for professional invoices and receipts
-- **File Management**: Secure poster image upload and serving
+- **File Management**: Secure image upload and serving
+- **Avatar Upload**: User profile pictures with JWT protection
+- **Poster Images**: DVD posters with public access
+- **Image Validation**: File size limits (5MB), format validation, base64 encoding
+- **Path Security**: Protection against path traversal attacks
 
 ## 📋 Prerequisites
 
@@ -46,6 +50,53 @@ Before running the application, ensure you have the following installed:
   - Alternative: Use Windows Subsystem for Linux (WSL)
 
 > **⚠️ Important for Windows Users**: You must use Git Bash to run the automation scripts. Command Prompt and PowerShell are not supported for the initialization scripts.
+
+## ✨ Key Features
+
+### User Management
+
+- **User Registration & Authentication**: Secure signup with email verification
+- **Profile Management**: Update personal information including nickname, age, and password
+- **Avatar Upload**: User profile pictures with:
+  - Base64 image encoding for secure transmission
+  - 5MB file size limit
+  - Format validation (PNG, JPEG, JPG, WEBP)
+  - JWT-protected access
+  - Automatic old avatar deletion
+  - Live preview before upload
+- **Genre Preferences**: Personalized DVD recommendations based on selected genres
+- **Email Verification**: Secure 6-digit verification code system
+
+### DVD Management
+
+- **Comprehensive Catalog**: Browse and search DVD collection
+- **Poster Images**: Visual representation with secure image upload
+- **Advanced Filtering**: Search by title, genre, and availability
+- **DVD Specifications**: Detailed information using JPA Specification queries
+- **Genre Management**: Admin control over genre categories
+
+### Rental System
+
+- **Reservation System**: Reserve DVDs in advance
+- **Rental Processing**: Complete rental workflow with automatic state management
+- **Return Management**: Track and process DVD returns
+- **Availability Tracking**: Real-time DVD availability status
+- **Reminder Notifications**: Scheduled email reminders for available reserved DVDs
+
+### Transaction & Billing
+
+- **PDF Invoice Generation**: Professional invoices using iText 5
+- **PDF Receipt Generation**: Detailed rental receipts
+- **Transaction History**: Complete rental and return history
+- **Strategy Pattern**: Flexible billing system with invoice/receipt strategies
+
+### Administrative Tools
+
+- **User Management**: Admin control over user accounts
+- **DVD Catalog Management**: Add, edit, and remove DVDs with poster uploads
+- **Reservation Management**: Monitor and manage all reservations
+- **Return Processing**: Handle DVD returns and availability updates
+- **Genre Management**: Create and manage genre categories
 
 ## 🚀 Quick Start
 
@@ -70,8 +121,12 @@ This script will:
 - Configure application properties for:
   - Backend service (`backend/src/main/resources/application.properties`)
   - Test environment (`backend/src/test/resources/application.properties`)
+- Set up file storage configuration:
+  - Avatar upload directory (`/app/uploads/avatars`)
+  - Poster upload directory (`/app/uploads/posters`)
+  - File size limits and validation rules
 - Set up Docker volumes for node_modules
-- Create necessary directories (certs, logs)
+- Create necessary directories (certs, logs, uploads)
 
 > **📋 Generated Files**: The script creates all required configuration files automatically. These files contain sensitive data and are gitignored.
 
@@ -153,6 +208,15 @@ springdoc.api-docs.enabled=true
 springdoc.swagger-ui.enabled=true
 springdoc.api-docs.path=/api-docs
 springdoc.swagger-ui.path=/
+
+# File Upload & Media Configuration
+media.poster.upload-dir=/app/uploads/posters
+media.poster.max-size=5242880
+media.poster.cache-control=public, max-age=31536000
+media.poster.default-content-type=application/octet-stream
+media.poster.base-url=/api/v1/resources/posters
+media.avatar.upload-dir=/app/uploads/avatars
+media.avatar.max-size=5242880
 ```
 
 **Test Environment** (`backend/src/test/resources/application.properties`):
@@ -272,7 +336,7 @@ docker compose down -v
 
 ## 🧪 Testing
 
-The backend includes comprehensive testing with H2 in-memory database.
+The backend includes comprehensive testing with H2 in-memory database and 776+ test cases covering all functionality.
 
 ### Run Tests
 
@@ -280,6 +344,22 @@ The backend includes comprehensive testing with H2 in-memory database.
 cd backend
 ./mvnw test
 ```
+
+### Test Coverage
+
+The test suite includes:
+
+- **776+ Test Cases** covering:
+  - User authentication and JWT token management
+  - DVD catalog operations with specifications
+  - Rental and reservation workflows
+  - Transaction processing and PDF generation
+  - Avatar upload and storage (12 tests)
+  - Image validation and security (26 tests)
+  - Resource handling and caching (11 tests)
+  - Path traversal protection
+  - Email verification system
+  - DVD reminder notifications
 
 ### Test Configuration
 
@@ -289,6 +369,7 @@ Tests automatically use:
 - Disabled SSL (HTTP only)
 - Separate logging configuration
 - In-memory JWT configuration
+- Temporary directories for file uploads
 
 ## 🛠️ Development
 
@@ -339,6 +420,9 @@ The initialization script creates:
 - **Application Properties**:
   - `backend/src/main/resources/application.properties` (production)
   - `backend/src/test/resources/application.properties` (testing)
+- **Upload Directories**:
+  - `uploads/avatars/` - User profile pictures (JWT-protected)
+  - `uploads/posters/` - DVD poster images (JWT-protected)
 - **Logs Directory**: `logs/` for application logs
 
 ### Docker Configuration
@@ -379,11 +463,20 @@ The initialization script creates:
 
 - **SSL/TLS**: All backend communications encrypted using HTTPS
 - **JWT Authentication**: Secure token-based authentication with HttpOnly cookies
+  - Access tokens: 5-minute expiration
+  - Refresh tokens: 24-hour expiration
+  - Automatic token refresh on 401 errors
 - **Database Security**: Encrypted connections with auto-generated passwords
 - **Environment Variables**: Sensitive data stored in `.env` file (gitignored)
 - **Distroless Images**: Minimal attack surface for production containers
 - **Non-Root Users**: All containers run as non-privileged users
 - **512-byte JWT Secret**: Cryptographically secure secret generation
+- **File Upload Security**:
+  - **Avatar Protection**: JWT authentication required for avatar access
+  - **Path Traversal Prevention**: Validated file paths to prevent directory traversal attacks
+  - **File Size Limits**: 5MB maximum for images
+  - **Format Validation**: Only PNG, JPEG, JPG, and WEBP formats allowed
+  - **Base64 Encoding**: Secure image transmission
 
 ## 📚 API Documentation
 
@@ -398,6 +491,13 @@ Features:
 - Request/response schemas
 - Authentication support
 - Try-it-out functionality
+- Complete endpoint documentation including:
+  - User management with avatar upload
+  - DVD catalog with poster images
+  - Reservation and rental workflows
+  - Transaction history
+  - Email verification
+  - DVD availability reminders
 
 ## 🔧 Maintenance
 
@@ -524,9 +624,24 @@ Requirements:
    - Ensure database initialization completed: `docker compose logs cine-rent-db`
 
 8. **JWT Token Issues**:
+
    - Verify JWT secret length is 512 bytes in application.properties
    - Check cookie settings match SSL configuration
    - Clear browser cookies and try again
+
+9. **Avatar Upload Issues**:
+
+   - Verify file size is under 5MB
+   - Ensure image format is PNG, JPEG, JPG, or WEBP
+   - Check uploads directory exists and has write permissions
+   - Verify JWT token is valid (avatars require authentication)
+   - Check browser console for base64 encoding errors
+
+10. **Image Not Displaying**:
+    - Verify upload directory is properly mounted in Docker
+    - Check file permissions in uploads directory
+    - Ensure backend URL is correctly configured in frontend
+    - For avatars: verify JWT token is being sent with request
 
 ### Windows-Specific Issues
 

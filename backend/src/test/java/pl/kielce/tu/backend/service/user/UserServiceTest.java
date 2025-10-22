@@ -36,6 +36,7 @@ import pl.kielce.tu.backend.model.entity.Genre;
 import pl.kielce.tu.backend.model.entity.User;
 import pl.kielce.tu.backend.repository.UserRepository;
 import pl.kielce.tu.backend.service.auth.CookieService;
+import pl.kielce.tu.backend.service.avatar.AvatarStorageService;
 import pl.kielce.tu.backend.service.validation.FieldValidationStrategy;
 import pl.kielce.tu.backend.service.validation.factory.ValidationStrategyFactory;
 
@@ -62,6 +63,9 @@ class UserServiceTest {
 
     @Mock
     private HttpServletRequest request;
+
+    @Mock
+    private AvatarStorageService avatarStorageService;
 
     @InjectMocks
     private UserService userService;
@@ -137,7 +141,7 @@ class UserServiceTest {
                 .build();
         when(userMapper.toUser(any(UserDto.class))).thenReturn(userWithGenres);
 
-        ResponseEntity<Void> response = userService.handleEditUser(request, updateDto);
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, updateDto);
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(userRepository).save(user);
@@ -159,7 +163,7 @@ class UserServiceTest {
         setupMocksForEdit(user);
         setupValidationMock(ValidationStrategyType.NICKNAME);
 
-        ResponseEntity<Void> response = userService.handleEditUser(request, updateDto);
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, updateDto);
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(userRepository).save(user);
@@ -181,7 +185,7 @@ class UserServiceTest {
         setupValidationMock(ValidationStrategyType.PASSWORD);
         when(passwordEncoder.encode("NewSecurePass!")).thenReturn("encoded-password");
 
-        ResponseEntity<Void> response = userService.handleEditUser(request, updateDto);
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, updateDto);
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(userRepository).save(user);
@@ -196,7 +200,7 @@ class UserServiceTest {
         when(cookieService.getTokenFromCookie(request, CookieNames.ACCESS_TOKEN)).thenReturn(VALID_TOKEN);
         when(claimsExtractor.extractUserId(VALID_TOKEN, JWT_SECRET)).thenReturn(USER_ID);
 
-        ResponseEntity<Void> response = userService.handleEditUser(request, emptyDto);
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, emptyDto);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         verify(userRepository, never()).save(any());
@@ -210,7 +214,7 @@ class UserServiceTest {
         when(claimsExtractor.extractUserId(VALID_TOKEN, JWT_SECRET)).thenReturn(USER_ID);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-        ResponseEntity<Void> response = userService.handleEditUser(request, updateDto);
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, updateDto);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(userRepository, never()).save(any());
@@ -228,7 +232,7 @@ class UserServiceTest {
         when(validationStrategyFactory.getStrategy(ValidationStrategyType.NICKNAME)).thenReturn(strategy);
         doThrow(new ValidationException("Nickname too short")).when(strategy).validate("a");
 
-        ResponseEntity<Void> response = userService.handleEditUser(request, updateDto);
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, updateDto);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         verify(userRepository, never()).save(any());
@@ -283,6 +287,142 @@ class UserServiceTest {
         FieldValidationStrategy strategy = mock(FieldValidationStrategy.class);
         when(validationStrategyFactory.getStrategy(type)).thenReturn(strategy);
         lenient().doNothing().when(strategy).validate(any());
+    }
+
+    @Test
+    void handleEditUser_shouldUploadAvatarWhenBase64AvatarProvided() throws Exception {
+
+        User user = createTestUser();
+        String base64Avatar = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+        String avatarPath = "/resources/avatars/user_1_avatar.png";
+        UserDto updateDto = UserDto.builder()
+                .base64Avatar(base64Avatar)
+                .build();
+
+        setupMocksForEdit(user);
+        when(avatarStorageService.storeAvatar(base64Avatar, USER_ID)).thenReturn(avatarPath);
+
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, updateDto);
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        UserDto body = response.getBody();
+        assertNotNull(body);
+        assertEquals(avatarPath, body.getAvatarPath());
+        assertEquals(avatarPath, user.getAvatarPath());
+        verify(avatarStorageService).storeAvatar(base64Avatar, USER_ID);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void handleEditUser_shouldDeleteOldAvatarWhenUploadingNew() throws Exception {
+
+        User user = createTestUser();
+        String oldAvatarPath = "/resources/avatars/user_1_old_avatar.png";
+        user.setAvatarPath(oldAvatarPath);
+
+        String base64Avatar = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+        String newAvatarPath = "/resources/avatars/user_1_new_avatar.png";
+        UserDto updateDto = UserDto.builder()
+                .base64Avatar(base64Avatar)
+                .build();
+
+        setupMocksForEdit(user);
+        when(avatarStorageService.storeAvatar(base64Avatar, USER_ID)).thenReturn(newAvatarPath);
+
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, updateDto);
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        UserDto body = response.getBody();
+        assertNotNull(body);
+        assertEquals(newAvatarPath, body.getAvatarPath());
+        assertEquals(newAvatarPath, user.getAvatarPath());
+        verify(avatarStorageService).deleteAvatar(oldAvatarPath);
+        verify(avatarStorageService).storeAvatar(base64Avatar, USER_ID);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void handleEditUser_shouldNotDeleteAvatarWhenNoOldAvatarExists() throws Exception {
+
+        User user = createTestUser();
+        user.setAvatarPath(null);
+
+        String base64Avatar = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+        String avatarPath = "/resources/avatars/user_1_avatar.png";
+        UserDto updateDto = UserDto.builder()
+                .base64Avatar(base64Avatar)
+                .build();
+
+        setupMocksForEdit(user);
+        when(avatarStorageService.storeAvatar(base64Avatar, USER_ID)).thenReturn(avatarPath);
+
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, updateDto);
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        UserDto body = response.getBody();
+        assertNotNull(body);
+        assertEquals(avatarPath, body.getAvatarPath());
+        assertEquals(avatarPath, user.getAvatarPath());
+        verify(avatarStorageService, never()).deleteAvatar(anyString());
+        verify(avatarStorageService).storeAvatar(base64Avatar, USER_ID);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void handleEditUser_shouldNotUpdateAvatarWhenBase64AvatarNotProvided() throws Exception {
+
+        User user = createTestUser();
+        String existingAvatarPath = "/resources/avatars/user_1_existing_avatar.png";
+        user.setAvatarPath(existingAvatarPath);
+
+        UserDto updateDto = UserDto.builder()
+                .nickname("NewNickname")
+                .build();
+
+        setupMocksForEdit(user);
+        setupValidationMock(ValidationStrategyType.NICKNAME);
+
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, updateDto);
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        assertEquals(existingAvatarPath, user.getAvatarPath());
+        verify(avatarStorageService, never()).deleteAvatar(anyString());
+        verify(avatarStorageService, never()).storeAvatar(anyString(), any());
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void handleEditUser_shouldHandleAvatarUploadWithOtherFieldsUpdate() throws Exception {
+
+        User user = createTestUser();
+        String oldAvatarPath = "/resources/avatars/user_1_old_avatar.png";
+        user.setAvatarPath(oldAvatarPath);
+
+        String base64Avatar = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+        String newAvatarPath = "/resources/avatars/user_1_new_avatar.png";
+        UserDto updateDto = UserDto.builder()
+                .nickname("UpdatedNickname")
+                .base64Avatar(base64Avatar)
+                .age(30)
+                .build();
+
+        setupMocksForEdit(user);
+        setupValidationMock(ValidationStrategyType.NICKNAME);
+        setupValidationMock(ValidationStrategyType.AGE);
+        when(avatarStorageService.storeAvatar(base64Avatar, USER_ID)).thenReturn(newAvatarPath);
+
+        ResponseEntity<UserDto> response = userService.handleEditUser(request, updateDto);
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        UserDto body = response.getBody();
+        assertNotNull(body);
+        assertEquals(newAvatarPath, body.getAvatarPath());
+        assertEquals("UpdatedNickname", user.getNickname());
+        assertEquals(30, user.getAge());
+        assertEquals(newAvatarPath, user.getAvatarPath());
+        verify(avatarStorageService).deleteAvatar(oldAvatarPath);
+        verify(avatarStorageService).storeAvatar(base64Avatar, USER_ID);
+        verify(userRepository).save(user);
     }
 
 }

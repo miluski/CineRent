@@ -1,138 +1,138 @@
 package pl.kielce.tu.backend.service.resource;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
-
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import pl.kielce.tu.backend.exception.ValidationException;
-import pl.kielce.tu.backend.util.UserContextLogger;
+import pl.kielce.tu.backend.service.resource.handler.AvatarResourceHandler;
+import pl.kielce.tu.backend.service.resource.handler.PosterResourceHandler;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceServiceTest {
 
     @Mock
-    private UserContextLogger userContextLogger;
+    private PosterResourceHandler posterHandler;
+
+    @Mock
+    private AvatarResourceHandler avatarHandler;
+
+    @Mock
+    private Resource mockResource;
 
     private ResourceService resourceService;
-    private Path tempDir;
 
     @BeforeEach
-    void setUp() throws Exception {
-        resourceService = new ResourceService(userContextLogger);
-        tempDir = Files.createTempDirectory("posters-test");
-        setPrivateField(resourceService, "posterDirectory", tempDir.toString());
-        setPrivateField(resourceService, "posterBaseUrl", "/test/base-url");
-        setPrivateField(resourceService, "maxPosterSize", 5242880L);
-        setPrivateField(resourceService, "cacheControlHeader", "public, max-age=31536000");
-        setPrivateField(resourceService, "defaultContentType", "application/octet-stream");
-
-        invokePostConstruct(resourceService);
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        if (tempDir != null && Files.exists(tempDir)) {
-            Files.walk(tempDir)
-                    .map(Path::toFile)
-                    .forEach(f -> {
-                        if (!f.delete()) {
-                            f.deleteOnExit();
-                        }
-                    });
-        }
-    }
-
-    private static void setPrivateField(Object target, String fieldName, Object value) throws Exception {
-        Field field = target.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(target, value);
-    }
-
-    private static void invokePostConstruct(Object target) throws Exception {
-        var method = target.getClass().getDeclaredMethod("initializePosterDirectory");
-        method.setAccessible(true);
-        method.invoke(target);
+    void setUp() {
+        resourceService = new ResourceService(posterHandler, avatarHandler);
     }
 
     @Test
-    void savePosterImage_validBase64_savesFileAndReturnsFilename() throws Exception {
-        byte[] imageBytes = new byte[] { 1, 2, 3, 4, 5 };
-        String base64 = Base64.getEncoder().encodeToString(imageBytes);
-        String dataUrl = "data:image/png;base64," + base64;
+    void handleGetPosterRequest_delegatesToPosterHandler() {
+        String filename = "test-poster.png";
+        ResponseEntity<Resource> expectedResponse = ResponseEntity.ok(mockResource);
+        when(posterHandler.handleGetRequest(filename)).thenReturn(expectedResponse);
 
-        String filename = resourceService.savePosterImage(dataUrl);
+        ResponseEntity<Resource> result = resourceService.handleGetPosterRequest(filename);
 
-        assertNotNull(filename);
-        assertTrue(filename.endsWith(".png"));
-        Path saved = tempDir.resolve(filename);
-        assertTrue(Files.exists(saved));
-        byte[] savedBytes = Files.readAllBytes(saved);
-        assertArrayEquals(imageBytes, savedBytes);
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(mockResource, result.getBody());
+        verify(posterHandler, times(1)).handleGetRequest(filename);
     }
 
     @Test
-    void handleGetPosterRequest_existingFile_returnsOkAndHeaders() throws Exception {
-        String filename = "sample.png";
-        byte[] content = new byte[] { 10, 11, 12, 13 };
-        Path file = tempDir.resolve(filename);
-        Files.write(file, content);
+    void handleGetAvatarRequest_delegatesToAvatarHandler() {
+        String filename = "test-avatar.jpg";
+        ResponseEntity<Resource> expectedResponse = ResponseEntity.ok(mockResource);
+        when(avatarHandler.handleGetRequest(filename)).thenReturn(expectedResponse);
 
-        ResponseEntity<Resource> response = resourceService.handleGetPosterRequest(filename);
+        ResponseEntity<Resource> result = resourceService.handleGetAvatarRequest(filename);
 
-        assertNotNull(response);
-        assertTrue(response.getStatusCode().is2xxSuccessful());
-        assertNotNull(response.getBody());
-        var contentType = response.getHeaders().getContentType();
-        assertNotNull(contentType);
-        assertTrue(contentType.toString().contains("image"));
-        assertEquals(content.length, response.getHeaders().getContentLength());
-        String etag = response.getHeaders().getETag();
-        assertNotNull(etag);
-        assertTrue(!etag.isEmpty());
-        String cacheControl = response.getHeaders().getCacheControl();
-        assertNotNull(cacheControl);
-        assertTrue(cacheControl.contains("max-age"));
-        String disposition = response.getHeaders().getFirst("Content-Disposition");
-        assertNotNull(disposition);
-        assertTrue(disposition.contains("inline"));
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(mockResource, result.getBody());
+        verify(avatarHandler, times(1)).handleGetRequest(filename);
     }
 
     @Test
-    void handleGetPosterRequest_missingFile_returnsNotFound() {
-        ResponseEntity<Resource> response = resourceService.handleGetPosterRequest("nonexistent.png");
-        assertEquals(true, response.getStatusCode().is4xxClientError());
+    void savePosterImage_delegatesToPosterHandler() throws Exception {
+        String base64Image = "data:image/png;base64,iVBORw0KGgoAAAANS";
+        String expectedFilename = "saved-poster-123.png";
+        when(posterHandler.saveImage(base64Image)).thenReturn(expectedFilename);
+
+        String result = resourceService.savePosterImage(base64Image);
+
+        assertEquals(expectedFilename, result);
+        verify(posterHandler, times(1)).saveImage(base64Image);
     }
 
     @Test
-    void savePosterImage_invalidInput_throwsValidationException() {
-        assertThrows(ValidationException.class, () -> resourceService.savePosterImage("not-a-data-url"));
-        assertThrows(ValidationException.class, () -> resourceService.savePosterImage(null));
+    void generatePosterUrl_delegatesToPosterHandler() {
+        String filename = "poster-456.jpg";
+        String expectedUrl = "/api/v1/resources/posters/" + filename;
+        when(posterHandler.generateUrl(filename)).thenReturn(expectedUrl);
+
+        String result = resourceService.generatePosterUrl(filename);
+
+        assertEquals(expectedUrl, result);
+        verify(posterHandler, times(1)).generateUrl(filename);
     }
 
     @Test
-    void generatePosterUrl_behaviour() {
-        String filename = "a.png";
-        String url = resourceService.generatePosterUrl(filename);
-        assertEquals("/test/base-url/" + filename, url);
+    void handleGetPosterRequest_returnsNotFoundWhenHandlerReturnsNotFound() {
+        String filename = "nonexistent.png";
+        ResponseEntity<Resource> notFoundResponse = ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        when(posterHandler.handleGetRequest(filename)).thenReturn(notFoundResponse);
 
-        assertNull(resourceService.generatePosterUrl(null));
-        assertNull(resourceService.generatePosterUrl("   "));
+        ResponseEntity<Resource> result = resourceService.handleGetPosterRequest(filename);
+
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        verify(posterHandler, times(1)).handleGetRequest(filename);
+    }
+
+    @Test
+    void handleGetAvatarRequest_returnsNotFoundWhenHandlerReturnsNotFound() {
+        String filename = "nonexistent-avatar.jpg";
+        ResponseEntity<Resource> notFoundResponse = ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        when(avatarHandler.handleGetRequest(filename)).thenReturn(notFoundResponse);
+
+        ResponseEntity<Resource> result = resourceService.handleGetAvatarRequest(filename);
+
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        verify(avatarHandler, times(1)).handleGetRequest(filename);
+    }
+
+    @Test
+    void savePosterImage_propagatesHandlerResult() throws Exception {
+        String base64 = "data:image/jpeg;base64,/9j/4AAQSkZJRg";
+        String generatedFilename = "uuid-generated-name.jpeg";
+        when(posterHandler.saveImage(base64)).thenReturn(generatedFilename);
+
+        String result = resourceService.savePosterImage(base64);
+
+        assertEquals(generatedFilename, result);
+        verify(posterHandler, times(1)).saveImage(base64);
+    }
+
+    @Test
+    void generatePosterUrl_returnsNullWhenHandlerReturnsNull() {
+        when(posterHandler.generateUrl(anyString())).thenReturn(null);
+
+        String result = resourceService.generatePosterUrl("anything.png");
+
+        assertEquals(null, result);
+        verify(posterHandler, times(1)).generateUrl(anyString());
     }
 }
