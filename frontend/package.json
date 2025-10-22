@@ -28,6 +28,7 @@
     "axios": "^1.12.2",
     "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.1",
+    "clean": "^4.0.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.545.0",

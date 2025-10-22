@@ -2,6 +2,7 @@ package pl.kielce.tu.backend.model.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -51,8 +52,8 @@ class UserTest {
 
     @Test
     void equalsAndHashCodeForSameFieldValues() {
-        User u1 = new User(3L, "alice", "alice@test.com", "pw", 28, null, RankType.USER, false, null, null);
-        User u2 = new User(3L, "alice", "alice@test.com", "pw", 28, null, RankType.USER, false, null, null);
+        User u1 = new User(3L, "alice", "alice@test.com", "pw", 28, null, RankType.USER, false, null, null, null);
+        User u2 = new User(3L, "alice", "alice@test.com", "pw", 28, null, RankType.USER, false, null, null, null);
 
         assertEquals(u1, u2);
         assertEquals(u1.hashCode(), u2.hashCode());
@@ -137,7 +138,7 @@ class UserTest {
         List<Genre> genres = Arrays.asList(genre);
 
         User user = new User(9L, "constructor", "constructor@test.com", "pwd", 33, genres, RankType.USER, false, null,
-                null);
+                null, null);
 
         assertEquals(9L, user.getId());
         assertEquals("constructor", user.getNickname());
@@ -146,5 +147,45 @@ class UserTest {
         assertEquals(33, user.getAge());
         assertEquals(1, user.getPreferredGenres().size());
         assertEquals(RankType.USER, user.getRank());
+    }
+
+    @Test
+    void userCanHaveAvatarPath() {
+        User user = User.builder()
+                .id(10L)
+                .nickname("avataruser")
+                .password("pass")
+                .age(25)
+                .avatarPath("/uploads/avatars/avatar-123.png")
+                .build();
+
+        assertNotNull(user.getAvatarPath());
+        assertEquals("/uploads/avatars/avatar-123.png", user.getAvatarPath());
+    }
+
+    @Test
+    void userCanHaveNullAvatarPath() {
+        User user = User.builder()
+                .id(11L)
+                .nickname("noavatar")
+                .password("pass")
+                .age(30)
+                .build();
+
+        assertNull(user.getAvatarPath());
+    }
+
+    @Test
+    void builderSetsAvatarPathCorrectly() {
+        String avatarPath = "/uploads/avatars/test-avatar.jpg";
+        User user = User.builder()
+                .id(12L)
+                .nickname("testuser")
+                .password("secure")
+                .age(28)
+                .avatarPath(avatarPath)
+                .build();
+
+        assertEquals(avatarPath, user.getAvatarPath());
     }
 }

@@ -89,17 +89,17 @@ public class UserController {
         return recommendationService.handleGetDvdRecommendations(request, page, size);
     }
 
-    @Operation(summary = "Partially update authenticated user", description = "Updates one or more fields of the authenticated user. User ID is extracted from the JWT token. At least one field must be provided. All fields are optional but at least one is required.", security = {
+    @Operation(summary = "Partially update authenticated user", description = "Updates one or more fields of the authenticated user. User ID is extracted from the JWT token. At least one field must be provided. All fields are optional but at least one is required. Returns the updated avatar path if avatar was changed.", security = {
             @SecurityRequirement(name = "accessToken") })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "202", description = "User successfully updated"),
+            @ApiResponse(responseCode = "202", description = "User successfully updated. Returns avatar path if avatar was updated.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "422", description = "Validation error - invalid field value or no fields provided"),
             @ApiResponse(responseCode = "500", description = "Internal server error occurred")
     })
     @PatchMapping("/edit")
-    public ResponseEntity<Void> editUser(
+    public ResponseEntity<UserDto> editUser(
             HttpServletRequest httpServletRequest,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Partial user update data. At least one field must be provided.", required = true, content = @Content(schema = @Schema(example = """
                     {

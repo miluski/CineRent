@@ -18,12 +18,12 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        cacheManager.setCaffeine(posterCacheBuilder());
-        cacheManager.setCacheNames(Arrays.asList("posterCache"));
+        cacheManager.setCaffeine(resourceCacheBuilder());
+        cacheManager.setCacheNames(Arrays.asList("posterCache", "avatarCache"));
         return cacheManager;
     }
 
-    private Caffeine<Object, Object> posterCacheBuilder() {
+    private Caffeine<Object, Object> resourceCacheBuilder() {
         return Caffeine.newBuilder()
                 .maximumSize(1000)
                 .expireAfterWrite(Duration.ofHours(24))

@@ -57,14 +57,20 @@ export function ProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: genres } = useGetAllGenres();
+  const [avatarTimestamp, setAvatarTimestamp] = useState(
+    localStorage.getItem('avatarTimestamp') || Date.now().toString()
+  );
   const updateUserMutation = useUpdateUserDetails(() => {
     form.reset({ ...form.getValues(), password: '' });
+    setAvatarPreview(null);
+    setAvatarTimestamp(localStorage.getItem('avatarTimestamp') || Date.now().toString());
   });
   const resendVerificationMutation = useResendVerification();
   const verifyEmailMutation = useVerifyEmail();
 
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const handleResendVerification = () => {
     if (!user?.email) {
@@ -126,6 +132,27 @@ export function ProfilePage() {
     },
   });
 
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Rozmiar pliku nie może przekraczać 5MB');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Plik musi być obrazem');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const payload: UpdateUserDetailsRequestDto = {};
 
@@ -150,6 +177,10 @@ export function ProfilePage() {
 
     if (JSON.stringify(currentGenreIds) !== JSON.stringify(newGenreIds)) {
       payload.preferredGenresIdentifiers = newGenreIds;
+    }
+
+    if (avatarPreview) {
+      payload.base64Avatar = avatarPreview;
     }
 
     if (Object.keys(payload).length === 0) {
@@ -188,16 +219,38 @@ export function ProfilePage() {
                 >
                   <div className="flex flex-col items-center gap-4 md:col-span-1">
                     <Avatar className="h-40 w-40">
-                      <AvatarImage draggable="false" src="https://github.com/shadcn.png" />
+                      <AvatarImage
+                        draggable="false"
+                        src={
+                          avatarPreview ||
+                          (user?.avatarPath
+                            ? `${import.meta.env.VITE_BACKEND_URL}${
+                                user.avatarPath
+                              }?t=${avatarTimestamp}`
+                            : undefined)
+                        }
+                      />
                       <AvatarFallback>
                         {user?.nickname?.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <p className="font-semibold">{user?.nickname}</p>
-                    <Button variant="outline" className="w-full">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => document.getElementById('avatar-upload')?.click()}
+                    >
                       <Camera className="mr-2 h-4 w-4" />
                       Zmień profilowe
                     </Button>
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarChange}
+                    />
                   </div>
 
                   <div className="space-y-4 md:col-span-2">

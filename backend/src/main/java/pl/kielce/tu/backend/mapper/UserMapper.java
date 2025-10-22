@@ -31,6 +31,7 @@ public class UserMapper {
                 .isVerified(user.getIsVerified())
                 .age(user.getAge())
                 .preferredGenres(genreMappingService.mapGenresToNames(user.getPreferredGenres()))
+                .avatarPath(user.getAvatarPath())
                 .build();
     }
 
